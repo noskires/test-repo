@@ -30,3 +30,7 @@ Keep a history of replacements (who changed it, when, old and new value) so past
 - [ ] Feature tests use the in-memory directory fake.
 
 ## Comments
+
+- 2026-11-22 (product-owner): Re-checked before hand-off. Blockers 01 and 02 are merged. Two clarifications, scope unchanged:
+  - The `Site` value object from issue 02 carries only `id` and `name`, so the Site Snapshot here is the Site name. Don't extend the port to invent a location field. Issue 03 may add one later.
+  - PRD v2 §5: "jobs already started stay with the old vendor; new jobs and schedules go to the new one". This slice only has to keep the history that makes this possible. The rule itself is enforced when PM Tasks (08) and E-Calls (12) copy the Site Vendor at creation.
