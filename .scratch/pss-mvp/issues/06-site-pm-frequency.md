@@ -1,6 +1,6 @@
 # 06 — Set a Site's PM Frequency
 
-Status: needs-info
+Status: ready-for-agent
 Blocked by: 05
 Type: task
 
@@ -31,3 +31,4 @@ PRD-listed values: Monthly, Twice a month, Every two months (bi-monthly), Quarte
 - Q3 answered: month arithmetic **clamps to the month's last day** (31 Jan + 1 month = 28/29 Feb).
 - Q4 answered: a frequency change **also re-dates the current open PM Task** (new due date = last Work Done Date + new interval). Whether that includes tasks already In Progress is still open.
 - Q4 follow-up answered: re-dating applies **only to PM Tasks still in `Scheduled`**. Tasks In Progress, For Validation or Returned keep their due date.
+- Q5 (preferred schedule / cycle start / effective date per Site): **not needed for the MVP**. The first due date comes from the installation date (issue 08).

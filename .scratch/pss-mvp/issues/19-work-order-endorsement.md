@@ -1,6 +1,6 @@
 # 19 — Work Order endorsement (2 levels) before implementation
 
-Status: needs-info
+Status: ready-for-agent
 Blocked by: 18
 Type: task
 

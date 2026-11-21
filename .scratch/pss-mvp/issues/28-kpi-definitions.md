@@ -1,6 +1,6 @@
 # 28 — Define dashboard and report KPIs
 
-Status: needs-info
+Status: ready-for-agent
 Blocked by: 09
 Type: task
 
