@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\BillingThresholdController;
 use App\Http\Controllers\Api\SiteController;
+use App\Http\Controllers\Api\SiteSettingsController;
 use App\Http\Controllers\Api\VendorController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +11,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('sites', [SiteController::class, 'index'])->name('sites.index');
     Route::get('sites/{site}/equipment', [SiteController::class, 'equipment'])->name('sites.equipment.index');
+    Route::get('sites/{site}/settings', [SiteSettingsController::class, 'show'])->name('sites.settings.show');
+    Route::put('sites/{site}/settings/vendor', [SiteSettingsController::class, 'updateVendor'])->name('sites.settings.vendor.update');
+    Route::put('sites/{site}/settings/eic', [SiteSettingsController::class, 'updateEic'])->name('sites.settings.eic.update');
 
     Route::get('settings/billing-thresholds', [BillingThresholdController::class, 'show'])->name('settings.billing-thresholds.show');
     Route::put('settings/billing-thresholds', [BillingThresholdController::class, 'update'])->name('settings.billing-thresholds.update');
