@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\BillingThresholdController;
+use App\Http\Controllers\Api\ChecklistTemplateController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
 use App\Http\Controllers\Api\VendorController;
@@ -14,6 +15,12 @@ Route::middleware('auth')->group(function () {
     Route::get('sites/{site}/settings', [SiteSettingsController::class, 'show'])->name('sites.settings.show');
     Route::put('sites/{site}/settings/vendor', [SiteSettingsController::class, 'updateVendor'])->name('sites.settings.vendor.update');
     Route::put('sites/{site}/settings/eic', [SiteSettingsController::class, 'updateEic'])->name('sites.settings.eic.update');
+
+    Route::get('checklist-templates', [ChecklistTemplateController::class, 'index'])->name('checklist-templates.index');
+    Route::get('checklist-templates/{checklistTemplate}', [ChecklistTemplateController::class, 'show'])->name('checklist-templates.show');
+    Route::get('checklist-templates/{checklistTemplate}/versions/{versionNumber}', [ChecklistTemplateController::class, 'version'])
+        ->whereNumber('versionNumber')
+        ->name('checklist-templates.versions.show');
 
     Route::get('settings/billing-thresholds', [BillingThresholdController::class, 'show'])->name('settings.billing-thresholds.show');
     Route::put('settings/billing-thresholds', [BillingThresholdController::class, 'update'])->name('settings.billing-thresholds.update');
