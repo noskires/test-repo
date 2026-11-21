@@ -1,4 +1,4 @@
-# 07 — PM Checklist templates with versions
+# 07 — PM Checklist templates with versions (fixed set, read-only API)
 
 Status: ready-for-agent
 Blocked by: 02
@@ -6,26 +6,42 @@ Type: task
 
 ## What to build
 
-Administrators configure **PM Checklist** templates per **Equipment Category** (category IDs come from `MasterDataDirectory`), PRD §6.5.
+PRD v2 §6.2 and the grilling decision below: the MVP ships a **fixed set** of PM Checklists. There is **no** admin create/edit API or screen in the MVP; that editor is version 2. This slice builds the versioned data model, a seeding mechanism that loads checklist definitions from data, and read-only endpoints. The real checklist content (Genset, ACU, ATS, Building) and its mapping to external Equipment Category IDs is issue 31 (needs-info). This slice is tested with fixture definitions.
 
-- A template has a name, an Equipment Category and an ordered list of **Checklist Items**.
-- A Checklist Item has: label, response type (`pass_fail`, `good_defective`, `yes_no`, `numeric`, `text`, `photo`), `mandatory` flag, `remarks_required_on_fail` flag, `photo_required` flag, optional acceptable criteria (for numeric: min and/or max; free-text criteria for the others), and an active flag.
-- **Versioning**: saving changes to a template creates a **new version**. Old versions are never changed, so past PM Reports stay consistent. An item is deactivated, never deleted.
-- At most one active template per Equipment Category at a time.
+Model (PSS-owned. Equipment Category IDs are external, from `MasterDataDirectory`):
+- A **PM Checklist** template has a name, an external `equipment_category_id`, and numbered **versions**. At most one active template per Equipment Category.
+- A version holds an ordered list of **Checklist Items**: label, response type (`pass_fail`, `good_defective`, `yes_no`, `numeric`, `text`, `photo`), `mandatory`, `remarks_required_on_fail`, `photo_required`, optional acceptable criteria (numeric: min and/or max; free text for the others).
+- Versions are immutable once written. Each item has a stable ID, so PM Tasks (issue 08) and PM Reports (issue 10) can point at a specific version and its items.
 
-Endpoints (writes need the `manage-checklists` Gate): list, create, show (with current version), update (creates a new version), and get by category: `GET /api/checklist-templates?equipment_category_id=`.
+Seeding mechanism:
+- One loader (seeder or artisan command, developer's choice) that takes checklist definitions as data (e.g. a PHP array or JSON file, in a single place) and writes them.
+- It is **idempotent**. Re-running with an unchanged definition creates no new version. A changed definition (an item added, removed or edited) creates version N+1 and leaves version N untouched. That is how the fixed set gets updated before the editor exists. An item missing from the new definition is absent from N+1 but still present in N.
+- A definition whose category is unknown to the directory is rejected with a clear error, and nothing is written for it.
+
+Read endpoints (any authenticated user):
+- `GET /api/checklist-templates`: list templates, each with its current version number. Optional `?equipment_category_id=` returns that category's current version with its items.
+- `GET /api/checklist-templates/{template}`: the template with its current version and items.
+- `GET /api/checklist-templates/{template}/versions/{version}`: a specific (possibly old) version with its items.
+
+Out of scope: create/update/deactivate endpoints, the `manage-checklists` Gate (it comes with the v2 editor), and the real checklist content (issue 31).
 
 ## Acceptance criteria
 
-- [ ] Creating a template for a category known to the directory stores version 1 with its items. An unknown category returns 422.
-- [ ] Invalid item definitions return 422 (unknown response type, or numeric min > max).
-- [ ] Updating a template creates version N+1. Version N's items are unchanged and still readable by ID.
-- [ ] Deactivating an item removes it from the new version but keeps it in older versions.
-- [ ] Creating a second active template for the same category returns 422.
-- [ ] Writes return 403 when the `manage-checklists` Gate denies.
-- [ ] The lookup by category returns the current version.
+- [ ] Migrations and models exist for templates, versions and items. `composer.json` is unchanged.
+- [ ] Loading a fixture definition for a category known to the in-memory directory creates version 1 with its items in order.
+- [ ] Loading the same definition again creates no new version.
+- [ ] Loading a changed definition creates version 2. Version 1's items are unchanged and still readable through the versions endpoint.
+- [ ] An item removed from the definition is absent from version 2 and present in version 1.
+- [ ] A definition with an unknown category, an unknown response type, or numeric min > max is rejected and writes nothing.
+- [ ] Two definitions for the same category cannot both be active. The loader rejects the second one.
+- [ ] `GET /api/checklist-templates?equipment_category_id=` returns the current version with items. A category with no template returns an empty result, not an error (issue 08 flags "no checklist").
+- [ ] All read endpoints return 401 when unauthenticated, and 404 for an unknown template or version.
+- [ ] There are no POST, PUT, PATCH or DELETE routes for checklist templates.
+- [ ] PHPUnit unit and feature tests cover every criterion above, using the in-memory directory fake, and `php artisan test` passes.
 
 ## Comments
+
+- 2026-11-22 (product-owner): Rewritten to match the grilling decision (fixed set in the MVP, editor in v2) and PRD v2 §6.2. The earlier admin create/update endpoints and the `manage-checklists` Gate are removed. The actual seeded content was split out into issue 31 (needs-info), because the PRD gives only example items for Genset, ACU and ATS, nothing for Building, no response types or flags per item, and the external Equipment Category IDs are unknown until issue 03.
 
 ## Decisions (grilling, 2026-11-22)
 - **MVP ships a fixed set of checklists** (Genset, ACU, ATS, Building), seeded from the approved PM standards. The admin create/edit endpoints and screen are **out of the MVP** (version 2). Keep the versioning model so the editor can be added later without a migration.
