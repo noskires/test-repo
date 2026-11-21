@@ -1,6 +1,6 @@
 # 08 — Automatic PM Task generation
 
-Status: needs-info
+Status: ready-for-agent
 Blocked by: 05, 06, 07
 Type: task
 
@@ -37,3 +37,4 @@ A scheduled job (Laravel scheduler, queued) that makes sure every Equipment at a
 - Q3 answered: Sites with no Site Vendor or no EIC are **skipped** and shown on a "needs setup" list for admins.
 - Q4 answered: if the Equipment is removed upstream, **keep its open PM Task and flag it**. The EIC decides whether to cancel it (issue 25). No auto-cancel.
 - Q5 (job frequency) is still open. Daily is assumed.
+- Q5: run the job **daily**. This was the default when the issue moved to ready-for-agent and can be tuned later.

@@ -1,6 +1,6 @@
 # 23 — Multi-level billing endorsement and closing the Work Order
 
-Status: needs-info
+Status: ready-for-agent
 Blocked by: 19, 21, 22
 Type: task
 

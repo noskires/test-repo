@@ -1,6 +1,6 @@
 # 09 — PM Timeliness (Upcoming / Due / Overdue)
 
-Status: needs-info
+Status: ready-for-agent
 Blocked by: 08
 Type: task
 
