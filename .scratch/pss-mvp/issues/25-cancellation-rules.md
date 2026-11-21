@@ -1,7 +1,7 @@
 # 25 â€” Cancelling PM Tasks, E-Calls and Work Orders
 
 Status: ready-for-agent
-Blocked by: none
+Blocked by: 08, 12, 18
 Type: task
 
 ## What to build
@@ -29,3 +29,5 @@ The PRD lists `CANCELLED` for PM Tasks ("cancelled with an authorized reason", Â
 - E-Call cut-off answered: it can be cancelled **until the EIC approves the FSR/BOQ**.
 - PM Task answered: cancelling does **not** automatically create the next task. The **EIC picks the next due date** when cancelling (or later). Until then, that Equipment has no scheduled PM.
 - Work Order cut-off: cancellable while `Open`, `For Lvl1 Endorsement` or `For Lvl2 Endorsement` (before `For Implementation`).
+
+- 2026-11-22 (product-owner): `Blocked by` corrected from `none` to `08, 12, 18`. Cancelling needs PM Tasks (08), E-Calls (12) and Work Orders (18) to exist. It can also be split per record type later if that helps delivery.
