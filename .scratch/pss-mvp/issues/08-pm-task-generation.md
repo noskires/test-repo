@@ -1,6 +1,6 @@
 # 08 — Automatic PM Task generation
 
-Status: ready-for-agent
+Status: needs-info
 Blocked by: 05, 06, 07
 Type: task
 
@@ -38,3 +38,7 @@ A scheduled job (Laravel scheduler, queued) that makes sure every Equipment at a
 - Q4 answered: if the Equipment is removed upstream, **keep its open PM Task and flag it**. The EIC decides whether to cancel it (issue 25). No auto-cancel.
 - Q5 (job frequency) is still open. Daily is assumed.
 - Q5: run the job **daily**. This was the default when the issue moved to ready-for-agent and can be tuned later.
+
+- 2026-11-22 (product-owner): Two additions, and the status is changed to **needs-info** for one new question.
+  - **Moved in from issue 06**: when a Site's PM Frequency changes (06 dispatches `SitePmFrequencyChanged` or equivalent), re-date that Site's PM Tasks that are still `Scheduled`. New due date = the last Work Done Date for that Equipment + the new interval, or the installation date + the new interval if it has no completed task yet. Tasks `In Progress`, `For Validation` or `Returned` keep their due date. Added acceptance criterion: "Changing a Site's frequency re-dates only its `Scheduled` tasks, and the others keep their due date."
+  - **New open question (blocking)**: the directory's `Equipment` value object has a **nullable** `installedOn` (issue 02). If an Equipment has no installation date and no PM history in PSS, what is its first PM Task's due date? Options: skip it and list it on the admin "needs setup" list; use the date the Equipment first appears in PSS + the frequency; or generate it as due immediately. Every other rule in this issue is settled. Only this case needs the human's answer before the issue goes back to ready-for-agent.
