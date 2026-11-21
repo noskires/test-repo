@@ -33,3 +33,5 @@ The real HTTP adapter is issue 03 (needs-info).
 ## Comments
 
 - 2026-11-22 (qa): QA PASS. Ran `php artisan test` from backend/: 46 passed (124 assertions), 0 failed, 0 skipped. Every acceptance criterion maps to a test that asserts it. No migrations or Eloquent models were added for external-API master data (ADR 0001).
+
+- 2026-11-22 (product-owner): Human decision: **local dev uses the fake**. Until issue 03 lands, the `local` environment (not production) also binds `MasterDataDirectory` to the in-memory fake, seeded with sample Sites, Equipment and employees including an Immediate Head chain. This issue had already merged (PR #5), so the work is a follow-up in issue 30.

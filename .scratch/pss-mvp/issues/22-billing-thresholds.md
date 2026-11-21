@@ -31,7 +31,7 @@ Build:
 
 ## Comments
 
+- 2026-11-22 (qa): QA PASS after one fix round (strict parsing of "+5", "5." and ".5"). Ran `php artisan test` from backend/: 94 passed (285 assertions), 0 failed, 0 skipped. Every acceptance criterion maps to a test that asserts it.
+
 ## Decisions (grilling, 2026-11-22)
 - Threshold changes **apply to Work Orders already in billing endorsement**: the required number of levels is recalculated against the current thresholds. If a Work Order has already completed the new number of levels, it Closes at once. (This affects issue 23.)
-
-- 2026-11-22 (qa): QA PASS after one fix round (strict parsing of "+5", "5." and ".5"). Ran `php artisan test` from backend/: 94 passed (285 assertions), 0 failed, 0 skipped. Every acceptance criterion maps to a test that asserts it.

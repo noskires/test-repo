@@ -27,3 +27,5 @@ The production implementation of `MasterDataDirectory` (issue 02), calling the e
 ## Decisions (grilling, 2026-11-22)
 - Q3 partly answered: **yes, the API exposes each employee's Immediate Head**. PSS stores no org chart. (Whether it also gives the role title is still open.)
 - Q4 answered: **yes, equipment operational status comes from the API** (the user confirmed). Its field name and values are still needed.
+
+- 2026-11-22 (product-owner): Human decision: until this adapter lands, the `local` environment binds `MasterDataDirectory` to the seeded in-memory fake (issue 30). Production has no fake binding. When this issue is built, its config-driven binding replaces the fake for non-testing environments. Whether `local` keeps an option to use the fake is a call for that time.
