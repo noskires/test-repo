@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\BillingThresholdController;
 use App\Http\Controllers\Api\ChecklistTemplateController;
+use App\Http\Controllers\Api\PriceListItemController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
 use App\Http\Controllers\Api\VendorController;
@@ -9,6 +10,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
     Route::apiResource('vendors', VendorController::class)->except(['destroy']);
+    Route::get('vendors/{vendor}/price-list-items', [PriceListItemController::class, 'index'])->name('vendors.price-list-items.index');
+    Route::post('vendors/{vendor}/price-list-items', [PriceListItemController::class, 'store'])->name('vendors.price-list-items.store');
+    Route::patch('price-list-items/{priceListItem}', [PriceListItemController::class, 'update'])->name('price-list-items.update');
 
     Route::get('sites', [SiteController::class, 'index'])->name('sites.index');
     Route::get('sites/{site}/equipment', [SiteController::class, 'equipment'])->name('sites.equipment.index');
