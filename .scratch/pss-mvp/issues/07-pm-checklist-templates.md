@@ -27,21 +27,23 @@ Out of scope: create/update/deactivate endpoints, the `manage-checklists` Gate (
 
 ## Acceptance criteria
 
-- [ ] Migrations and models exist for templates, versions and items. `composer.json` is unchanged.
-- [ ] Loading a fixture definition for a category known to the in-memory directory creates version 1 with its items in order.
-- [ ] Loading the same definition again creates no new version.
-- [ ] Loading a changed definition creates version 2. Version 1's items are unchanged and still readable through the versions endpoint.
-- [ ] An item removed from the definition is absent from version 2 and present in version 1.
-- [ ] A definition with an unknown category, an unknown response type, or numeric min > max is rejected and writes nothing.
-- [ ] Two definitions for the same category cannot both be active. The loader rejects the second one.
-- [ ] `GET /api/checklist-templates?equipment_category_id=` returns the current version with items. A category with no template returns an empty result, not an error (issue 08 flags "no checklist").
-- [ ] All read endpoints return 401 when unauthenticated, and 404 for an unknown template or version.
-- [ ] There are no POST, PUT, PATCH or DELETE routes for checklist templates.
-- [ ] PHPUnit unit and feature tests cover every criterion above, using the in-memory directory fake, and `php artisan test` passes.
+- [x] Migrations and models exist for templates, versions and items. `composer.json` is unchanged.
+- [x] Loading a fixture definition for a category known to the in-memory directory creates version 1 with its items in order.
+- [x] Loading the same definition again creates no new version.
+- [x] Loading a changed definition creates version 2. Version 1's items are unchanged and still readable through the versions endpoint.
+- [x] An item removed from the definition is absent from version 2 and present in version 1.
+- [x] A definition with an unknown category, an unknown response type, or numeric min > max is rejected and writes nothing.
+- [x] Two definitions for the same category cannot both be active. The loader rejects the second one.
+- [x] `GET /api/checklist-templates?equipment_category_id=` returns the current version with items. A category with no template returns an empty result, not an error (issue 08 flags "no checklist").
+- [x] All read endpoints return 401 when unauthenticated, and 404 for an unknown template or version.
+- [x] There are no POST, PUT, PATCH or DELETE routes for checklist templates.
+- [x] PHPUnit unit and feature tests cover every criterion above, using the in-memory directory fake, and `php artisan test` passes.
 
 ## Comments
 
 - 2026-11-22 (product-owner): Rewritten to match the grilling decision (fixed set in the MVP, editor in v2) and PRD v2 §6.2. The earlier admin create/update endpoints and the `manage-checklists` Gate are removed. The actual seeded content was split out into issue 31 (needs-info), because the PRD gives only example items for Genset, ACU and ATS, nothing for Building, no response types or flags per item, and the external Equipment Category IDs are unknown until issue 03.
+
+- 2026-11-22 (qa): QA PASS. Ran `php artisan test` from backend/: 174 passed (589 assertions), 0 failed, 0 skipped. Every acceptance criterion maps to a test that asserts it. equipment_category_id is an external ID string, with no categories table (ADR 0001).
 
 ## Decisions (grilling, 2026-11-22)
 - **MVP ships a fixed set of checklists** (Genset, ACU, ATS, Building), seeded from the approved PM standards. The admin create/edit endpoints and screen are **out of the MVP** (version 2). Keep the versioning model so the editor can be added later without a migration.
