@@ -21,12 +21,14 @@ Issue 02 (merged in PR #5) binds `InMemoryMasterDataDirectory` only when `app()-
 
 ## Acceptance criteria
 
-- [ ] In the `local` environment, resolving `MasterDataDirectory` returns the fake loaded with the sample data. A test can switch the app's environment to `local` and re-run the provider registration to check this.
-- [ ] In the `testing` environment, the resolved fake starts empty (`listSites()` returns `[]`).
-- [ ] In the `production` environment, `MasterDataDirectory` has no in-memory fake binding.
-- [ ] The sample data has at least 2 Sites, each with at least 2 Equipment, and every Equipment's category is in `listEquipmentCategories()`.
-- [ ] The Immediate Head helper from issue 02 resolves levels 1 to 4 from the sample Requestor, and level 5 returns null.
-- [ ] No migration is added and `composer.json` is unchanged.
-- [ ] PHPUnit tests cover every criterion above, and `php artisan test` passes.
+- [x] In the `local` environment, resolving `MasterDataDirectory` returns the fake loaded with the sample data. A test can switch the app's environment to `local` and re-run the provider registration to check this.
+- [x] In the `testing` environment, the resolved fake starts empty (`listSites()` returns `[]`).
+- [x] In the `production` environment, `MasterDataDirectory` has no in-memory fake binding.
+- [x] The sample data has at least 2 Sites, each with at least 2 Equipment, and every Equipment's category is in `listEquipmentCategories()`.
+- [x] The Immediate Head helper from issue 02 resolves levels 1 to 4 from the sample Requestor, and level 5 returns null.
+- [x] No migration is added and `composer.json` is unchanged.
+- [x] PHPUnit tests cover every criterion above, and `php artisan test` passes.
 
 ## Comments
+
+- 2026-11-22 (qa): QA PASS. Ran `php artisan test` from backend/: 103 passed (327 assertions), 0 failed, 0 skipped. Every acceptance criterion maps to a test that asserts it. The real app booted with APP_ENV=local serves the 2 sample sites. No master-data tables exist (ADR 0001).
