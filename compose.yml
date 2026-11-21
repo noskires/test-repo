@@ -1,0 +1,78 @@
+# Local dev stack for PSS: MySQL + Laravel API + Angular (SSR dev server).
+#
+#   podman compose up --build      # start everything
+#   podman compose down            # stop (data kept)
+#   podman compose down -v         # stop and wipe MySQL data + dependency volumes
+#
+# Only the frontend is published to the host: http://localhost:4200
+# Everything else talks over the internal compose network by service name:
+#   browser -> frontend:4200 --(/api proxy)--> backend:8000 --> mysql:3306
+
+name: pss
+
+services:
+  mysql:
+    image: docker.io/library/mysql:8.4
+    environment:
+      MYSQL_DATABASE: spares_db
+      MYSQL_USER: pss
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    # No host port: only reachable as mysql:3306 inside the network.
+    # For a DB GUI, temporarily add:  ports: ["3307:3306"]
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    working_dir: /app
+    # Container env overrides backend/.env (Laravel's Dotenv won't overwrite existing vars).
+    environment:
+      APP_URL: http://localhost:4200
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: spares_db
+      DB_USERNAME: pss
+      DB_PASSWORD: secret
+    command: >
+      sh -c "composer install --no-interaction --prefer-dist &&
+             php artisan migrate --force &&
+             php artisan serve --host=0.0.0.0 --port=8000"
+    # No host port: the frontend reaches it as backend:8000 via the /api proxy.
+    volumes:
+      - ./backend:/app
+      - backend-vendor:/app/vendor # Linux vendor/, kept separate from the host's
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    image: docker.io/library/node:22-alpine
+    working_dir: /app
+    environment:
+      # Angular SSR rejects unknown Host headers (SSRF guard); allow the published host.
+      NG_ALLOWED_HOSTS: localhost
+    command: >
+      sh -c "npx -y npm@11 install &&
+             npx ng serve --host 0.0.0.0 --port 4200 --poll 2000 --proxy-config proxy.container.json"
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules # Linux node_modules, kept separate from the host's
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:
+  backend-vendor:
+  frontend-node-modules:

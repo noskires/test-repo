@@ -1,0 +1,34 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+
+# Secrets (also covered in backend/.gitignore)
+.env
+.env.*
+!.env.example
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Dependencies
+vendor/
+node_modules/
+
+# Build output / caches
+dist/
+.angular/
+out-tsc/
+coverage/
+
+# Logs and Laravel storage runtime files
+*.log
+backend/storage/logs/*
+!backend/storage/logs/.gitignore
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*.php
+
+# Office lock files
+~$*

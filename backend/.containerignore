@@ -1,0 +1,3 @@
+# Source is bind-mounted at runtime; keep the build context tiny.
+*
+!Containerfile
