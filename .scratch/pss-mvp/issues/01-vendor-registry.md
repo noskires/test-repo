@@ -24,15 +24,18 @@ Out of scope here (later issues): accreditation document upload, Site assignment
 
 ## Acceptance criteria
 
-- [ ] `routes/api.php` exists and is registered. `composer.json` is unchanged.
-- [ ] `vendors` migration, `Vendor` model and factory exist.
-- [ ] Creating a vendor with a valid payload returns 201 and persists it with status `active` by default.
-- [ ] Creating without a name, or with an invalid email, returns 422 with validation errors for those fields.
-- [ ] Updating name, contact fields or status returns 200 and persists the change.
-- [ ] `GET /api/vendors?status=active` returns only active vendors.
-- [ ] Create and update return 403 when the `manage-vendors` Gate denies.
-- [ ] All endpoints return 401 for unauthenticated requests.
-- [ ] There is no route that deletes a vendor.
-- [ ] PHPUnit feature tests cover every criterion above, and `php artisan test` passes.
+- [x] `routes/api.php` exists and is registered. `composer.json` is unchanged.
+- [x] `vendors` migration, `Vendor` model and factory exist.
+- [x] Creating a vendor with a valid payload returns 201 and persists it with status `active` by default.
+- [x] Creating without a name, or with an invalid email, returns 422 with validation errors for those fields.
+- [x] Updating name, contact fields or status returns 200 and persists the change.
+- [x] `GET /api/vendors?status=active` returns only active vendors.
+- [x] Create and update return 403 when the `manage-vendors` Gate denies.
+- [x] All endpoints return 401 for unauthenticated requests.
+- [x] There is no route that deletes a vendor.
+- [x] PHPUnit feature tests cover every criterion above, and `php artisan test` passes.
 
 ## Comments
+
+- 2026-11-22 (product-owner): Most of this slice already landed on main with the scaffold PR #2 (Vendor model, VendorStatus enum, controller, Store/Update requests, VendorResource, migration, factory, `routes/api.php` registered in `bootstrap/app.php`, `tests/Feature/VendorApiTest.php`). Remaining work is to **verify every acceptance criterion above has a passing PHPUnit test and fill the gaps**, in particular: 403 from the `manage-vendors` Gate on create and update, the `?status=` filter, 401 on all endpoints, and the absence of any delete route. Scope is unchanged.
+- 2026-11-22 (qa): QA PASS. Ran `php artisan test` from backend/: 21 passed (49 assertions), 0 failed, 0 skipped (19 of them in VendorApiTest). Every acceptance criterion maps to a real, asserting test. composer.json is unchanged.
