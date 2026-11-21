@@ -22,12 +22,14 @@ The real HTTP adapter is issue 03 (needs-info).
 
 ## Acceptance criteria
 
-- [ ] The interface and value objects exist. Nothing outside the adapter layer depends on HTTP.
-- [ ] The fake can be seeded with sites, equipment, categories and employees, and its methods return them.
-- [ ] Looking up an unknown Site, Equipment or employee returns null, and the endpoints return 404.
-- [ ] The Immediate Head helper returns the correct employee for levels 1 to 4, and returns null when the chain runs out.
-- [ ] `GET /api/sites` lists the seeded sites. `GET /api/sites/{id}/equipment` lists only that site's equipment.
-- [ ] Both endpoints require authentication (401 otherwise).
-- [ ] Unit tests cover the fake and the chain helper. Feature tests cover the endpoints.
+- [x] The interface and value objects exist. Nothing outside the adapter layer depends on HTTP.
+- [x] The fake can be seeded with sites, equipment, categories and employees, and its methods return them.
+- [x] Looking up an unknown Site, Equipment or employee returns null, and the endpoints return 404.
+- [x] The Immediate Head helper returns the correct employee for levels 1 to 4, and returns null when the chain runs out.
+- [x] `GET /api/sites` lists the seeded sites. `GET /api/sites/{id}/equipment` lists only that site's equipment.
+- [x] Both endpoints require authentication (401 otherwise).
+- [x] Unit tests cover the fake and the chain helper. Feature tests cover the endpoints.
 
 ## Comments
+
+- 2026-11-22 (qa): QA PASS. Ran `php artisan test` from backend/: 46 passed (124 assertions), 0 failed, 0 skipped. Every acceptance criterion maps to a test that asserts it. No migrations or Eloquent models were added for external-API master data (ADR 0001).
