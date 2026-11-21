@@ -26,3 +26,5 @@ Glossary: administrators can maintain a Price List "by uploading a file", as wel
 - Q2 answered: an upload **merges**. It adds new items and updates prices by item code. Items not in the file stay unchanged.
 - Q3 answered: **all or nothing**. If any row is invalid, nothing is imported and the admin gets a per-row error list.
 - Q4: XLSX support is implied by the user choosing XLSX export (issue 29). Confirm the package.
+
+- 2026-11-22 (product-owner): Human decision: **`phpoffice/phpspreadsheet` is approved** as a dependency for XLSX price-list upload (Q4 answered). Q2 and Q3 were already answered. This stays **needs-info** because Q1 is still open: the vendors' Price List template. We need a sample file showing its columns (item code, description, unit, unit price, item type material/service?) and whether CSV must also be accepted.
