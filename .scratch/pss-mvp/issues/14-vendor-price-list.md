@@ -16,10 +16,12 @@ File upload is issue 15 (needs-info).
 
 ## Acceptance criteria
 
-- [ ] Creating an item with description, type, unit and a unit price >= 0 returns 201. A missing field or negative price returns 422.
-- [ ] Money is stored exactly (decimal with 2 places, or integer centavos), with a test using a value like 1234.56.
-- [ ] Duplicate code within the same Vendor returns 422. The same code at a different Vendor is fine.
-- [ ] Listing supports `?type=` and `?active=` filters.
-- [ ] Writes return 403 when the Gate denies.
+- [x] Creating an item with description, type, unit and a unit price >= 0 returns 201. A missing field or negative price returns 422.
+- [x] Money is stored exactly (decimal with 2 places, or integer centavos), with a test using a value like 1234.56.
+- [x] Duplicate code within the same Vendor returns 422. The same code at a different Vendor is fine.
+- [x] Listing supports `?type=` and `?active=` filters.
+- [x] Writes return 403 when the Gate denies.
 
 ## Comments
+
+- 2026-11-22 (qa): QA PASS. Ran `php artisan test` from backend/: 202 passed (707 assertions), 0 failed, 0 skipped. Every acceptance criterion maps to a test that asserts it. Money is stored as integer centavos (1234.56 is stored as 123456).
