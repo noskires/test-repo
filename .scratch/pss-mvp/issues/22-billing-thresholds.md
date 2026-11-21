@@ -20,10 +20,10 @@ Build:
 
 ## Acceptance criteria
 
-- [ ] Defaults are seeded at 200,000.00 and 1,000,000.00.
-- [ ] Unit tests: 199,999.99 → 2. 200,000.00 → 3. 1,000,000.00 → 3. 1,000,000.01 → 4.
-- [ ] PUT with lower >= upper, or with a non-positive value, returns 422. PUT returns 403 without the Gate.
-- [ ] Changes are recorded (who, when, old and new values).
+- [x] Defaults are seeded at 200,000.00 and 1,000,000.00.
+- [x] Unit tests: 199,999.99 → 2. 200,000.00 → 3. 1,000,000.00 → 3. 1,000,000.01 → 4.
+- [x] PUT with lower >= upper, or with a non-positive value, returns 422. PUT returns 403 without the Gate.
+- [x] Changes are recorded (who, when, old and new values).
 
 ## Open questions (non-blocking, for the human)
 
@@ -33,3 +33,5 @@ Build:
 
 ## Decisions (grilling, 2026-11-22)
 - Threshold changes **apply to Work Orders already in billing endorsement**: the required number of levels is recalculated against the current thresholds. If a Work Order has already completed the new number of levels, it Closes at once. (This affects issue 23.)
+
+- 2026-11-22 (qa): QA PASS after one fix round (strict parsing of "+5", "5." and ".5"). Ran `php artisan test` from backend/: 94 passed (285 assertions), 0 failed, 0 skipped. Every acceptance criterion maps to a test that asserts it.
