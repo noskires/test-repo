@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\BillingThresholdController;
 use App\Http\Controllers\Api\ChecklistTemplateController;
+use App\Http\Controllers\Api\ECallController;
 use App\Http\Controllers\Api\PriceListItemController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
@@ -25,6 +26,10 @@ Route::middleware('auth')->group(function () {
     Route::get('checklist-templates/{checklistTemplate}/versions/{versionNumber}', [ChecklistTemplateController::class, 'version'])
         ->whereNumber('versionNumber')
         ->name('checklist-templates.versions.show');
+
+    Route::get('e-calls', [ECallController::class, 'index'])->name('e-calls.index');
+    Route::post('e-calls', [ECallController::class, 'store'])->name('e-calls.store');
+    Route::get('e-calls/{eCall}', [ECallController::class, 'show'])->name('e-calls.show');
 
     Route::get('settings/billing-thresholds', [BillingThresholdController::class, 'show'])->name('settings.billing-thresholds.show');
     Route::put('settings/billing-thresholds', [BillingThresholdController::class, 'update'])->name('settings.billing-thresholds.update');
