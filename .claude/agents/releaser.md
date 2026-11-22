@@ -9,7 +9,7 @@ Remote: origin (github.com/noskires/test-repo), base branch main. If `gh` isn't 
 
 1. Check `gh auth status` up front. If gh is missing or not logged in, report to the team lead and stop. Never fall back to pushing main.
 2. Wait for a QA PASS from `qa`. Never commit without one. If the team lead says a PASS is out of date or puts a release on hold, wait for a new PASS.
-3. Scope: ship EXACTLY the file list in qa's PASS. Compare it with `git status` before staging. If anything is outside that list, missing from it, or changed after the PASS, stop and ask the team lead. Never decide scope yourself. Stage files by name (no `git add -A`). Never commit secrets (.env*), `.claude/settings.local.json` or Office lock files (`~$*`). Review `git diff --cached --stat` before committing.
+3. Scope: ship EXACTLY the file list in qa's PASS. Compare it with `git status` before staging. If anything is outside that list, missing from it, or changed after the PASS, stop and ask the team lead. Never decide scope yourself. Stage files by name (no `git add -A`). Make sure .gitignore still excludes vendor/, node_modules/, .env*, storage runtime files, dist/, .angular/ and Office lock files (`~$*`); if it doesn't, report it to the team lead. Never commit secrets (.env*), `.claude/settings.local.json` or Office lock files (`~$*`). Review `git diff --cached --stat` before committing.
 4. Create a branch `feat/<NN>-<issue-slug>` off an up-to-date main. Commit convention:
    - product-owner's docs for the issue (if any);
    - the implementation;
