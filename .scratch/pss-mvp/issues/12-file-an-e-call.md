@@ -17,13 +17,13 @@ Endpoints: `POST /api/e-calls`, `GET /api/e-calls/{id}`, `GET /api/e-calls` (fil
 
 ## Acceptance criteria
 
-- [ ] A valid E-Call with no Equipment is accepted (e.g. "build a new fence").
-- [ ] An Equipment that isn't at the given Site returns 422. An unknown Site returns 422.
-- [ ] A Priority outside the four values returns 422.
-- [ ] The E-Call stores the Requestor, the Site Vendor and EIC at filing time, the snapshots and the attachments.
-- [ ] A Site with no Site Vendor or EIC returns 422 with a clear message.
-- [ ] Vendor staff listing E-Calls see only their Vendor's. Others' E-Calls return 403 on show.
-- [ ] Feature tests use the directory fake and `Storage::fake()`.
+- [x] A valid E-Call with no Equipment is accepted (e.g. "build a new fence").
+- [x] An Equipment that isn't at the given Site returns 422. An unknown Site returns 422.
+- [x] A Priority outside the four values returns 422.
+- [x] The E-Call stores the Requestor, the Site Vendor and EIC at filing time, the snapshots and the attachments.
+- [x] A Site with no Site Vendor or EIC returns 422 with a clear message.
+- [x] Vendor staff listing E-Calls see only their Vendor's. Others' E-Calls return 403 on show.
+- [x] Feature tests use the directory fake and `Storage::fake()`.
 
 ## Comments
 
@@ -34,3 +34,5 @@ Endpoints: `POST /api/e-calls`, `GET /api/e-calls/{id}`, `GET /api/e-calls` (fil
   - E-Call Status values follow PRD v2 §7: For Vendor Assessment, For EIC Review, Approved, Closed, Returned, Rejected, Cancelled. This slice only sets the initial `For Vendor Assessment`.
   - Attachments: accept images and PDF/Office documents, stored with `Storage::fake()` in tests. The PRD gives no size limit. Pick a sane configurable maximum (e.g. 10 MB per file) and state it in the PR, so it's visible rather than hidden.
 - 2026-11-22 (product-owner): Picked as the next slice after issue 14 merged (main 20cde31). Its only blocker (05) is merged. Chosen over 06 because it unblocks 16 directly (16's other blocker, 14, is merged), and also 13 and 25. 06 only unblocks 08, which is still needs-info.
+
+- 2026-11-22 (qa): QA PASS. Ran `php artisan test` from backend/: 239 passed (889 assertions), 0 failed. `tests/Feature/ECallApiTest.php`: 37 passed (173 assertions). Every acceptance criterion maps to a test that asserts it. Attachment limit is 10 MB per file (config `pss.e_call_attachments.max_kilobytes`, env `PSS_E_CALL_ATTACHMENT_MAX_KB`), at most 10 files.
