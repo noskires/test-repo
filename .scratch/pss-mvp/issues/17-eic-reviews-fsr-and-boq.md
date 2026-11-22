@@ -24,3 +24,4 @@ Endpoints: `POST /api/e-calls/{eCall}/approve`, `/return`, `/reject`.
 - [ ] After a Reject, every further action on that E-Call (proposal, approve, Work Order creation) returns 422.
 
 ## Comments
+- 2026-11-22 (product-owner): Human decision (issue 11 Decisions, spec.md): when a Site's EIC is replaced, the **current Site EIC** (`site_settings.eic_employee_id` at the time of the request) acts on pending items. The EIC captured on the record is history only and isn't used for authorization. The reviewer is the current Site EIC of the E-Call's Site, not the `eic_employee_id` captured at filing (issue 12). Add a test where the EIC is replaced while the E-Call is `For EIC Review`: the new EIC can act, and the old one gets 403.
