@@ -19,3 +19,7 @@ Whenever a PSS record points at a Site or Equipment, it also stores a **Snapshot
 
 - Approval routing depends on the external Immediate Head chain. Approvers are captured when a Work Order is submitted, and a missing level blocks the Work Order until the chain is fixed in the external system, not in PSS.
 - Building the real integration is blocked until we have the API's URL, auth and response shapes. Until then, tests use an in-memory fake of the directory port.
+
+## Amendment (2026-11-23)
+
+The human decided (issue 19) that Work Order endorsers are **resolved from the E-Call Requestor's Immediate Head chain at each step**, at the time each endorser acts, **not captured when the Work Order is submitted**. This replaces the first sentence of the first Consequence above. It matches the decision that the **current** Site EIC acts on pending items (issue 11). The rest of that Consequence still holds: a short or missing chain **blocks** the Work Order (a 422 at submit or at the waiting level), and it is **flagged** on the admin Needs Setup list (issue 32) until the chain is fixed in the external system, not in PSS.

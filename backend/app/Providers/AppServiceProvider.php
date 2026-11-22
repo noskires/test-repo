@@ -7,6 +7,7 @@ use App\MasterData\MasterDataDirectory;
 use App\MasterData\SampleMasterData;
 use App\Models\ECall;
 use App\Models\PmTask;
+use App\Models\WorkOrder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -47,13 +48,14 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Stable aliases for polymorphic rows (Approval Record subjects), so stored data never depends on class names.
      * Enforced: a polymorphic relation to an unmapped model throws instead of storing its class name.
-     * Later issues add work_order here.
+     * New ApprovalSubject models must add their alias here.
      */
     private function registerMorphMap(): void
     {
         Relation::enforceMorphMap([
             'pm_task' => PmTask::class,
             'e_call' => ECall::class,
+            'work_order' => WorkOrder::class,
         ]);
     }
 }

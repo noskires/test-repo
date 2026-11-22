@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
 use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\WorkOrderController;
+use App\Http\Controllers\Api\WorkOrderEndorsementController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
@@ -46,6 +47,11 @@ Route::middleware('auth')->group(function () {
     Route::post('e-calls/{eCall}/work-order', [WorkOrderController::class, 'store'])->name('e-calls.work-order.store');
     Route::get('work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
     Route::patch('work-orders/{workOrder}', [WorkOrderController::class, 'update'])->name('work-orders.update');
+    Route::post('work-orders/{workOrder}/submit', [WorkOrderEndorsementController::class, 'submit'])->name('work-orders.submit');
+    Route::post('work-orders/{workOrder}/approve', [WorkOrderEndorsementController::class, 'approve'])->name('work-orders.approve');
+    Route::post('work-orders/{workOrder}/return', [WorkOrderEndorsementController::class, 'returnOneStep'])->name('work-orders.return');
+    Route::post('work-orders/{workOrder}/reject', [WorkOrderEndorsementController::class, 'reject'])->name('work-orders.reject');
+    Route::get('work-orders/{workOrder}/approvals', [WorkOrderEndorsementController::class, 'approvals'])->name('work-orders.approvals.index');
 
     Route::get('vendor/pm-tasks', [PmTaskController::class, 'vendorIndex'])->name('vendor.pm-tasks.index');
     Route::post('pm-tasks/{pmTask}/start', [PmTaskController::class, 'start'])->name('pm-tasks.start');
