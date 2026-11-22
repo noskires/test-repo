@@ -46,6 +46,7 @@ Equipment, Sites, Equipment Categories, employees (with each one's Immediate Hea
 
 - **Money rounding** (docs/adr/0002-money-rounding.md): line totals stay exact. Only document totals (BOQ total, Work Order estimated amount, Billing Amount) are rounded, once, to the centavo, half-up. Billing Thresholds compare against the rounded Billing Amount. Quantities have up to 3 decimal places.
 - **Equipment with no start date**: an Equipment with no installation date and no PM history in PSS gets **no PM Task**. It is listed on the admin **Needs Setup** list (issue 32) until a start date is set. Whether admins can enter that start date in PSS is open (issue 33).
+- **No duplicate lines** (confirmed): the same Price List item can't appear twice in one BOQ revision (422). The vendor combines the quantities into one line. Likewise, a Work Order can't repeat a BOQ line (issue 18).
 
 ## Issues
 

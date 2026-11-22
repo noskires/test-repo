@@ -87,7 +87,7 @@ The actual cost the EIC validated for a Work Order (not its originally approved 
 The Site Vendor's write-up of its assessment or site inspection for an E-Call. It is submitted together with the BOQ and reviewed by the EIC.
 
 ## Bill of Quantities (BOQ)
-The Site Vendor's cost quote for an E-Call. It lists Price List items with quantities, and the unit prices are copied in when it's submitted. It is revised each time the EIC Returns it. The approved BOQ is the basis of the Work Order. Its lines keep exact amounts, and only its total is rounded to the centavo, half-up (ADR 0002). Items that aren't on the Price List aren't allowed.
+The Site Vendor's cost quote for an E-Call. It lists Price List items with quantities, and the unit prices are copied in when it's submitted. It is revised each time the EIC Returns it. The approved BOQ is the basis of the Work Order. Its lines keep exact amounts, and only its total is rounded to the centavo, half-up (ADR 0002). Items that aren't on the Price List aren't allowed, and each Price List item appears at most once per revision (quantities are combined into one line).
 _Avoid:_ cost proposal, quotation (as separate concepts)
 
 ## PM Checklist
