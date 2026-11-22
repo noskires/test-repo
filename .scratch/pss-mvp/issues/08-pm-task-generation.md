@@ -56,3 +56,4 @@ PM Status values: `Scheduled`, `In Progress`, `For Validation`, `Returned`, `Com
 - Q3: Sites with no Site Vendor or no EIC are **skipped** and shown on the "Needs Setup" list for admins.
 - Q4: if the Equipment is removed upstream, **keep its open PM Task and flag it**. The EIC decides whether to cancel it (issue 25). No auto-cancel.
 - Q5: run the job **daily**. It can be tuned later.
+- 2026-11-22 (product-owner): Timezone decided by the human: the application timezone is **Asia/Manila** (docs/adr/0003-application-timezone-asia-manila.md, issue 35). Due dates are Manila calendar dates, and the daily job runs at Manila midnight. Issue 35 adds the boundary tests. Nothing else changes here.
