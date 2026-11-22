@@ -189,7 +189,7 @@ class PmReportApiTest extends TestCase
         $this->postJson("/api/pm-tasks/{$this->task->id}/start")
             ->assertOk()
             ->assertJsonPath('data.status', 'in_progress')
-            ->assertJsonPath('data.started_at', '2026-11-22T10:00:00.000000Z');
+            ->assertJsonPath('data.started_at', '2026-11-22T02:00:00.000000Z', 'API timestamps are ISO-8601 UTC: 10:00 Manila = 02:00Z.');
 
         $this->task->refresh();
         $this->assertSame(PmStatus::InProgress, $this->task->status);
@@ -811,23 +811,17 @@ class PmReportApiTest extends TestCase
 
     public function test_the_start_date_is_compared_in_the_app_timezone(): void
     {
-        config(['app.timezone' => 'Asia/Manila']);
-        date_default_timezone_set('Asia/Manila');
+        $this->assertSame('Asia/Manila', config('app.timezone'));
+        $this->actingAsVendorStaff();
+        $this->task->update(['status' => PmStatus::Scheduled]);
+        Carbon::setTestNow(CarbonImmutable::parse('2026-11-14 17:00:00', 'UTC'));
+        $this->postJson("/api/pm-tasks/{$this->task->id}/start")->assertOk();
+        Carbon::setTestNow(CarbonImmutable::parse('2026-11-22 10:00:00', 'UTC'));
 
-        try {
-            $this->actingAsVendorStaff();
-            $this->task->update(['status' => PmStatus::Scheduled]);
-            Carbon::setTestNow(CarbonImmutable::parse('2026-11-14 17:00:00', 'UTC'));
-            $this->postJson("/api/pm-tasks/{$this->task->id}/start")->assertOk();
-            Carbon::setTestNow(CarbonImmutable::parse('2026-11-22 10:00:00', 'UTC'));
-
-            $this->submitReport($this->validReport(['work_done_date' => '2026-11-14']))
-                ->assertUnprocessable()
-                ->assertJsonValidationErrors(['work_done_date' => 'The Work Done Date cannot be before the PM Task was started (2026-11-15).']);
-            $this->submitReport($this->validReport(['work_done_date' => '2026-11-15']))->assertCreated();
-        } finally {
-            date_default_timezone_set('UTC');
-        }
+        $this->submitReport($this->validReport(['work_done_date' => '2026-11-14']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['work_done_date' => 'The Work Done Date cannot be before the PM Task was started (2026-11-15).']);
+        $this->submitReport($this->validReport(['work_done_date' => '2026-11-15']))->assertCreated();
     }
 
     public function test_a_task_with_no_start_date_accepts_any_past_work_done_date(): void
