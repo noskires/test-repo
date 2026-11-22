@@ -20,13 +20,14 @@ Out of scope: per-user timezones, and the UI's display formatting (the frontend 
 
 ## Acceptance criteria
 
-- [ ] `config('app.timezone')` is `Asia/Manila` when `APP_TIMEZONE` isn't set, and `.env.example` contains `APP_TIMEZONE=Asia/Manila`. A test asserts the config value under the test environment.
-- [ ] **Boundary test, "not in the future"**: with time frozen at 2026-11-23 01:00 Manila (= 2026-11-22 17:00 UTC), a Work Done Date of 2026-11-23 is accepted, and 2026-11-24 returns 422.
-- [ ] **Boundary test, "not before start"**: a task started at 2026-11-23 07:30 Manila (= 2026-11-22 23:30 UTC) accepts a Work Done Date of 2026-11-23 and rejects 2026-11-22.
-- [ ] **PM due dates**: generating a task with time frozen inside the 00:00–08:00 Manila window gives the same due date as computing it from the Manila calendar date (e.g. `installedOn` + frequency). The successor's due date counts from the Work Done Date as a Manila date.
-- [ ] `grep` finds no hard-coded `'UTC'` timezone in `backend/app`, and the scheduler entry for the PM generation job runs in the app timezone.
-- [ ] The full suite (`php artisan test`) passes. No new packages.
+- [x] `config('app.timezone')` is `Asia/Manila` when `APP_TIMEZONE` isn't set, and `.env.example` contains `APP_TIMEZONE=Asia/Manila`. A test asserts the config value under the test environment.
+- [x] **Boundary test, "not in the future"**: with time frozen at 2026-11-23 01:00 Manila (= 2026-11-22 17:00 UTC), a Work Done Date of 2026-11-23 is accepted, and 2026-11-24 returns 422.
+- [x] **Boundary test, "not before start"**: a task started at 2026-11-23 07:30 Manila (= 2026-11-22 23:30 UTC) accepts a Work Done Date of 2026-11-23 and rejects 2026-11-22.
+- [x] **PM due dates**: generating a task with time frozen inside the 00:00–08:00 Manila window gives the same due date as computing it from the Manila calendar date (e.g. `installedOn` + frequency). The successor's due date counts from the Work Done Date as a Manila date.
+- [x] `grep` finds no hard-coded `'UTC'` timezone in `backend/app`, and the scheduler entry for the PM generation job runs in the app timezone.
+- [x] The full suite (`php artisan test`) passes. No new packages.
 
 ## Comments
 
 - 2026-11-22 (product-owner): Created from the human's timezone decision (ADR 0003). Use `$this->travelTo(...)` or `Carbon::setTestNow` for the boundary tests. 2026-11-23 01:00 Asia/Manila equals 2026-11-22 17:00 UTC, which is inside the 16:00–24:00 UTC window where UTC is still on the previous date.
+- 2026-11-22 (qa): QA PASS. `php artisan test` from backend/ gives 477 passed (1682 assertions), 0 failed. `tests/Feature/ApplicationTimezoneTest.php` gives 10 passed (27 assertions). Every acceptance criterion maps to a test that asserts it. API timestamps are still serialised as ISO-8601 UTC with a "Z". Stored timestamps are now Manila wall-clock time. The two PM-generation timezone tests are guards: they also passed before the change, because generation never reads "now".
