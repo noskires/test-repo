@@ -69,16 +69,6 @@ class ECall extends Model implements ApprovalSubject
     }
 
     /**
-     * Whether the user may review E-Calls at the Site: the Site's current EIC, and never vendor staff (an EIC is an
-     * employee of the organisation). With $lockForUpdate the Site's settings row is locked, so an EIC replacement
-     * can't slip in before the caller's transaction commits.
-     */
-    public static function isReviewer(string $siteId, User $user, bool $lockForUpdate = false): bool
-    {
-        return $user->vendor_id === null && SiteSetting::isCurrentEic($siteId, $user, $lockForUpdate);
-    }
-
-    /**
      * The Site's current EIC approves the latest FSR + BOQ revision: Approved, and that revision is recorded as the
      * approved one. Remarks are optional.
      *
@@ -132,7 +122,7 @@ class ECall extends Model implements ApprovalSubject
         return DB::transaction(function () use ($eCall, $eic, $action, $toStatus, $remarks, $beforeTransition): self {
             $lockedECall = static::query()->lockForUpdate()->findOrFail($eCall->id);
 
-            if (! static::isReviewer($lockedECall->site_id, $eic, lockForUpdate: true)) {
+            if (! SiteSetting::isActingEic($lockedECall->site_id, $eic, lockForUpdate: true)) {
                 throw new AuthorizationException("Only the Site's current EIC can review this E-Call.");
             }
 

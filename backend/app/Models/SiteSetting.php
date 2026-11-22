@@ -46,13 +46,19 @@ class SiteSetting extends Model
     }
 
     /**
-     * Whether the user is the Site's current EIC. False when the user has no employee ID or the Site has no EIC;
-     * there is no fallback to an EIC captured on a task. With $lockForUpdate, the settings row is locked, so an
-     * EIC replacement (assignEic also locks it) can't slip in before the caller's transaction commits.
+     * THE check for "may act as this Site's EIC" (issue 37). Every EIC action uses it, both in its policy and in its
+     * in-lock re-check: PM Task validation (issue 11), E-Call review (17), and the Work Order EIC actions (18, 21, 25).
+     * Callers must not repeat any part of the comparison themselves.
+     *
+     * True only when the user is the Site's CURRENT EIC (site settings, read now) and is not vendor staff: an EIC is
+     * an employee of the organisation, so a vendor account never qualifies, even if it carries the EIC's employee ID.
+     * False when the user has no employee ID, the Site has no EIC or no settings row; there is no fallback to an EIC
+     * captured on a task or E-Call. With $lockForUpdate the settings row is locked, so an EIC replacement (assignEic
+     * also locks it) can't slip in before the caller's transaction commits.
      */
-    public static function isCurrentEic(string $siteId, User $user, bool $lockForUpdate = false): bool
+    public static function isActingEic(string $siteId, User $user, bool $lockForUpdate = false): bool
     {
-        if ($user->employee_id === null) {
+        if ($user->vendor_id !== null || $user->employee_id === null) {
             return false;
         }
 

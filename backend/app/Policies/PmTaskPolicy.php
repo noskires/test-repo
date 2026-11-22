@@ -28,12 +28,13 @@ class PmTaskPolicy
     }
 
     /**
-     * Determine whether the user is the Site's CURRENT EIC (site settings, read at action time), who approves or
-     * returns the PM Report. The EIC captured on the task is history only: a replaced EIC can no longer validate.
+     * Determine whether the user may act as the Site's EIC (SiteSetting::isActingEic: the CURRENT EIC, never vendor
+     * staff), who approves or returns the PM Report. The EIC captured on the task is history only.
+     * PmTask::validateReport repeats this check under a lock.
      */
     public function validate(User $user, PmTask $pmTask): bool
     {
-        return SiteSetting::isCurrentEic($pmTask->site_id, $user);
+        return SiteSetting::isActingEic($pmTask->site_id, $user);
     }
 
     /**

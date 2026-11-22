@@ -262,6 +262,44 @@ class PmTaskValidationApiTest extends TestCase
         $this->postJson("/api/pm-tasks/{$this->task->id}/approve")->assertForbidden();
     }
 
+    private function vendorUserWithTheEicEmployeeId(): User
+    {
+        return User::factory()->vendorStaff($this->vendor)->create(['employee_id' => 'P-EIC']);
+    }
+
+    public function test_vendor_staff_with_the_eic_employee_id_gets_403_on_approve_and_return(): void
+    {
+        Event::fake([PmTaskCompleted::class]);
+        $this->actingAs($this->vendorUserWithTheEicEmployeeId());
+
+        $this->postJson("/api/pm-tasks/{$this->task->id}/approve")->assertForbidden();
+        $this->postJson("/api/pm-tasks/{$this->task->id}/return", ['remarks' => 'No.'])->assertForbidden();
+
+        $this->assertSame(PmStatus::ForValidation, $this->task->refresh()->status);
+        $this->assertSame(0, ApprovalRecord::query()->count());
+        Event::assertNotDispatched(PmTaskCompleted::class);
+    }
+
+    public function test_the_in_lock_recheck_refuses_vendor_staff_with_the_eic_employee_id(): void
+    {
+        $vendorUser = $this->vendorUserWithTheEicEmployeeId();
+
+        foreach ([
+            fn () => PmTask::approveReport($this->task, $vendorUser, null),
+            fn () => PmTask::returnReport($this->task, $vendorUser, 'No.'),
+        ] as $attempt) {
+            try {
+                $attempt();
+                $this->fail('Vendor staff must not be able to act as the EIC.');
+            } catch (AuthorizationException) {
+                // Expected.
+            }
+        }
+
+        $this->assertSame(PmStatus::ForValidation, $this->task->refresh()->status);
+        $this->assertSame(0, ApprovalRecord::query()->count());
+    }
+
     public function test_a_user_with_no_employee_id_gets_403_even_when_the_site_has_no_eic(): void
     {
         SiteSetting::query()->where('site_id', 'S-1')->update(['eic_employee_id' => null]);
