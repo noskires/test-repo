@@ -20,17 +20,17 @@ Out of scope here: re-dating open PM Tasks when the frequency changes. PM Tasks 
 
 ## Acceptance criteria
 
-- [ ] `PUT .../settings/pm-frequency` with a valid value returns 200, stores it, and `GET .../settings` returns it. It is null when never set.
-- [ ] An unknown value returns 422. An unknown Site returns 404. The PUT returns 403 when the `manage-site-settings` Gate denies, and 401 when unauthenticated.
-- [ ] Changing the frequency writes a history entry with the old value, new value, user and timestamp, and dispatches `SitePmFrequencyChanged` (or equivalent). Setting the same value again writes no history entry.
-- [ ] Unit tests for `nextDueDate`:
+- [x] `PUT .../settings/pm-frequency` with a valid value returns 200, stores it, and `GET .../settings` returns it. It is null when never set.
+- [x] An unknown value returns 422. An unknown Site returns 404. The PUT returns 403 when the `manage-site-settings` Gate denies, and 401 when unauthenticated.
+- [x] Changing the frequency writes a history entry with the old value, new value, user and timestamp, and dispatches `SitePmFrequencyChanged` (or equivalent). Setting the same value again writes no history entry.
+- [x] Unit tests for `nextDueDate`:
   - `monthly`: 2026-01-15 → 2026-02-15. 2026-01-31 → 2026-02-28. 2028-01-31 → 2028-02-29 (leap year).
   - `twice_a_month`: 2026-01-31 → 2026-02-15. 2026-02-20 → 2026-03-07.
   - `bi_monthly`: 2026-12-31 → 2027-02-28.
   - `quarterly`: 2026-11-30 → 2027-02-28.
   - `semi_annual`: 2026-08-31 → 2027-02-28.
   - `annual`: 2028-02-29 → 2029-02-28.
-- [ ] Feature tests use the in-memory directory fake. No new packages, and `php artisan test` passes.
+- [x] Feature tests use the in-memory directory fake. No new packages, and `php artisan test` passes.
 
 ## Comments
 
@@ -39,6 +39,7 @@ Out of scope here: re-dating open PM Tasks when the frequency changes. PM Tasks 
   - The existing history table `site_assignment_changes` has typed vendor/EIC columns and an `assignment` discriminator. Recording the frequency change there (e.g. `assignment = pm_frequency` plus nullable old/new frequency columns) or in a separate table is the developer's choice. Either way, the change needs the old value, new value, user and timestamp.
   - `manage-site-settings` is checked through `Gate::allows` in the form requests, as for vendor and EIC. Reuse that pattern.
   - A Site with no `site_settings` row yet gets one created on the first PUT, as the vendor and EIC assignments do. Its history entry's old value is null.
+- 2026-11-22 (qa): QA PASS. Ran `php artisan test` from backend/: 263 passed (982 assertions), 0 failed. `tests/Feature/SiteSettingsApiTest.php` and `tests/Unit/Scheduling`: 48 passed (194 assertions). Every acceptance criterion maps to a test that asserts it, and all 9 `nextDueDate` example dates are unit-test data sets. `SitePmFrequencyChanged` is dispatched after commit, so issue 08 can re-date Scheduled PM Tasks.
 
 ## Decisions (grilling, 2026-11-22)
 - Q1 answered: **Twice a month = every 15 days**, added to the Work Done Date.
