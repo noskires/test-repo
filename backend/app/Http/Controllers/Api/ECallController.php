@@ -35,7 +35,7 @@ class ECallController extends Controller
             ->when($request->filled('site_id'), fn ($query) => $query->where('site_id', $request->string('site_id')->value()))
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')->value()))
             ->when($request->filled('priority'), fn ($query) => $query->where('priority', $request->string('priority')->value()))
-            ->with(['vendor', 'attachments'])
+            ->with(['vendor', 'attachments', 'approvedProposal'])
             ->latest('id')
             ->get();
 
@@ -59,7 +59,7 @@ class ECallController extends Controller
             files: $request->attachments(),
         );
 
-        return ECallResource::make($eCall->refresh()->load(['vendor', 'attachments']))
+        return ECallResource::make($eCall->refresh()->load(['vendor', 'attachments', 'approvedProposal']))
             ->response()
             ->setStatusCode(201);
     }
@@ -71,6 +71,6 @@ class ECallController extends Controller
     {
         Gate::authorize('view', $eCall);
 
-        return ECallResource::make($eCall->load(['vendor', 'attachments']));
+        return ECallResource::make($eCall->load(['vendor', 'attachments', 'approvedProposal']));
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\BillingThresholdController;
 use App\Http\Controllers\Api\ChecklistTemplateController;
 use App\Http\Controllers\Api\ECallController;
 use App\Http\Controllers\Api\ECallProposalController;
+use App\Http\Controllers\Api\ECallReviewController;
 use App\Http\Controllers\Api\PmReportController;
 use App\Http\Controllers\Api\PmTaskController;
 use App\Http\Controllers\Api\PmTaskValidationController;
@@ -37,6 +38,10 @@ Route::middleware('auth')->group(function () {
     Route::get('e-calls/{eCall}', [ECallController::class, 'show'])->name('e-calls.show');
     Route::get('e-calls/{eCall}/proposals', [ECallProposalController::class, 'index'])->name('e-calls.proposals.index');
     Route::post('e-calls/{eCall}/proposal', [ECallProposalController::class, 'store'])->name('e-calls.proposal.store');
+    Route::post('e-calls/{eCall}/approve', [ECallReviewController::class, 'approve'])->name('e-calls.approve');
+    Route::post('e-calls/{eCall}/return', [ECallReviewController::class, 'returnToVendor'])->name('e-calls.return');
+    Route::post('e-calls/{eCall}/reject', [ECallReviewController::class, 'reject'])->name('e-calls.reject');
+    Route::get('e-calls/{eCall}/approvals', [ECallReviewController::class, 'approvals'])->name('e-calls.approvals.index');
 
     Route::get('vendor/pm-tasks', [PmTaskController::class, 'vendorIndex'])->name('vendor.pm-tasks.index');
     Route::post('pm-tasks/{pmTask}/start', [PmTaskController::class, 'start'])->name('pm-tasks.start');

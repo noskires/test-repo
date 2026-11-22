@@ -38,6 +38,10 @@ class ECallResource extends JsonResource
             'vendor' => ['id' => $this->vendor_id, 'name' => $this->vendor->name],
             'eic_employee_id' => $this->eic_employee_id,
             'pm_task_id' => $this->pm_task_id,
+            'approved_proposal' => $this->approved_proposal_id === null ? null : [
+                'id' => $this->approved_proposal_id,
+                'revision' => $this->approvedProposal->revision,
+            ],
             'attachments' => ECallAttachmentResource::collection($this->attachments),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
