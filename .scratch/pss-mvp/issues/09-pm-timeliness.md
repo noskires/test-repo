@@ -28,3 +28,4 @@ Compute **PM Timeliness** for each open PM Task. It is shown next to PM Status a
 - **Due**: on the due date.
 - **Overdue**: from the day after the due date, with no grace period, if the work isn't done.
 - **On time vs late is judged by the Work Done Date**, not the approval date. A task the vendor submitted (with a Work Done Date) on or before the due date shows as For Validation, not Overdue, while it waits for the EIC.
+- 2026-11-22 (product-owner): Timezone decided by the human: the application timezone is **Asia/Manila** (docs/adr/0003-application-timezone-asia-manila.md, issue 35). Upcoming / Due / Overdue are judged against **today in Manila**. When this issue is built, include a test with time frozen between 00:00 and 08:00 Manila (16:00–24:00 UTC the day before).
