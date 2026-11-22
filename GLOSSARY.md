@@ -53,6 +53,8 @@ _Avoid:_ treating whoever filed the E-Call as its reviewer
 
 ## PM Frequency
 How often check-ups happen. One frequency is set per Site, and every Equipment at that Site follows it.
+The MVP has a fixed list: monthly, twice a month (every 15 days), every 2 months, quarterly, semi-annual and annual. There are no custom intervals. Month-based intervals land on the same day of the month, or on the month's last day when that day doesn't exist (31 Jan + 1 month = 28 or 29 Feb).
+_Avoid:_ reading "twice a month" as fixed calendar days (e.g. the 1st and 15th)
 
 ## Price List
 A Vendor's contract-agreed list of priced items, covering both materials/consumables and scope-of-work (service) items, each with a unit price. A vendor's cost quote (BOQ) is built from it. Administrators maintain it by uploading a file or adding items by hand.

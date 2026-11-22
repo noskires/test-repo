@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::get('sites/{site}/settings', [SiteSettingsController::class, 'show'])->name('sites.settings.show');
     Route::put('sites/{site}/settings/vendor', [SiteSettingsController::class, 'updateVendor'])->name('sites.settings.vendor.update');
     Route::put('sites/{site}/settings/eic', [SiteSettingsController::class, 'updateEic'])->name('sites.settings.eic.update');
+    Route::put('sites/{site}/settings/pm-frequency', [SiteSettingsController::class, 'updatePmFrequency'])->name('sites.settings.pm-frequency.update');
 
     Route::get('checklist-templates', [ChecklistTemplateController::class, 'index'])->name('checklist-templates.index');
     Route::get('checklist-templates/{checklistTemplate}', [ChecklistTemplateController::class, 'show'])->name('checklist-templates.show');
