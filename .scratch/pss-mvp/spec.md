@@ -40,6 +40,7 @@ Equipment, Sites, Equipment Categories, employees (with each one's Immediate Hea
 | UPCOMING / DUE / OVERDUE listed as PM statuses (§6.8) | Those are **PM Timeliness**, shown next to PM Status, not as statuses. |
 | Billing basis "to be confirmed" (§8.5) | **Billing Amount** = the validated actual cost. |
 | Next PM date from configured frequency | **Sliding schedule**: the next due date counts from the previous task's **Work Done Date**. |
+| BOQ lines that aren't on the Price List are allowed but flagged for the EIC (PRD v2 §10) | A **BOQ** lists the Vendor's own active **Price List** items (GLOSSARY "Bill of Quantities"). Issue 16 builds on-list lines only. Whether off-list lines are wanted is an open question for the human (see issue 16). |
 
 ## Issues
 
