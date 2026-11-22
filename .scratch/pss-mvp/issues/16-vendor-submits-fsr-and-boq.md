@@ -18,7 +18,7 @@ Endpoint: `POST /api/e-calls/{eCall}/proposal`. Allowed when the E-Call Status i
 - [x] Submitting in any other status returns 422.
 - [x] Using a Price List item from another Vendor, or an inactive one, returns 422.
 - [x] A quantity <= 0 returns 422. A missing FSR file returns 422.
-- [x] Line totals and the BOQ total are computed by the server exactly (test with decimal quantities and prices).
+- [x] Line totals are computed by the server exactly, never rounded (test with decimal quantities and prices). The BOQ total is the exact sum of the lines, rounded once to the whole centavo, half-up, and stored as integer centavos (ADR 0002). E.g. two lines of qty 0.5 x 101 centavos give a total of 101 (not 102), and one such line gives 51.
 - [x] Changing a Price List price after submission does not change the BOQ.
 - [x] Status becomes `For EIC Review`. Resubmitting after `Returned` creates a new BOQ revision and keeps the old one readable.
 
@@ -34,3 +34,8 @@ Endpoint: `POST /api/e-calls/{eCall}/proposal`. Allowed when the E-Call Status i
   - **`Returned` status**: only issue 17 sets it. Tests put the E-Call into `Returned` directly.
   - Write no Approval Record here. Approval Records come in issue 11, and 16 isn't blocked by it. Record the submitter and submission time on the revision itself.
 - 2026-11-22 (qa): QA PASS. Ran `php artisan test` from backend/: 326 passed (1203 assertions), 0 failed. `tests/Feature/ECallProposalApiTest.php` and `tests/Unit/Billing/BoqQuantityTest.php`: 63 passed (214 assertions). Every acceptance criterion maps to a test that asserts it. Quantities allow up to 3 decimal places (`pss.boq.quantity_decimal_places`), a BOQ holds at most 200 lines (`pss.boq.max_lines`), and totals are stored exactly as integer millicentavos. Rounding to whole centavos is still open for issues 18 and 21.
+- 2026-11-22 (product-owner): The human answered after QA PASS:
+  - **Rounding**: line totals stay exact. **Only the BOQ total is rounded** to the centavo, half-up (docs/adr/0002-money-rounding.md). I've replaced the totals criterion and **un-ticked** it, so QA must re-verify it against dev-lead's rework. dev-lead was told during the build.
+  - The **3-decimal quantity limit** is fine.
+  - **Off-list BOQ lines are not wanted**: Price List items only. The glossary stands, and the spec conflict row is marked resolved. No follow-up issue.
+- 2026-11-22 (qa): The first PASS above is withdrawn. It was replaced after the human decided that the BOQ total is rounded half-up to the centavo (ADR 0002). New QA PASS on commit 22694d2: `php artisan test` from backend/ gives 340 passed (1241 assertions), 0 failed. `tests/Feature/ECallProposalApiTest.php` and `tests/Unit/Billing/BoqQuantityTest.php` give 77 passed (252 assertions). Line totals stay exact, and only the BOQ total is rounded and stored as integer `total_centavos`. The API returns both `total` (exact) and `total_rounded`. One line of 0.5 x 101 centavos rounds 50.5 to 51. Two such lines give 101, not 102. 0.00500 rounds to 0.01, 0.00499 to 0.00, and 0.004 + 0.004 to 0.01. Unit boundary cases pass, and PHP_INT_MAX doesn't overflow. Whether the same Price List item may appear twice in one BOQ is still open with the human. It currently returns 422.
