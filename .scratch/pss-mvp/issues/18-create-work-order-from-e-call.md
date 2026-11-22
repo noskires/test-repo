@@ -22,7 +22,7 @@ Endpoints: `POST /api/e-calls/{eCall}/work-order`, `PATCH /api/work-orders/{wo}`
 - [ ] Only the E-Call's Requestor or EIC can create. Others get 403.
 - [ ] On creation, the E-Call is `Closed` and the Work Order is `Open`, linked to the E-Call, FSR and BOQ revision.
 - [ ] A line referencing something not in the approved BOQ returns 422. A quantity <= 0 returns 422.
-- [ ] Line totals and the estimated amount are exact and computed by the server.
+- [ ] Line totals are exact and computed by the server. The estimated amount is their exact sum, rounded once to the whole centavo, half-up (ADR 0002).
 - [ ] Only the creator can PATCH, and only while `Open`. Otherwise 403 / 422.
 
 ## Open questions (non-blocking, for the human)
@@ -34,3 +34,4 @@ Endpoints: `POST /api/e-calls/{eCall}/work-order`, `PATCH /api/work-orders/{wo}`
 ## Decisions (grilling, 2026-11-22) — supersedes the "Requestor or EIC" rule above
 - **Only the E-Call's Requestor** (the person who filed it) creates the Work Order. The EIC does not. Others, including the EIC, get 403.
 - Quantity question answered: a Work Order line's approved quantity is **capped at the approved BOQ quantity** (0 < qty ≤ BOQ qty, otherwise 422). More work needs a revised BOQ or a new E-Call.
+- 2026-11-22 (product-owner): Rounding decided by the human (docs/adr/0002-money-rounding.md). Line totals stay exact, and only the estimated amount is rounded to the centavo, half-up. Acceptance criterion updated. Also note that the open question about quantity > BOQ quantity is answered in PRD v2 §8 ("Line quantities must be > 0 and ≤ the approved BOQ quantity"). Re-check it, and add the cap to the acceptance criteria when this issue is picked up.

@@ -17,7 +17,7 @@ A configurable classification of Equipment (e.g. ACU, Genset, ATS, Building Faci
 The process of scheduled inspection and servicing of Equipment, done to prevent failures.
 
 ## PM Task
-One scheduled check-up of one Equipment. The next PM Task's due date is counted from the previous task's Work Done Date (a sliding schedule), not from a fixed calendar. A newly registered Equipment's first PM Task is due one PM Frequency interval after its installation date.
+One scheduled check-up of one Equipment. The next PM Task's due date is counted from the previous task's Work Done Date (a sliding schedule), not from a fixed calendar. A newly registered Equipment's first PM Task is due one PM Frequency interval after its installation date. An Equipment with no installation date and no PM history gets no PM Task until a start date is set. Until then it's on the Needs Setup list.
 
 ## Work Done Date
 The date a vendor actually did the work on a PM Task, as reported by the vendor and confirmed when the EIC approves the report. It is not the date of the approval itself.
@@ -81,13 +81,13 @@ A Work Order that's still a draft. Its creator can keep editing it until they su
 An approver's "no" that permanently ends an E-Call or Work Order. To try again, file a new E-Call. PM reports cannot be Rejected, only Approved or Returned.
 
 ## Billing Amount
-The actual cost the EIC validated for a Work Order (not its originally approved estimate). It decides how many billing approval levels are needed.
+The actual cost the EIC validated for a Work Order (not its originally approved estimate). It decides how many billing approval levels are needed. It's rounded once to the centavo, half-up (ADR 0002).
 
 ## Field Service Report (FSR)
 The Site Vendor's write-up of its assessment or site inspection for an E-Call. It is submitted together with the BOQ and reviewed by the EIC.
 
 ## Bill of Quantities (BOQ)
-The Site Vendor's cost quote for an E-Call. It lists Price List items with quantities, and the unit prices are copied in when it's submitted. It is revised each time the EIC Returns it. The approved BOQ is the basis of the Work Order.
+The Site Vendor's cost quote for an E-Call. It lists Price List items with quantities, and the unit prices are copied in when it's submitted. It is revised each time the EIC Returns it. The approved BOQ is the basis of the Work Order. Its lines keep exact amounts, and only its total is rounded to the centavo, half-up (ADR 0002). Items that aren't on the Price List aren't allowed.
 _Avoid:_ cost proposal, quotation (as separate concepts)
 
 ## PM Checklist
@@ -113,3 +113,6 @@ The permanent log entry for every Approve, Return or Reject (and cancellation): 
 
 ## Snapshot
 A copy of an external Site's or Equipment's details (name, category, location) stored on a PSS record, so history still reads correctly after the item is renamed or removed in the external system.
+
+## Needs Setup list
+An administrator's list of what stops PM Tasks from being generated: Sites with a PM Frequency but no Site Vendor or EIC, and Equipment with no installation date and no PM history. It's worked out live, not stored.

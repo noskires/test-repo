@@ -1,44 +1,57 @@
 # 08 — Automatic PM Task generation
 
-Status: needs-info
+Status: ready-for-agent
 Blocked by: 05, 06, 07
 Type: task
 
 ## What to build
 
-A scheduled job (Laravel scheduler, queued) that makes sure every Equipment at a Site with a PM Frequency has its next **PM Task** (PRD §6.4):
+A scheduled job (Laravel scheduler, runs **daily**, queued) that makes sure every eligible Equipment has its next **PM Task** (PRD §6.4, glossary "PM Task"):
 - Assigned to the Site Vendor and Site EIC at the time of generation.
-- Linked to the current PM Checklist version for the Equipment's category.
-- Stores an Equipment and Site **Snapshot**.
+- Linked to the current active PM Checklist version for the Equipment's category (issue 07).
+- Stores an Equipment and Site **Snapshot** (ADR 0001).
 - Initial PM Status `Scheduled`.
-- **Sliding schedule**: the next task's due date = the previous task's Work Done Date + the frequency (glossary). Once a task is Completed (issue 11 fires `PmTaskCompleted`), its successor is generated.
-- **No duplicates**: never more than one open PM Task per Equipment, even if the job runs twice at the same time.
-- Historical PM Tasks remain after the next one is generated.
+- **Due date** (use issue 06's `nextDueDate`):
+  - The Equipment's first PM Task is due at its installation date (`installedOn`) + the Site's PM Frequency.
+  - After that, the schedule slides: the successor of a `Completed` task is due at that task's Work Done Date + the frequency.
+- **No duplicates**: never more than one open (not `Completed`/`Cancelled`) PM Task per Equipment, even when the job runs twice at the same time. Enforce it with a DB unique constraint or a lock.
+- Historical PM Tasks stay after the next one is generated.
+- The job finds Equipment through the MasterDataDirectory port (issue 02). In tests, that's the in-memory fake.
 
-## Open questions (for the human)
+Which Equipment is eligible (decided, see Decisions):
+- **The Site has no PM Frequency**: the job skips it.
+- **The Site has no Site Vendor or no EIC**: the job skips it. It belongs on the admin "Needs Setup" list (issue 32).
+- **No installation date and no PM history in PSS**: the job **doesn't generate a task**. It belongs on the "Needs Setup" list. The job generates the task on its next run once a start date is available. For now, that means an `installedOn` appears in the directory. Whether admins can also enter a start date in PSS is issue 33 (needs-info), and it doesn't block this slice.
+- **No active checklist for the category**: the job **still generates** the task, with no checklist version and flagged `no checklist`.
+- **Equipment gone from the directory**: the job keeps its open PM Task and flags it (`equipment_removed`). It never auto-cancels it. The EIC decides (issue 25).
 
-1. **First due date**: for an Equipment with no PM history in PSS, what is the first PM Task's due date? Options: a Site "start date of maintenance cycle" (PRD §6.2), today + frequency, or a last-PM date imported from the old process.
-2. **Equipment without a checklist**: if the Equipment's category has no active PM Checklist, should the task still be generated (with no checklist), or skipped and flagged?
-3. **Sites without a Site Vendor or EIC**: skip them, or generate unassigned tasks?
-4. **Equipment removed upstream**: if the Equipment disappears from the external API, should its open PM Task be cancelled automatically?
-5. How often should the job run (daily is assumed)?
+**Frequency changes** (moved in from issue 06): on `SitePmFrequencyChanged`, re-date that Site's PM Tasks that are still `Scheduled`. New due date = the last Work Done Date + the new interval, or the installation date + the new interval if there's no completed task yet. Tasks `In Progress`, `For Validation` or `Returned` keep their due date.
 
-## Acceptance criteria (draft)
+Successor tasks: this slice doesn't depend on issue 11's event. The daily job generates the successor for any Equipment whose latest task is `Completed`. Tests create a `Completed` task with a Work Done Date directly. (Issue 11 may also trigger generation right away on completion. That's optional.)
 
-- [ ] Running the job creates one Scheduled PM Task per eligible Equipment, with vendor, EIC, checklist version and snapshot.
-- [ ] Running it twice (or concurrently) creates no duplicates (DB unique constraint or lock, plus a test).
-- [ ] Completing a task with Work Done Date D leads to a successor due at D + frequency.
+PM Status values: `Scheduled`, `In Progress`, `For Validation`, `Returned`, `Completed`, `Cancelled` (GLOSSARY "PM Status"). This slice only creates `Scheduled` tasks.
+
+## Acceptance criteria
+
+- [ ] Running the job creates one `Scheduled` PM Task per eligible Equipment, with the Site Vendor, EIC, checklist version and Site/Equipment Snapshots, due at `installedOn` + the Site's frequency.
+- [ ] Running it twice (or concurrently) creates no duplicates. Test both the DB unique constraint or lock and a repeated run.
+- [ ] An Equipment whose latest task is `Completed` with Work Done Date D gets a successor due at D + frequency. The completed task is still there.
+- [ ] An Equipment with no `installedOn` and no PM history gets no task. Once the fake directory gives it an `installedOn`, the next run creates it.
+- [ ] Equipment at a Site with no PM Frequency, no Site Vendor or no EIC gets no task.
+- [ ] An Equipment whose category has no active checklist gets a task flagged `no checklist`, with no checklist version.
+- [ ] An open task whose Equipment no longer exists in the directory is kept, flagged `equipment_removed`, and not cancelled.
+- [ ] Changing a Site's frequency re-dates only its `Scheduled` tasks, and the others keep their due date.
+- [ ] The job is registered in the scheduler to run daily. Tests use the directory fake. No new packages, and `php artisan test` passes.
 
 ## Comments
 
-## Decisions (grilling, 2026-11-22)
-- Q1 answered: a newly registered Equipment's **first PM Task is due one Site PM Frequency interval after its installation date**. After that, the schedule slides from each Work Done Date. (Check that the external API exposes the installation/commissioning date.)
-- Q2 answered: if the category has no active checklist, **still generate the task**, flagged "no checklist". The vendor submits a report without a checklist, and the dashboard surfaces "missing checklist".
-- Q3 answered: Sites with no Site Vendor or no EIC are **skipped** and shown on a "needs setup" list for admins.
-- Q4 answered: if the Equipment is removed upstream, **keep its open PM Task and flag it**. The EIC decides whether to cancel it (issue 25). No auto-cancel.
-- Q5 (job frequency) is still open. Daily is assumed.
-- Q5: run the job **daily**. This was the default when the issue moved to ready-for-agent and can be tuned later.
+- 2026-11-22 (product-owner): Moved in from issue 06: re-dating `Scheduled` tasks on a frequency change (see What to build).
+- 2026-11-22 (product-owner): The human answered the last blocking question, so the status is back to **ready-for-agent**. If an Equipment has no installation date and no PM history, **don't generate a task**. List it on the admin "Needs Setup" list until a start date is set. I've rewritten the body into final acceptance criteria and removed the stale "Open questions" and draft sections; the answers are kept under Decisions. The list itself is issue 32, so this slice only skips the Equipment. Who can "set a start date" (only the external API, or also an admin in PSS) is issue 33 (needs-info). It doesn't block this slice, because either way the job just uses the start date once it exists.
 
-- 2026-11-22 (product-owner): Two additions, and the status is changed to **needs-info** for one new question.
-  - **Moved in from issue 06**: when a Site's PM Frequency changes (06 dispatches `SitePmFrequencyChanged` or equivalent), re-date that Site's PM Tasks that are still `Scheduled`. New due date = the last Work Done Date for that Equipment + the new interval, or the installation date + the new interval if it has no completed task yet. Tasks `In Progress`, `For Validation` or `Returned` keep their due date. Added acceptance criterion: "Changing a Site's frequency re-dates only its `Scheduled` tasks, and the others keep their due date."
-  - **New open question (blocking)**: the directory's `Equipment` value object has a **nullable** `installedOn` (issue 02). If an Equipment has no installation date and no PM history in PSS, what is its first PM Task's due date? Options: skip it and list it on the admin "needs setup" list; use the date the Equipment first appears in PSS + the frequency; or generate it as due immediately. Every other rule in this issue is settled. Only this case needs the human's answer before the issue goes back to ready-for-agent.
+## Decisions (grilling, 2026-11-22)
+- Q1: a newly registered Equipment's **first PM Task is due one Site PM Frequency interval after its installation date**. After that, the schedule slides from each Work Done Date.
+- Q1 follow-up (human, 2026-11-22): **no installation date and no PM history → no task**. The Equipment goes on the admin "Needs Setup" list until a start date is set.
+- Q2: if the category has no active checklist, **still generate the task**, flagged "no checklist".
+- Q3: Sites with no Site Vendor or no EIC are **skipped** and shown on the "Needs Setup" list for admins.
+- Q4: if the Equipment is removed upstream, **keep its open PM Task and flag it**. The EIC decides whether to cancel it (issue 25). No auto-cancel.
+- Q5: run the job **daily**. It can be tuned later.

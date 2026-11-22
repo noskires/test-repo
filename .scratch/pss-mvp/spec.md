@@ -40,7 +40,12 @@ Equipment, Sites, Equipment Categories, employees (with each one's Immediate Hea
 | UPCOMING / DUE / OVERDUE listed as PM statuses (§6.8) | Those are **PM Timeliness**, shown next to PM Status, not as statuses. |
 | Billing basis "to be confirmed" (§8.5) | **Billing Amount** = the validated actual cost. |
 | Next PM date from configured frequency | **Sliding schedule**: the next due date counts from the previous task's **Work Done Date**. |
-| BOQ lines that aren't on the Price List are allowed but flagged for the EIC (PRD v2 §10) | A **BOQ** lists the Vendor's own active **Price List** items (GLOSSARY "Bill of Quantities"). Issue 16 builds on-list lines only. Whether off-list lines are wanted is an open question for the human (see issue 16). |
+| BOQ lines that aren't on the Price List are allowed but flagged for the EIC (PRD v2 §10) | **Resolved: glossary** (human, 2026-11-22). A **BOQ** lists only the Site Vendor's own active **Price List** items. Off-list lines are not wanted. |
+
+## Decisions from the human (2026-11-22)
+
+- **Money rounding** (docs/adr/0002-money-rounding.md): line totals stay exact. Only document totals (BOQ total, Work Order estimated amount, Billing Amount) are rounded, once, to the centavo, half-up. Billing Thresholds compare against the rounded Billing Amount. Quantities have up to 3 decimal places.
+- **Equipment with no start date**: an Equipment with no installation date and no PM history in PSS gets **no PM Task**. It is listed on the admin **Needs Setup** list (issue 32) until a start date is set. Whether admins can enter that start date in PSS is open (issue 33).
 
 ## Issues
 

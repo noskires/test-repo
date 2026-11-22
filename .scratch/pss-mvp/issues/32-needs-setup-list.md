@@ -1,0 +1,27 @@
+# 32 — Admin "Needs Setup" list
+
+Status: ready-for-agent
+Blocked by: 08
+Type: task
+
+## What to build
+
+A read-only list for administrators of what stops PM Tasks from being generated (glossary "Needs Setup list", issue 08 decisions). It is **computed live** from the directory and PSS's own Site settings and PM Tasks. Nothing new is stored.
+
+Two kinds of entry:
+- **Site**: a Site that has a PM Frequency but no Site Vendor, or no EIC, or neither. The reason says which: `no_site_vendor`, `no_eic`.
+- **Equipment**: an Equipment at a Site with a PM Frequency that has no `installedOn` in the directory and no PM history in PSS. Reason: `no_start_date`. Each entry shows the Equipment and its Site.
+
+Endpoint: `GET /api/needs-setup`, behind the `manage-site-settings` Gate. Each entry has a type (`site` / `equipment`), IDs, display names and reasons.
+
+## Acceptance criteria
+
+- [ ] A Site with a PM Frequency and no Site Vendor appears with `no_site_vendor`. One with no EIC appears with `no_eic`. Both reasons are listed when both are missing.
+- [ ] A Site with no PM Frequency does not appear, and neither does its Equipment.
+- [ ] An Equipment with no `installedOn` and no PM Task appears with `no_start_date`. Once the fake directory gives it an `installedOn`, it no longer appears.
+- [ ] An Equipment with no `installedOn` that already has PM history does not appear.
+- [ ] 403 when the Gate denies, 401 when unauthenticated. Tests use the directory fake. No new packages, and `php artisan test` passes.
+
+## Comments
+
+- 2026-11-22 (product-owner): Created from the human's answer on issue 08: Equipment with no installation date and no PM history gets no task and is listed here until a start date is set. Issue 08 skips these Equipment and Sites but doesn't build the list. If issue 33 adds a PSS-side start date, an Equipment that has one leaves this list too. That change belongs to 33.
