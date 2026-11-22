@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * One scheduled check-up of one external Equipment, assigned to the Site Vendor and EIC at generation time,
@@ -77,6 +80,36 @@ class PmTask extends Model
     public function checklistVersion(): BelongsTo
     {
         return $this->belongsTo(ChecklistTemplateVersion::class, 'checklist_template_version_id');
+    }
+
+    /**
+     * The Site Vendor's PM Report revisions.
+     *
+     * @return HasMany<PmReport, $this>
+     */
+    public function reports(): HasMany
+    {
+        return $this->hasMany(PmReport::class);
+    }
+
+    /**
+     * Move a Scheduled task to In Progress. The row is locked so two starts can't both succeed.
+     *
+     * @throws ValidationException when the task is not Scheduled.
+     */
+    public static function start(PmTask $task): self
+    {
+        return DB::transaction(function () use ($task): self {
+            $lockedTask = static::query()->lockForUpdate()->findOrFail($task->id);
+
+            if ($lockedTask->status !== PmStatus::Scheduled) {
+                throw ValidationException::withMessages(['pm_task' => 'Only a Scheduled PM Task can be started.']);
+            }
+
+            $lockedTask->update(['status' => PmStatus::InProgress]);
+
+            return $lockedTask;
+        });
     }
 
     /**

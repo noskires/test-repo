@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\BillingThresholdController;
 use App\Http\Controllers\Api\ChecklistTemplateController;
 use App\Http\Controllers\Api\ECallController;
 use App\Http\Controllers\Api\ECallProposalController;
+use App\Http\Controllers\Api\PmReportController;
+use App\Http\Controllers\Api\PmTaskController;
 use App\Http\Controllers\Api\PriceListItemController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
@@ -34,6 +36,11 @@ Route::middleware('auth')->group(function () {
     Route::get('e-calls/{eCall}', [ECallController::class, 'show'])->name('e-calls.show');
     Route::get('e-calls/{eCall}/proposals', [ECallProposalController::class, 'index'])->name('e-calls.proposals.index');
     Route::post('e-calls/{eCall}/proposal', [ECallProposalController::class, 'store'])->name('e-calls.proposal.store');
+
+    Route::get('vendor/pm-tasks', [PmTaskController::class, 'vendorIndex'])->name('vendor.pm-tasks.index');
+    Route::post('pm-tasks/{pmTask}/start', [PmTaskController::class, 'start'])->name('pm-tasks.start');
+    Route::get('pm-tasks/{pmTask}/reports', [PmReportController::class, 'index'])->name('pm-tasks.reports.index');
+    Route::post('pm-tasks/{pmTask}/report', [PmReportController::class, 'store'])->name('pm-tasks.report.store');
 
     Route::get('settings/billing-thresholds', [BillingThresholdController::class, 'show'])->name('settings.billing-thresholds.show');
     Route::put('settings/billing-thresholds', [BillingThresholdController::class, 'update'])->name('settings.billing-thresholds.update');
