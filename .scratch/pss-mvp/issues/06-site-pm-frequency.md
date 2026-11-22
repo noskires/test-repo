@@ -6,24 +6,35 @@ Type: task
 
 ## What to build
 
-One **PM Frequency** per Site (glossary). Every Equipment at that Site follows it. This was decided over the PRD's "per equipment or category" (see spec, conflicts table). An administrator sets it alongside the Site Vendor and EIC. It also needs a pure function that computes the next due date from a Work Done Date and a frequency (sliding schedule).
+One **PM Frequency** per Site (glossary). Every Equipment at that Site follows it. This was decided over the PRD's "per equipment or category" (see spec, conflicts table). An administrator sets it alongside the Site Vendor and EIC (issue 05's Site settings). The slice also includes a pure function that computes the next due date from a date and a frequency (sliding schedule, PRD v2 §6.1).
 
-PRD-listed values: Monthly, Twice a month, Every two months (bi-monthly), Quarterly, Semi-annually, Annually, "other configurable intervals".
+MVP frequencies (fixed list, no custom intervals): `monthly`, `twice_a_month` (= every 15 days), `bi_monthly` (every 2 months), `quarterly`, `semi_annual`, `annual`.
 
-## Open questions (for the human)
+Build:
+- A PM Frequency enum with the six values above.
+- A nullable PM Frequency on the Site settings from issue 05, exposed in `GET /api/sites/{siteId}/settings`.
+- `PUT /api/sites/{siteId}/settings/pm-frequency` with body `{pm_frequency}`, behind the `manage-site-settings` Gate. Each change writes a Site settings history entry (old value, new value, user, timestamp), like the vendor and EIC changes.
+- A pure function `nextDueDate(CarbonImmutable $from, PmFrequency $frequency): CarbonImmutable` (the name is the developer's choice). Month-based intervals **clamp to the month's last day**. `twice_a_month` adds exactly 15 days.
 
-1. **Twice a month**: since the schedule slides from the Work Done Date, is that "every 15 days" or "every half month"? What exact interval should be added?
-2. **Other configurable intervals**: do admins need to enter any arbitrary interval (e.g. "every 45 days", "every 4 months")? Or is the fixed list enough for the MVP?
-3. Month arithmetic edge case: if the Work Done Date is 31 Jan and the frequency is Monthly, is the next due date 28/29 Feb or 2/3 Mar?
-4. When a Site's frequency changes, does it affect only tasks generated afterwards, or also re-date the current open PM Task?
-5. PRD §6.2 also lists "preferred maintenance schedule", "start date of the maintenance cycle" and "effective date". Are any of these needed per Site? (See also issue 08 Q1.)
+Out of scope here: re-dating open PM Tasks when the frequency changes. PM Tasks don't exist until issue 08, so that rule (only `Scheduled` tasks are re-dated) belongs to issue 08. This slice should make the change observable, e.g. by dispatching a `SitePmFrequencyChanged` event with the site ID and the old and new frequency, so 08 can react to it.
 
-## Acceptance criteria (draft)
+## Acceptance criteria
 
-- [ ] Admin can set and change a Site's PM Frequency (`manage-site-settings` Gate). The change is recorded in the Site settings history.
-- [ ] The next-due-date function has unit tests for each frequency and the month-end edge cases.
+- [ ] `PUT .../settings/pm-frequency` with a valid value returns 200, stores it, and `GET .../settings` returns it. It is null when never set.
+- [ ] An unknown value returns 422. An unknown Site returns 404. The PUT returns 403 when the `manage-site-settings` Gate denies, and 401 when unauthenticated.
+- [ ] Changing the frequency writes a history entry with the old value, new value, user and timestamp, and dispatches `SitePmFrequencyChanged` (or equivalent). Setting the same value again writes no history entry.
+- [ ] Unit tests for `nextDueDate`:
+  - `monthly`: 2026-01-15 → 2026-02-15. 2026-01-31 → 2026-02-28. 2028-01-31 → 2028-02-29 (leap year).
+  - `twice_a_month`: 2026-01-31 → 2026-02-15. 2026-02-20 → 2026-03-07.
+  - `bi_monthly`: 2026-12-31 → 2027-02-28.
+  - `quarterly`: 2026-11-30 → 2027-02-28.
+  - `semi_annual`: 2026-08-31 → 2027-02-28.
+  - `annual`: 2028-02-29 → 2029-02-28.
+- [ ] Feature tests use the in-memory directory fake. No new packages, and `php artisan test` passes.
 
 ## Comments
+
+- 2026-11-22 (product-owner): Replaced the stale open questions and draft criteria with final ones based on the grilling decisions below and PRD v2 §6.1. Re-dating `Scheduled` PM Tasks on a frequency change is moved to issue 08, because PM Tasks don't exist yet. 08 is already blocked by 06.
 
 ## Decisions (grilling, 2026-11-22)
 - Q1 answered: **Twice a month = every 15 days**, added to the Work Done Date.
