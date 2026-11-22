@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * One FSR + BOQ revision. The total is an exact peso string with five decimals (unrounded). The FSR path stays private.
+ * One FSR + BOQ revision. `total` is the exact peso string with five decimals. `total_rounded` is that total
+ * rounded half-up to the centavo (two decimals). The FSR path stays private.
  *
  * @mixin ECallProposal
  */
@@ -33,6 +34,7 @@ class ECallProposalResource extends JsonResource
             ],
             'lines' => ECallProposalLineResource::collection($this->lines),
             'total' => PesoAmount::fromMillicentavos($this->total_millicentavos),
+            'total_rounded' => PesoAmount::fromCentavos($this->total_centavos),
             'submitted_by_user_id' => $this->submitted_by_user_id,
             'submitted_at' => $this->submitted_at,
         ];

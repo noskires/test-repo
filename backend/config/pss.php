@@ -26,8 +26,9 @@ return [
     |--------------------------------------------------------------------------
     |
     | The PRD sets no quantity precision. BOQ quantities accept up to 3 decimal
-    | places by default (0 to 3 allowed; storage keeps thousandths). Totals are
-    | stored exactly, never rounded. The FSR file follows the E-Call attachment
+    | places by default (0 to 3 allowed; storage keeps thousandths). Line totals
+    | are stored exactly, never rounded. The BOQ total is stored both exactly and
+    | rounded half-up to the centavo. The FSR file follows the E-Call attachment
     | rules above.
     |
     */

@@ -9,7 +9,8 @@ return new class extends Migration
     /**
      * Run the migrations. One row per FSR + BOQ revision of an E-Call. Revisions are never changed or deleted.
      * Money is exact integers: unit prices in centavos, line and BOQ totals in millicentavos (thousandths of a
-     * centavo), quantities in thousandths. The Price List item's details and price are copied onto each line.
+     * centavo), quantities in thousandths. total_centavos is the exact total rounded half-up to the centavo (only
+     * the BOQ total is rounded). The Price List item's details and price are copied onto each line.
      */
     public function up(): void
     {
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->string('fsr_mime_type');
             $table->unsignedBigInteger('fsr_size_bytes');
             $table->unsignedBigInteger('total_millicentavos');
+            $table->unsignedBigInteger('total_centavos');
             $table->foreignId('submitted_by_user_id')->constrained('users');
             $table->timestamp('submitted_at');
             $table->timestamps();

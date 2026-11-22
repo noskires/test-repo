@@ -110,6 +110,37 @@ class BoqQuantityTest extends TestCase
         $this->assertSame(0, BoqQuantity::sumMillicentavos([]));
     }
 
+    /**
+     * @return array<string, array{int, int}>
+     */
+    public static function roundedTotals(): array
+    {
+        return [
+            'exactly half a centavo rounds up' => [500, 1],
+            'just below half a centavo rounds down' => [499, 0],
+            'just above half a centavo rounds up' => [501, 1],
+            'whole centavos stay unchanged' => [12_000, 12],
+            'zero' => [0, 0],
+            'half up on a larger amount' => [31_195_833, 31_196],
+            'half exactly on a larger amount' => [30_862_500, 30_863],
+            'just below half on a larger amount' => [30_862_499, 30_862],
+            'largest storable total does not overflow' => [PHP_INT_MAX, intdiv(PHP_INT_MAX, 1_000) + 1],
+        ];
+    }
+
+    #[DataProvider('roundedTotals')]
+    public function test_the_total_rounds_half_up_to_the_centavo(int $millicentavos, int $expectedCentavos): void
+    {
+        $this->assertSame($expectedCentavos, BoqQuantity::roundHalfUpToCentavos($millicentavos));
+    }
+
+    public function test_rounding_a_negative_amount_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        BoqQuantity::roundHalfUpToCentavos(-1);
+    }
+
     public function test_millicentavos_format_as_pesos_with_five_decimal_places(): void
     {
         $this->assertSame('308.62500', PesoAmount::fromMillicentavos(30_862_500));

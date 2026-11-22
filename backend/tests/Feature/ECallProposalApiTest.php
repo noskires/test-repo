@@ -101,9 +101,11 @@ class ECallProposalApiTest extends TestCase
             ->assertJsonPath('data.lines.1.quantity', '0.333')
             ->assertJsonPath('data.lines.1.unit_price', '10.01')
             ->assertJsonPath('data.lines.1.line_total', '3.33333')
-            ->assertJsonPath('data.total', '311.95833');
+            ->assertJsonPath('data.total', '311.95833')
+            ->assertJsonPath('data.total_rounded', '311.96');
 
         $proposal = ECallProposal::query()->with('lines')->sole();
+        $this->assertSame(31_196, $proposal->total_centavos);
         $this->assertSame(1, $proposal->revision);
         $this->assertSame($user->id, $proposal->submitted_by_user_id);
         $this->assertNotNull($proposal->submitted_at);
@@ -123,7 +125,78 @@ class ECallProposalApiTest extends TestCase
         $this->submit($this->validPayload(['lines' => [['price_list_item_id' => $this->paint->id, 'quantity' => 1.005]]]))
             ->assertCreated()
             ->assertJsonPath('data.lines.0.quantity', '1.005')
-            ->assertJsonPath('data.lines.0.line_total', '124.06725');
+            ->assertJsonPath('data.lines.0.line_total', '124.06725')
+            ->assertJsonPath('data.total', '124.06725')
+            ->assertJsonPath('data.total_rounded', '124.07');
+    }
+
+    public function test_only_the_boq_total_is_rounded_half_up_and_line_totals_stay_exact(): void
+    {
+        $this->actingAsSiteVendorStaff();
+        $halfCentavoItem = PriceListItem::factory()->create(['vendor_id' => $this->siteVendor->id, 'unit_price_centavos' => 1]);
+        $justBelowHalfItem = PriceListItem::factory()->create(['vendor_id' => $this->siteVendor->id, 'unit_price_centavos' => 499]);
+
+        $this->submit($this->validPayload(['lines' => [['price_list_item_id' => $halfCentavoItem->id, 'quantity' => '0.5']]]))
+            ->assertCreated()
+            ->assertJsonPath('data.lines.0.line_total', '0.00500')
+            ->assertJsonPath('data.total', '0.00500')
+            ->assertJsonPath('data.total_rounded', '0.01');
+
+        $this->eCall->update(['status' => ECallStatus::Returned]);
+
+        $this->submit($this->validPayload(['lines' => [['price_list_item_id' => $justBelowHalfItem->id, 'quantity' => '0.001']]]))
+            ->assertCreated()
+            ->assertJsonPath('data.lines.0.line_total', '0.00499')
+            ->assertJsonPath('data.total', '0.00499')
+            ->assertJsonPath('data.total_rounded', '0.00');
+    }
+
+    public function test_a_single_half_centavo_line_total_rounds_up(): void
+    {
+        $this->actingAsSiteVendorStaff();
+        $item = PriceListItem::factory()->create(['vendor_id' => $this->siteVendor->id, 'unit_price_centavos' => 101]);
+
+        $this->submit($this->validPayload(['lines' => [['price_list_item_id' => $item->id, 'quantity' => '0.5']]]))
+            ->assertCreated()
+            ->assertJsonPath('data.lines.0.line_total', '0.50500')
+            ->assertJsonPath('data.total', '0.50500')
+            ->assertJsonPath('data.total_rounded', '0.51');
+
+        $this->assertSame(51, ECallProposal::query()->sole()->total_centavos);
+    }
+
+    public function test_two_half_centavo_lines_sum_exactly_before_rounding_instead_of_rounding_each_line(): void
+    {
+        $this->actingAsSiteVendorStaff();
+        [$first, $second] = PriceListItem::factory()->count(2)->create(['vendor_id' => $this->siteVendor->id, 'unit_price_centavos' => 101]);
+
+        $this->submit($this->validPayload(['lines' => [
+            ['price_list_item_id' => $first->id, 'quantity' => '0.5'],
+            ['price_list_item_id' => $second->id, 'quantity' => '0.5'],
+        ]]))
+            ->assertCreated()
+            ->assertJsonPath('data.lines.0.line_total', '0.50500')
+            ->assertJsonPath('data.lines.1.line_total', '0.50500')
+            ->assertJsonPath('data.total', '1.01000')
+            ->assertJsonPath('data.total_rounded', '1.01');
+
+        $this->assertSame(101, ECallProposal::query()->sole()->total_centavos, 'Rounding each line first would give 51 + 51 = 102.');
+    }
+
+    public function test_line_totals_are_summed_exactly_before_the_total_is_rounded(): void
+    {
+        $this->actingAsSiteVendorStaff();
+        [$first, $second] = PriceListItem::factory()->count(2)->create(['vendor_id' => $this->siteVendor->id, 'unit_price_centavos' => 1]);
+
+        $this->submit($this->validPayload(['lines' => [
+            ['price_list_item_id' => $first->id, 'quantity' => '0.4'],
+            ['price_list_item_id' => $second->id, 'quantity' => '0.4'],
+        ]]))
+            ->assertCreated()
+            ->assertJsonPath('data.lines.0.line_total', '0.00400')
+            ->assertJsonPath('data.lines.1.line_total', '0.00400')
+            ->assertJsonPath('data.total', '0.00800')
+            ->assertJsonPath('data.total_rounded', '0.01');
     }
 
     public function test_changing_a_price_list_price_after_submission_does_not_change_the_boq(): void

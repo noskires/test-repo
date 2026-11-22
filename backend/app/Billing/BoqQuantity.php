@@ -8,7 +8,8 @@ use OverflowException;
 /**
  * Exact BOQ arithmetic without floats. Quantities are stored as integer thousandths, unit prices as integer
  * centavos, so a line total (quantity x unit price) is an exact integer number of millicentavos
- * (thousandths of a centavo). Nothing is rounded here: rounding to centavos is decided later (issues 18, 21).
+ * (thousandths of a centavo). Line totals are never rounded. Only the BOQ total also gets a rounded value,
+ * half-up to whole centavos.
  */
 final class BoqQuantity
 {
@@ -80,6 +81,19 @@ final class BoqQuantity
         }
 
         return self::toStorableInteger($total);
+    }
+
+    /**
+     * Round an exact, non-negative amount in millicentavos to whole centavos, half-up (0.5 centavo rounds up).
+     * Only the BOQ total is rounded. Line totals stay exact.
+     */
+    public static function roundHalfUpToCentavos(int $millicentavos): int
+    {
+        if ($millicentavos < 0) {
+            throw new InvalidArgumentException('Only non-negative amounts can be rounded.');
+        }
+
+        return intdiv($millicentavos, 1_000) + ($millicentavos % 1_000 >= 500 ? 1 : 0);
     }
 
     private static function toStorableInteger(string $exact): int

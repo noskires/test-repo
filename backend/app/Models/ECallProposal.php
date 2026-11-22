@@ -22,7 +22,7 @@ use Throwable;
 #[Fillable([
     'revision', 'assessment_notes',
     'fsr_disk', 'fsr_path', 'fsr_original_name', 'fsr_mime_type', 'fsr_size_bytes',
-    'total_millicentavos', 'submitted_by_user_id', 'submitted_at',
+    'total_millicentavos', 'total_centavos', 'submitted_by_user_id', 'submitted_at',
 ])]
 class ECallProposal extends Model
 {
@@ -38,6 +38,7 @@ class ECallProposal extends Model
             'revision' => 'integer',
             'fsr_size_bytes' => 'integer',
             'total_millicentavos' => 'integer',
+            'total_centavos' => 'integer',
             'submitted_by_user_id' => 'integer',
             'submitted_at' => 'immutable_datetime',
         ];
@@ -91,6 +92,7 @@ class ECallProposal extends Model
                 }
 
                 $lineAttributes = static::lineAttributes($lines);
+                $exactTotal = static::exactTotal($lineAttributes);
 
                 $fsrPath = $fsr->store("e-calls/{$lockedECall->id}/proposals", $disk);
 
@@ -102,7 +104,8 @@ class ECallProposal extends Model
                     'fsr_original_name' => $fsr->getClientOriginalName(),
                     'fsr_mime_type' => $fsr->getMimeType(),
                     'fsr_size_bytes' => $fsr->getSize(),
-                    'total_millicentavos' => static::exactTotal($lineAttributes),
+                    'total_millicentavos' => $exactTotal,
+                    'total_centavos' => BoqQuantity::roundHalfUpToCentavos($exactTotal),
                     'submitted_by_user_id' => $submitter->id,
                     'submitted_at' => now(),
                 ]);
