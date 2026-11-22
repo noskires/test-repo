@@ -46,3 +46,8 @@ Note: this issue only depends on 08 for the PM Task table and model. Tests can c
     2. May the Work Done Date be **earlier than the task's start**, or earlier than the previous task's Work Done Date? This slice only rejects future dates.
     3. Can the vendor still start or report a task flagged `equipment_removed`? This slice doesn't block it. The EIC decides whether to cancel (issue 25).
 - 2026-11-22 (qa): QA PASS. `php artisan test` from backend/ gives 452 passed (1584 assertions), 0 failed. `tests/Feature/PmReportApiTest.php` and `tests/Unit/Checklists/ChecklistResponseEvaluatorTest.php` give 84 passed (265 assertions). Every acceptance criterion, and each product-owner clarification above, maps to a test that asserts it. The three open questions are built as stated: the PM Service Report file is optional, only future Work Done Dates are rejected, and tasks flagged `equipment_removed` aren't blocked.
+
+## Decisions (human, 2026-11-22, after the merge in PR #16)
+- Q1: the **PM Service Report file is required** on every PM Report submission. The merged build has it optional, and the change goes in **issue 34**.
+- Q2: the **Work Done Date must not be earlier than the task's start date**, and must not be in the future. There's no rule about the previous task's Work Done Date. The merged build only rejects future dates, and the change (including recording `started_at`) goes in **issue 34**.
+- Q3: tasks flagged `equipment_removed` **can still be started and reported**. The EIC decides whether to cancel them (issue 25). The merged build already does this, so nothing changes.

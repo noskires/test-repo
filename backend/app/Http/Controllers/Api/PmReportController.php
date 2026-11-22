@@ -43,6 +43,7 @@ class PmReportController extends Controller
             submitter: $request->user(),
             workDoneDate: $request->validated('work_done_date'),
             findings: $request->validated('findings'),
+            serviceReport: $request->serviceReport(),
             responses: $request->checklistResponses(),
             materials: $request->materials(),
             attachments: $request->generalAttachments(),

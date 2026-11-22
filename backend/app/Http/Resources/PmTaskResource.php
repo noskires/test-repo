@@ -33,6 +33,7 @@ class PmTaskResource extends JsonResource
             'status' => $this->status->value,
             'due_date' => $this->due_date->toDateString(),
             'work_done_date' => $this->work_done_date?->toDateString(),
+            'started_at' => $this->started_at,
             'vendor_id' => $this->vendor_id,
             'eic_employee_id' => $this->eic_employee_id,
             'checklist_template_version_id' => $this->checklist_template_version_id,

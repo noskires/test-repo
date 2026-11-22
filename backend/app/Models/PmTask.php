@@ -22,7 +22,7 @@ use Illuminate\Validation\ValidationException;
     'site_id', 'site_name_snapshot',
     'equipment_id', 'equipment_name_snapshot', 'equipment_category_id', 'equipment_category_snapshot', 'equipment_location_snapshot',
     'vendor_id', 'eic_employee_id', 'checklist_template_version_id', 'no_checklist', 'equipment_removed',
-    'status', 'due_from_date', 'due_date', 'work_done_date',
+    'status', 'due_from_date', 'due_date', 'work_done_date', 'started_at',
 ])]
 class PmTask extends Model
 {
@@ -63,6 +63,7 @@ class PmTask extends Model
             'due_from_date' => 'immutable_date',
             'due_date' => 'immutable_date',
             'work_done_date' => 'immutable_date',
+            'started_at' => 'immutable_datetime',
         ];
     }
 
@@ -93,7 +94,8 @@ class PmTask extends Model
     }
 
     /**
-     * Move a Scheduled task to In Progress. The row is locked so two starts can't both succeed.
+     * Move a Scheduled task to In Progress and record when it was started. The row is locked so two starts
+     * can't both succeed.
      *
      * @throws ValidationException when the task is not Scheduled.
      */
@@ -106,7 +108,7 @@ class PmTask extends Model
                 throw ValidationException::withMessages(['pm_task' => 'Only a Scheduled PM Task can be started.']);
             }
 
-            $lockedTask->update(['status' => PmStatus::InProgress]);
+            $lockedTask->update(['status' => PmStatus::InProgress, 'started_at' => now()]);
 
             return $lockedTask;
         });
