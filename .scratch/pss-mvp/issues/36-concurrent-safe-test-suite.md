@@ -16,12 +16,13 @@ Give each test **process** its own fake-disk root, e.g. in `tests/TestCase.php`:
 
 ## Acceptance criteria
 
-- [ ] Fake disks in tests resolve to a per-process root, not `storage/framework/testing/disks/`. A test asserts that the faked disk's root path contains the process-specific part.
-- [ ] Faking a disk never deletes files under another process's root, and never under the shared `storage/framework/testing/disks/` folder. Test this with a file planted in a sibling root, which must survive.
-- [ ] Two full `php artisan test` runs started at the same time on the same checkout both pass. Record the command and both results in the PR or QA notes. A manual check is fine, since this can't be a PHPUnit assertion.
-- [ ] No per-process folders are left behind after a run.
-- [ ] Existing tests are unchanged apart from any mechanical cleanup. No new packages, and `php artisan test` passes.
+- [x] Fake disks in tests resolve to a per-process root, not `storage/framework/testing/disks/`. A test asserts that the faked disk's root path contains the process-specific part.
+- [x] Faking a disk never deletes files under another process's root, and never under the shared `storage/framework/testing/disks/` folder. Test this with a file planted in a sibling root, which must survive.
+- [x] Two full `php artisan test` runs started at the same time on the same checkout both pass. Record the command and both results in the PR or QA notes. A manual check is fine, since this can't be a PHPUnit assertion.
+- [x] No per-process folders are left behind after a run.
+- [x] Existing tests are unchanged apart from any mechanical cleanup. No new packages, and `php artisan test` passes.
 
 ## Comments
 
 - 2026-11-22 (product-owner): Created at the team lead's request after false failures when dev-lead and qa ran the suite at the same time. The team lead decides when this is built relative to issue 17, so it hasn't been handed off yet.
+- 2026-11-22 (qa): QA PASS. `php artisan test` from backend/ gives 530 passed (1897 assertions), 0 failed. `tests/Feature/ConcurrentSafeFakeStorageTest.php` gives 4 passed (8 assertions). Concurrency check: two full `php artisan test --compact` runs started together from backend/, in 3 rounds. All 6 runs gave 530 passed (1897 assertions), exit 0. Two `process-{pid}-{hex}` folders existed during each round and none afterwards. The sibling-root test plants files in a sibling process root and in the shared `disks` folder, and both survive `Storage::fake`.
