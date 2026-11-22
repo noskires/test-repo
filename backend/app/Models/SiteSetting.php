@@ -46,6 +46,25 @@ class SiteSetting extends Model
     }
 
     /**
+     * Whether the user is the Site's current EIC. False when the user has no employee ID or the Site has no EIC;
+     * there is no fallback to an EIC captured on a task. With $lockForUpdate, the settings row is locked, so an
+     * EIC replacement (assignEic also locks it) can't slip in before the caller's transaction commits.
+     */
+    public static function isCurrentEic(string $siteId, User $user, bool $lockForUpdate = false): bool
+    {
+        if ($user->employee_id === null) {
+            return false;
+        }
+
+        $currentEicEmployeeId = static::query()
+            ->where('site_id', $siteId)
+            ->when($lockForUpdate, fn ($query) => $query->lockForUpdate())
+            ->value('eic_employee_id');
+
+        return $currentEicEmployeeId !== null && $user->employee_id === $currentEicEmployeeId;
+    }
+
+    /**
      * Make the Vendor the Site's one current Site Vendor, recording the change unless it is already assigned.
      */
     public static function assignVendor(Site $site, Vendor $vendor, User $changedBy): self

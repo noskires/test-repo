@@ -127,6 +127,7 @@ class PmTask extends Model implements ApprovalSubject
      * Approval Record and announces PmTaskCompleted after commit. Releasing the open-task key happens in the
      * saving hook.
      *
+     * @throws AuthorizationException when the actor is no longer the Site's current EIC.
      * @throws ValidationException when the task is not For Validation.
      */
     public static function approveReport(PmTask $task, User $eic, ?string $remarks): self
@@ -141,6 +142,7 @@ class PmTask extends Model implements ApprovalSubject
     /**
      * The EIC returns the PM Report to the vendor with remarks: Returned. Writes an Approval Record.
      *
+     * @throws AuthorizationException when the actor is no longer the Site's current EIC.
      * @throws ValidationException when the task is not For Validation.
      */
     public static function returnReport(PmTask $task, User $eic, string $remarks): self
