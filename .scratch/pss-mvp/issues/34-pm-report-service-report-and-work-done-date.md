@@ -13,14 +13,15 @@ The human's answers on issue 10 (2026-11-22) change the merged build from PR #16
 
 ## Acceptance criteria
 
-- [ ] `start` sets `started_at` to the current time. The PM Task resource returns it.
-- [ ] A submission without a service report file returns 422 naming `service_report`. This applies to a first submission and to a resubmission from `Returned`. A service report with a disallowed type or size returns 422.
-- [ ] A valid submission stores the service report against that report revision, readable separately from the other attachments.
-- [ ] A Work Done Date earlier than the `started_at` date returns 422 with a clear message. The same day as `started_at` and today are both accepted. A future date still returns 422.
-- [ ] A task with a null `started_at` accepts any Work Done Date that isn't in the future.
-- [ ] **Existing stored revisions are unaffected**: a report revision stored before this change, with no service report and an earlier Work Done Date, is still readable unchanged through the API. No migration rewrites or deletes it.
-- [ ] Feature tests use `Storage::fake()` and factories. No new packages, and `php artisan test` passes.
+- [x] `start` sets `started_at` to the current time. The PM Task resource returns it.
+- [x] A submission without a service report file returns 422 naming `service_report`. This applies to a first submission and to a resubmission from `Returned`. A service report with a disallowed type or size returns 422.
+- [x] A valid submission stores the service report against that report revision, readable separately from the other attachments.
+- [x] A Work Done Date earlier than the `started_at` date returns 422 with a clear message. The same day as `started_at` and today are both accepted. A future date still returns 422.
+- [x] A task with a null `started_at` accepts any Work Done Date that isn't in the future.
+- [x] **Existing stored revisions are unaffected**: a report revision stored before this change, with no service report and an earlier Work Done Date, is still readable unchanged through the API. No migration rewrites or deletes it.
+- [x] Feature tests use `Storage::fake()` and factories. No new packages, and `php artisan test` passes.
 
 ## Comments
 
 - 2026-11-22 (product-owner): Created from the human's answers to issue 10's non-blocking questions 1 and 2. Question 3 (`equipment_removed` tasks can still be started and reported) needs no change.
+- 2026-11-22 (qa): QA PASS. `php artisan test` from backend/ gives 467 passed (1654 assertions), 0 failed. `tests/Feature/PmReportApiTest.php` gives 70 passed (306 assertions). Every acceptance criterion maps to a test that asserts it. The migration only adds nullable columns and rewrites no rows. A null `started_at` falls back to the not-in-future rule only. The start date is compared as a date in the app timezone. The service report is a single required file on every submission, under the E-Call upload rules (10 MB).
