@@ -35,6 +35,10 @@ Out of scope here: re-dating open PM Tasks when the frequency changes. PM Tasks 
 ## Comments
 
 - 2026-11-22 (product-owner): Replaced the stale open questions and draft criteria with final ones based on the grilling decisions below and PRD v2 §6.1. Re-dating `Scheduled` PM Tasks on a frequency change is moved to issue 08, because PM Tasks don't exist yet. 08 is already blocked by 06.
+- 2026-11-22 (product-owner): Re-checked before hand-off (main 605c950). Blocker 05 is merged. No open questions remain for this slice. The "twice a month" rule (exactly +15 days) and the month-end rule (clamp to the last day) were settled in grilling, and the expected dates in the criteria check out. GLOSSARY "PM Frequency" now records both rules. Implementation notes, scope unchanged:
+  - The existing history table `site_assignment_changes` has typed vendor/EIC columns and an `assignment` discriminator. Recording the frequency change there (e.g. `assignment = pm_frequency` plus nullable old/new frequency columns) or in a separate table is the developer's choice. Either way, the change needs the old value, new value, user and timestamp.
+  - `manage-site-settings` is checked through `Gate::allows` in the form requests, as for vendor and EIC. Reuse that pattern.
+  - A Site with no `site_settings` row yet gets one created on the first PUT, as the vendor and EIC assignments do. Its history entry's old value is null.
 
 ## Decisions (grilling, 2026-11-22)
 - Q1 answered: **Twice a month = every 15 days**, added to the Work Done Date.
