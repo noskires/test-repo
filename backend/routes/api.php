@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\PriceListItemController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
 use App\Http\Controllers\Api\VendorController;
+use App\Http\Controllers\Api\WorkOrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
@@ -42,6 +43,9 @@ Route::middleware('auth')->group(function () {
     Route::post('e-calls/{eCall}/return', [ECallReviewController::class, 'returnToVendor'])->name('e-calls.return');
     Route::post('e-calls/{eCall}/reject', [ECallReviewController::class, 'reject'])->name('e-calls.reject');
     Route::get('e-calls/{eCall}/approvals', [ECallReviewController::class, 'approvals'])->name('e-calls.approvals.index');
+    Route::post('e-calls/{eCall}/work-order', [WorkOrderController::class, 'store'])->name('e-calls.work-order.store');
+    Route::get('work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
+    Route::patch('work-orders/{workOrder}', [WorkOrderController::class, 'update'])->name('work-orders.update');
 
     Route::get('vendor/pm-tasks', [PmTaskController::class, 'vendorIndex'])->name('vendor.pm-tasks.index');
     Route::post('pm-tasks/{pmTask}/start', [PmTaskController::class, 'start'])->name('pm-tasks.start');

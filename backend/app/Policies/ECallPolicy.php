@@ -37,4 +37,13 @@ class ECallPolicy
     {
         return SiteSetting::isActingEic($eCall->site_id, $user);
     }
+
+    /**
+     * Only the E-Call's Requestor (the user who filed it) creates its Work Order. Not the EIC, not vendor staff.
+     * WorkOrder::createFromECall repeats this under a lock.
+     */
+    public function createWorkOrder(User $user, ECall $eCall): bool
+    {
+        return $user->id === $eCall->requestor_user_id;
+    }
 }
