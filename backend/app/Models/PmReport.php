@@ -15,10 +15,15 @@ use Throwable;
 
 /**
  * One revision of the Site Vendor's PM Report for a PM Task: checklist responses against the task's checklist
- * version, the Work Done Date, findings, materials used and attachments. Revisions start at 1 and grow with each
- * resubmission after Returned. The latest is the current one; earlier ones are kept unchanged.
+ * version, the Work Done Date, findings, materials used, the PM Service Report file (its own columns, separate from
+ * the attachments) and attachments. Revisions start at 1 and grow with each resubmission after Returned. The latest
+ * is the current one; earlier ones are kept unchanged. Revisions stored before the service report was required
+ * (issue 34) have null service report columns.
  */
-#[Fillable(['revision', 'checklist_template_version_id', 'work_done_date', 'findings', 'submitted_by_user_id', 'submitted_at'])]
+#[Fillable([
+    'revision', 'checklist_template_version_id', 'work_done_date', 'findings', 'submitted_by_user_id', 'submitted_at',
+    'service_report_disk', 'service_report_path', 'service_report_original_name', 'service_report_mime_type', 'service_report_size_bytes',
+])]
 class PmReport extends Model
 {
     /**
@@ -35,6 +40,7 @@ class PmReport extends Model
             'work_done_date' => 'immutable_date',
             'submitted_by_user_id' => 'integer',
             'submitted_at' => 'immutable_datetime',
+            'service_report_size_bytes' => 'integer',
         ];
     }
 
@@ -86,6 +92,7 @@ class PmReport extends Model
         User $submitter,
         string $workDoneDate,
         ?string $findings,
+        UploadedFile $serviceReport,
         array $responses,
         array $materials,
         array $attachments,
@@ -94,7 +101,7 @@ class PmReport extends Model
         $storedPaths = [];
 
         try {
-            return DB::transaction(function () use ($task, $submitter, $workDoneDate, $findings, $responses, $materials, $attachments, $disk, &$storedPaths): self {
+            return DB::transaction(function () use ($task, $submitter, $workDoneDate, $findings, $serviceReport, $responses, $materials, $attachments, $disk, &$storedPaths): self {
                 $lockedTask = PmTask::query()->lockForUpdate()->findOrFail($task->id);
 
                 if (! in_array($lockedTask->status, [PmStatus::InProgress, PmStatus::Returned], true)) {
@@ -112,8 +119,20 @@ class PmReport extends Model
                     'submitted_at' => now(),
                 ]);
 
-                $storeFile = function (UploadedFile $file, ?int $checklistItemId) use ($report, $disk, &$storedPaths): void {
-                    $path = $file->store("pm-tasks/{$report->pm_task_id}/reports/{$report->revision}", $disk);
+                $directory = "pm-tasks/{$report->pm_task_id}/reports/{$report->revision}";
+
+                $serviceReportPath = $serviceReport->store("{$directory}/service-report", $disk);
+                $storedPaths[] = $serviceReportPath;
+                $report->update([
+                    'service_report_disk' => $disk,
+                    'service_report_path' => $serviceReportPath,
+                    'service_report_original_name' => $serviceReport->getClientOriginalName(),
+                    'service_report_mime_type' => $serviceReport->getMimeType(),
+                    'service_report_size_bytes' => $serviceReport->getSize(),
+                ]);
+
+                $storeFile = function (UploadedFile $file, ?int $checklistItemId) use ($report, $disk, $directory, &$storedPaths): void {
+                    $path = $file->store($directory, $disk);
                     $storedPaths[] = $path;
 
                     $report->attachments()->create([

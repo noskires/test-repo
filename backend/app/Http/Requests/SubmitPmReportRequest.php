@@ -51,8 +51,9 @@ class SubmitPmReportRequest extends FormRequest
         $items = $this->checklistItems();
 
         $rules = [
-            'work_done_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'work_done_date' => ['bail', 'required', 'date_format:Y-m-d', 'before_or_equal:today', $this->notBeforeStartRule()],
             'findings' => ['nullable', 'string', 'max:10000'],
+            'service_report' => ['required', 'file', 'mimes:'.$extensions, 'extensions:'.$extensions, 'max:'.$maxKilobytes],
             'responses' => $items->isEmpty()
                 ? ['prohibited']
                 : ['sometimes', 'array:'.$items->keys()->implode(',')],
@@ -196,8 +197,14 @@ class SubmitPmReportRequest extends FormRequest
         ], array_values($this->validated('materials', [])));
     }
 
+    public function serviceReport(): UploadedFile
+    {
+        return $this->file('service_report');
+    }
+
     /**
-     * General attachments (PM Service Report, other photos), not linked to a Checklist Item.
+     * General attachments (other documents and photos), not linked to a Checklist Item. The PM Service Report
+     * has its own field.
      *
      * @return list<UploadedFile>
      */
@@ -218,6 +225,27 @@ class SubmitPmReportRequest extends FormRequest
             ChecklistResponseType::Numeric => ['bail', $presence, 'regex:'.ChecklistResponseEvaluator::NUMERIC_READING_PATTERN],
             ChecklistResponseType::Text => [$presence, 'string', 'max:5000'],
             default => [$presence, 'string', Rule::in(ChecklistResponseEvaluator::CHOICES[$item->response_type->value])],
+        };
+    }
+
+    /**
+     * The Work Done Date may not be before the day the task was started, taken in the app timezone. A task
+     * started before started_at existed (null) is only held to the "not in the future" rule.
+     */
+    private function notBeforeStartRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            $startedAt = $this->pmTask()->started_at;
+
+            if ($startedAt === null) {
+                return;
+            }
+
+            $startDate = $startedAt->setTimezone(config('app.timezone'))->toDateString();
+
+            if ($value < $startDate) {
+                $fail("The Work Done Date cannot be before the PM Task was started ({$startDate}).");
+            }
         };
     }
 

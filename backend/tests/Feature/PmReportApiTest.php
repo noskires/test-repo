@@ -10,6 +10,7 @@ use App\Models\PmReport;
 use App\Models\PmTask;
 use App\Models\User;
 use App\Models\Vendor;
+use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -123,7 +124,8 @@ class PmReportApiTest extends TestCase
                 ['description' => 'Air filter', 'quantity' => '1'],
                 ['description' => 'Engine oil', 'quantity' => '2.5'],
             ],
-            'attachments' => [UploadedFile::fake()->create('pm-service-report.pdf', 200, 'application/pdf')],
+            'service_report' => UploadedFile::fake()->create('pm-service-report.pdf', 200, 'application/pdf'),
+            'attachments' => [UploadedFile::fake()->create('site-sketch.pdf', 50, 'application/pdf')],
         ], $overrides);
     }
 
@@ -186,9 +188,21 @@ class PmReportApiTest extends TestCase
 
         $this->postJson("/api/pm-tasks/{$this->task->id}/start")
             ->assertOk()
-            ->assertJsonPath('data.status', 'in_progress');
+            ->assertJsonPath('data.status', 'in_progress')
+            ->assertJsonPath('data.started_at', '2026-11-22T10:00:00.000000Z');
 
-        $this->assertSame(PmStatus::InProgress, $this->task->refresh()->status);
+        $this->task->refresh();
+        $this->assertSame(PmStatus::InProgress, $this->task->status);
+        $this->assertSame('2026-11-22 10:00:00', $this->task->started_at->format('Y-m-d H:i:s'));
+    }
+
+    public function test_the_task_resource_returns_a_null_started_at_for_a_task_never_started_through_the_api(): void
+    {
+        $this->actingAsVendorStaff();
+
+        $this->getJson('/api/vendor/pm-tasks')
+            ->assertOk()
+            ->assertJsonPath('data.0.started_at', null);
     }
 
     /**
@@ -274,7 +288,9 @@ class PmReportApiTest extends TestCase
             ->assertJsonPath('data.materials.1.description', 'Engine oil')
             ->assertJsonPath('data.materials.1.quantity', '2.500')
             ->assertJsonCount(1, 'data.attachments')
-            ->assertJsonPath('data.attachments.0.original_name', 'pm-service-report.pdf')
+            ->assertJsonPath('data.attachments.0.original_name', 'site-sketch.pdf')
+            ->assertJsonPath('data.service_report.original_name', 'pm-service-report.pdf')
+            ->assertJsonPath('data.service_report.mime_type', 'application/pdf')
             ->assertJsonCount(3, 'data.photos');
 
         $this->task->refresh();
@@ -299,6 +315,9 @@ class PmReportApiTest extends TestCase
         $this->assertSame(1, $report->attachments->where('checklist_item_id', $this->belt->id)->count());
         $this->assertSame(2, $report->attachments->where('checklist_item_id', $this->areaPhoto->id)->count());
         $this->assertSame(1, $report->attachments->whereNull('checklist_item_id')->count());
+        $this->assertSame('pm-service-report.pdf', $report->service_report_original_name);
+        Storage::disk(config('pss.e_call_attachments.disk'))->assertExists($report->service_report_path);
+        $this->assertNotContains($report->service_report_path, $report->attachments->pluck('path')->all());
         foreach ($report->attachments as $attachment) {
             Storage::disk(config('pss.e_call_attachments.disk'))->assertExists($attachment->path);
         }
@@ -663,6 +682,189 @@ class PmReportApiTest extends TestCase
         foreach (PmReport::query()->with('attachments')->get()->flatMap->attachments as $attachment) {
             Storage::disk(config('pss.e_call_attachments.disk'))->assertExists($attachment->path);
         }
+    }
+
+    public function test_a_submission_without_a_service_report_returns_422(): void
+    {
+        $this->actingAsVendorStaff();
+        $report = $this->validReport();
+        unset($report['service_report']);
+
+        $this->submitReport($report)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['service_report']);
+
+        $this->assertDatabaseCount('pm_reports', 0);
+        $this->assertEmpty(Storage::disk(config('pss.e_call_attachments.disk'))->allFiles());
+    }
+
+    public function test_a_resubmission_from_returned_without_a_service_report_returns_422(): void
+    {
+        $this->actingAsVendorStaff();
+        $this->submitReport($this->validReport())->assertCreated();
+        $this->task->update(['status' => PmStatus::Returned]);
+        $report = $this->validReport();
+        unset($report['service_report']);
+
+        $this->submitReport($report)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['service_report']);
+
+        $this->assertSame(1, PmReport::query()->count());
+        $this->assertSame(PmStatus::Returned, $this->task->refresh()->status);
+    }
+
+    /**
+     * @return array<string, array{UploadedFile|string}>
+     */
+    public static function invalidServiceReports(): array
+    {
+        return [
+            'disallowed type' => [UploadedFile::fake()->create('report.exe', 10, 'application/x-msdownload')],
+            'over the size limit' => [UploadedFile::fake()->create('report.pdf', 10241, 'application/pdf')],
+            'not a file' => ['report.pdf'],
+        ];
+    }
+
+    #[DataProvider('invalidServiceReports')]
+    public function test_an_invalid_service_report_returns_422(UploadedFile|string $serviceReport): void
+    {
+        $this->actingAsVendorStaff();
+
+        $this->submitReport($this->validReport(['service_report' => $serviceReport]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['service_report']);
+
+        $this->assertDatabaseCount('pm_reports', 0);
+    }
+
+    public function test_more_than_one_service_report_returns_422(): void
+    {
+        $this->actingAsVendorStaff();
+
+        $this->submitReport($this->validReport(['service_report' => [
+            UploadedFile::fake()->create('a.pdf', 10, 'application/pdf'),
+            UploadedFile::fake()->create('b.pdf', 10, 'application/pdf'),
+        ]]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['service_report']);
+    }
+
+    public function test_each_revision_keeps_its_own_service_report(): void
+    {
+        $this->actingAsVendorStaff();
+        $this->submitReport($this->validReport(['service_report' => UploadedFile::fake()->create('first.pdf', 10, 'application/pdf')]))->assertCreated();
+        $this->task->update(['status' => PmStatus::Returned]);
+        $this->submitReport($this->validReport(['service_report' => UploadedFile::fake()->create('second.docx', 10, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')]))->assertCreated();
+
+        $this->getJson("/api/pm-tasks/{$this->task->id}/reports")
+            ->assertOk()
+            ->assertJsonPath('data.0.service_report.original_name', 'second.docx')
+            ->assertJsonPath('data.1.service_report.original_name', 'first.pdf');
+    }
+
+    private function startTaskAt(string $startedAt): void
+    {
+        $this->task->update(['status' => PmStatus::Scheduled]);
+        Carbon::setTestNow($startedAt);
+        $this->postJson("/api/pm-tasks/{$this->task->id}/start")->assertOk();
+        Carbon::setTestNow('2026-11-22 10:00:00');
+    }
+
+    public function test_a_work_done_date_before_the_start_date_returns_422_with_a_clear_message(): void
+    {
+        $this->actingAsVendorStaff();
+        $this->startTaskAt('2026-11-15 08:30:00');
+
+        $this->submitReport($this->validReport(['work_done_date' => '2026-11-14']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['work_done_date' => 'The Work Done Date cannot be before the PM Task was started (2026-11-15).']);
+
+        $this->assertDatabaseCount('pm_reports', 0);
+    }
+
+    public function test_the_start_date_itself_is_an_accepted_work_done_date(): void
+    {
+        $this->actingAsVendorStaff();
+        $this->startTaskAt('2026-11-15 23:59:00');
+
+        $this->submitReport($this->validReport(['work_done_date' => '2026-11-15']))->assertCreated();
+    }
+
+    public function test_today_is_an_accepted_work_done_date_after_a_start(): void
+    {
+        $this->actingAsVendorStaff();
+        $this->startTaskAt('2026-11-15 08:30:00');
+
+        $this->submitReport($this->validReport(['work_done_date' => '2026-11-22']))->assertCreated();
+    }
+
+    public function test_a_future_work_done_date_still_returns_422_after_a_start(): void
+    {
+        $this->actingAsVendorStaff();
+        $this->startTaskAt('2026-11-15 08:30:00');
+
+        $this->submitReport($this->validReport(['work_done_date' => '2026-11-23']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['work_done_date' => 'The Work Done Date cannot be in the future.']);
+    }
+
+    public function test_the_start_date_is_compared_in_the_app_timezone(): void
+    {
+        config(['app.timezone' => 'Asia/Manila']);
+        date_default_timezone_set('Asia/Manila');
+
+        try {
+            $this->actingAsVendorStaff();
+            $this->task->update(['status' => PmStatus::Scheduled]);
+            Carbon::setTestNow(CarbonImmutable::parse('2026-11-14 17:00:00', 'UTC'));
+            $this->postJson("/api/pm-tasks/{$this->task->id}/start")->assertOk();
+            Carbon::setTestNow(CarbonImmutable::parse('2026-11-22 10:00:00', 'UTC'));
+
+            $this->submitReport($this->validReport(['work_done_date' => '2026-11-14']))
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors(['work_done_date' => 'The Work Done Date cannot be before the PM Task was started (2026-11-15).']);
+            $this->submitReport($this->validReport(['work_done_date' => '2026-11-15']))->assertCreated();
+        } finally {
+            date_default_timezone_set('UTC');
+        }
+    }
+
+    public function test_a_task_with_no_start_date_accepts_any_past_work_done_date(): void
+    {
+        $this->actingAsVendorStaff();
+        $this->assertNull($this->task->started_at);
+
+        $this->submitReport($this->validReport(['work_done_date' => '2020-01-01']))->assertCreated();
+    }
+
+    public function test_a_revision_stored_before_this_change_is_still_readable_unchanged(): void
+    {
+        $submitter = $this->actingAsVendorStaff();
+        $legacy = $this->task->reports()->create([
+            'revision' => 1,
+            'checklist_template_version_id' => $this->checklist->id,
+            'work_done_date' => '2026-01-05',
+            'findings' => 'Filed before the service report was required.',
+            'submitted_by_user_id' => $submitter->id,
+            'submitted_at' => '2026-01-05 09:00:00',
+        ]);
+        $legacy->responses()->create(['checklist_item_id' => $this->engineOil->id, 'value' => 'pass', 'is_failed' => false]);
+        $legacy->attachments()->create(['disk' => 'local', 'path' => 'legacy/report.pdf', 'original_name' => 'legacy-report.pdf', 'mime_type' => 'application/pdf', 'size_bytes' => 123]);
+        $this->task->update(['status' => PmStatus::ForValidation, 'work_done_date' => '2026-01-05', 'started_at' => '2026-03-01 08:00:00']);
+
+        $this->getJson("/api/pm-tasks/{$this->task->id}/reports")
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.revision', 1)
+            ->assertJsonPath('data.0.work_done_date', '2026-01-05')
+            ->assertJsonPath('data.0.findings', 'Filed before the service report was required.')
+            ->assertJsonPath('data.0.service_report', null)
+            ->assertJsonPath('data.0.responses.0.value', 'pass')
+            ->assertJsonPath('data.0.attachments.0.original_name', 'legacy-report.pdf');
+
+        $this->assertSame('2026-01-05', $legacy->refresh()->work_done_date->toDateString());
+        $this->assertNull($legacy->service_report_path);
     }
 
     public function test_another_vendor_cannot_read_the_reports(): void

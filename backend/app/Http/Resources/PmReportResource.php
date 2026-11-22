@@ -32,6 +32,11 @@ class PmReportResource extends JsonResource
             'checklist_template_version_id' => $this->checklist_template_version_id,
             'work_done_date' => $this->work_done_date->toDateString(),
             'findings' => $this->findings,
+            'service_report' => $this->service_report_path === null ? null : [
+                'original_name' => $this->service_report_original_name,
+                'mime_type' => $this->service_report_mime_type,
+                'size_bytes' => $this->service_report_size_bytes,
+            ],
             'responses' => $this->responses->map(fn (PmReportResponse $response): array => [
                 'checklist_item_id' => $response->checklist_item_id,
                 'value' => $response->value,
