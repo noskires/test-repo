@@ -35,4 +35,12 @@ final class PesoAmount
     {
         return intdiv($centavos, 100).'.'.str_pad((string) ($centavos % 100), 2, '0', STR_PAD_LEFT);
     }
+
+    /**
+     * Format millicentavos (thousandths of a centavo) as an exact peso amount with five decimal places, e.g. "308.62500".
+     */
+    public static function fromMillicentavos(int $millicentavos): string
+    {
+        return intdiv($millicentavos, 100_000).'.'.str_pad((string) ($millicentavos % 100_000), 5, '0', STR_PAD_LEFT);
+    }
 }
