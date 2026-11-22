@@ -22,12 +22,13 @@ Out of scope: rejecting a vendor-staff employee as the Site EIC at assignment ti
 
 ## Acceptance criteria
 
-- [ ] There is exactly one shared "current Site EIC and not vendor staff" check. `PmTaskPolicy`, `PmTask::validateReport`, `ECallPolicy` and the E-Call review in-lock re-check all call it, and none of them repeats the `vendor_id` or EIC comparison itself. A unit test covers it: the current EIC passes; a vendor user with a matching `employee_id` fails; a user with a null `employee_id` fails; a Site with no EIC fails; a replaced EIC fails.
-- [ ] A user with a `vendor_id` whose `employee_id` matches the Site's current EIC gets **403** on `POST /api/pm-tasks/{task}/approve` and `/return`. The task's status is unchanged, and **no Approval Record** is written.
-- [ ] The in-lock re-check refuses the same vendor user. Test this by bypassing or passing the request-level check (e.g. calling `PmTask::approveReport` / `returnReport` directly, or as in issue 11's in-lock tests): an authorization error, no status change, no record.
-- [ ] E-Call review behaviour is unchanged. The existing `ECall` review tests pass without changing their expectations, including the vendor-user-as-EIC case that already gets 403.
-- [ ] Full `php artisan test` passes. No new packages.
+- [x] There is exactly one shared "current Site EIC and not vendor staff" check. `PmTaskPolicy`, `PmTask::validateReport`, `ECallPolicy` and the E-Call review in-lock re-check all call it, and none of them repeats the `vendor_id` or EIC comparison itself. A unit test covers it: the current EIC passes; a vendor user with a matching `employee_id` fails; a user with a null `employee_id` fails; a Site with no EIC fails; a replaced EIC fails.
+- [x] A user with a `vendor_id` whose `employee_id` matches the Site's current EIC gets **403** on `POST /api/pm-tasks/{task}/approve` and `/return`. The task's status is unchanged, and **no Approval Record** is written.
+- [x] The in-lock re-check refuses the same vendor user. Test this by bypassing or passing the request-level check (e.g. calling `PmTask::approveReport` / `returnReport` directly, or as in issue 11's in-lock tests): an authorization error, no status change, no record.
+- [x] E-Call review behaviour is unchanged. The existing `ECall` review tests pass without changing their expectations, including the vendor-user-as-EIC case that already gets 403.
+- [x] Full `php artisan test` passes. No new packages.
 
 ## Comments
 
 - 2026-11-22 (product-owner): Created from the human's decision to fix issue 04's alignment item 1 now. Issue 18 comes after this, and any EIC check it needs must use this shared check.
+- 2026-11-22 (qa): QA PASS. `php artisan test` from backend/ gives 588 passed (2191 assertions), 0 failed. `tests/Unit/SiteSettings`, `tests/Feature/PmTaskValidationApiTest.php` and `tests/Feature/ECallReviewApiTest.php` give 96 passed (460 assertions). Every acceptance criterion maps to a test that asserts it. `SiteSetting::isActingEic` is the only EIC comparison in app/, and `isCurrentEic` and `isReviewer` are gone. Vendor staff carrying the EIC's employee_id get 403 on PM approve and return, and the in-lock re-check refuses them too, with no status change, record or event. `ECallReviewApiTest` is unchanged and passes.
