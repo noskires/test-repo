@@ -2,9 +2,15 @@
 
 namespace App\Models;
 
+use App\Approvals\ApprovalRecorder;
+use App\Approvals\ApprovalSubject;
+use App\Approvals\HasApprovalRecords;
 use App\Billing\BoqQuantity;
+use App\Enums\ApprovalAction;
 use App\Enums\ECallStatus;
 use App\Enums\WorkOrderStatus;
+use App\MasterData\Data\Employee;
+use App\MasterData\ImmediateHeadChain;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -27,8 +33,10 @@ use Throwable;
     'e_call_id', 'e_call_proposal_id', 'status', 'created_by_user_id',
     'estimated_amount_millicentavos', 'estimated_amount_centavos',
 ])]
-class WorkOrder extends Model
+class WorkOrder extends Model implements ApprovalSubject
 {
+    use HasApprovalRecords;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -179,6 +187,121 @@ class WorkOrder extends Model
 
             throw $exception;
         }
+    }
+
+    /**
+     * The creator submits an Open Work Order for endorsement: For LVL1 Endorsement. Both endorsement levels must
+     * resolve from the E-Call Requestor's Immediate Head chain right now, or the submit is blocked (422 naming the
+     * level) and the Work Order stays Open. Submitting writes no Approval Record (it isn't an approval action).
+     *
+     * @throws AuthorizationException when the user is not the creator.
+     * @throws ValidationException when the Work Order is not Open or the chain is short or missing.
+     */
+    public static function submit(WorkOrder $workOrder, User $creator): self
+    {
+        return DB::transaction(function () use ($workOrder, $creator): self {
+            $locked = static::query()->lockForUpdate()->findOrFail($workOrder->id);
+
+            if ($locked->created_by_user_id !== $creator->id) {
+                throw new AuthorizationException('Only the creator can submit this Work Order.');
+            }
+
+            if ($locked->getRawOriginal('status') !== WorkOrderStatus::Open->value) {
+                throw ValidationException::withMessages(['work_order' => 'Only an Open Work Order can be submitted for endorsement.']);
+            }
+
+            $locked->endorserAtLevel(1);
+            $locked->endorserAtLevel(2);
+
+            $locked->update(['status' => WorkOrderStatus::ForLvl1Endorsement]);
+
+            return $locked;
+        });
+    }
+
+    /**
+     * The current level's endorser approves, returns or rejects. The endorser is resolved from the E-Call
+     * Requestor's Immediate Head chain at the moment of the action, inside the lock: an org-chart change re-routes
+     * a waiting Work Order, and a chain that no longer resolves blocks every action (422) until it is fixed.
+     *
+     * @throws AuthorizationException when the user is not the current level's endorser.
+     * @throws ValidationException when no endorsement is pending or the current endorser cannot be resolved.
+     */
+    public static function endorse(WorkOrder $workOrder, User $endorser, ApprovalAction $action, ?string $remarks): self
+    {
+        return DB::transaction(function () use ($workOrder, $endorser, $action, $remarks): self {
+            $locked = static::query()->lockForUpdate()->findOrFail($workOrder->id);
+            $level = $locked->pendingEndorsementLevel();
+
+            if ($level === null) {
+                throw ValidationException::withMessages(['work_order' => 'This Work Order is not waiting for an endorsement.']);
+            }
+
+            if (! static::isEndorser($endorser, $locked->endorserAtLevel($level))) {
+                throw new AuthorizationException("Only the Requestor's current level {$level} endorser can act on this Work Order.");
+            }
+
+            app(ApprovalRecorder::class)->transition($locked, $endorser, $action, $locked->status->afterEndorsement($action), $remarks);
+
+            return $locked;
+        });
+    }
+
+    /**
+     * Whether the user is the current endorser for this Work Order's pending level. Used by the policy for the early
+     * 403; true when no endorsement is pending or the endorser can't be resolved, so WorkOrder::endorse reports
+     * those as 422.
+     */
+    public function mayBeEndorsedBy(User $user): bool
+    {
+        $level = $this->pendingEndorsementLevel();
+
+        if ($level === null) {
+            return true;
+        }
+
+        $head = $this->resolveEndorser($level);
+
+        return $head === null || static::isEndorser($user, $head);
+    }
+
+    /**
+     * The endorser is the resolved head by employee ID, and never vendor staff (mirrors SiteSetting::isActingEic).
+     */
+    private static function isEndorser(User $user, Employee $head): bool
+    {
+        return $user->vendor_id === null && $user->employee_id !== null && $user->employee_id === $head->id;
+    }
+
+    private function pendingEndorsementLevel(): ?int
+    {
+        return WorkOrderStatus::tryFrom((string) $this->getRawOriginal('status'))?->endorsementLevel();
+    }
+
+    /**
+     * The E-Call Requestor's Immediate Head at the given level, resolved now. Throws a 422 naming the level when the
+     * Requestor has no employee ID or the chain stops short.
+     */
+    private function endorserAtLevel(int $level): Employee
+    {
+        if ($this->requestorEmployeeId() === null) {
+            throw ValidationException::withMessages(['work_order' => "The Requestor has no employee ID, so the level {$level} endorser cannot be found."]);
+        }
+
+        return $this->resolveEndorser($level)
+            ?? throw ValidationException::withMessages(['work_order' => "No level {$level} endorser: the Requestor's Immediate Head chain stops before level {$level}."]);
+    }
+
+    private function resolveEndorser(int $level): ?Employee
+    {
+        $requestorEmployeeId = $this->requestorEmployeeId();
+
+        return $requestorEmployeeId === null ? null : app(ImmediateHeadChain::class)->headAtLevel($requestorEmployeeId, $level);
+    }
+
+    private function requestorEmployeeId(): ?string
+    {
+        return ECall::query()->whereKey($this->e_call_id)->value('requestor_employee_id');
     }
 
     /**

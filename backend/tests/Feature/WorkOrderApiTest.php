@@ -582,9 +582,9 @@ class WorkOrderApiTest extends TestCase
         $this->assertSame(2, DB::table('work_order_lines')->where('work_order_id', $workOrder->id)->count());
     }
 
-    public function test_the_open_status_is_the_only_one_so_far(): void
+    public function test_a_new_work_order_starts_open(): void
     {
-        $this->assertSame(['open'], array_column(WorkOrderStatus::cases(), 'value'));
+        $this->assertSame(WorkOrderStatus::Open, $this->createAsRequestor()->status);
     }
 
     /**
