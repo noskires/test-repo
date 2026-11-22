@@ -33,20 +33,21 @@ PM Status values: `Scheduled`, `In Progress`, `For Validation`, `Returned`, `Com
 
 ## Acceptance criteria
 
-- [ ] Running the job creates one `Scheduled` PM Task per eligible Equipment, with the Site Vendor, EIC, checklist version and Site/Equipment Snapshots, due at `installedOn` + the Site's frequency.
-- [ ] Running it twice (or concurrently) creates no duplicates. Test both the DB unique constraint or lock and a repeated run.
-- [ ] An Equipment whose latest task is `Completed` with Work Done Date D gets a successor due at D + frequency. The completed task is still there.
-- [ ] An Equipment with no `installedOn` and no PM history gets no task. Once the fake directory gives it an `installedOn`, the next run creates it.
-- [ ] Equipment at a Site with no PM Frequency, no Site Vendor or no EIC gets no task.
-- [ ] An Equipment whose category has no active checklist gets a task flagged `no checklist`, with no checklist version.
-- [ ] An open task whose Equipment no longer exists in the directory is kept, flagged `equipment_removed`, and not cancelled.
-- [ ] Changing a Site's frequency re-dates only its `Scheduled` tasks, and the others keep their due date.
-- [ ] The job is registered in the scheduler to run daily. Tests use the directory fake. No new packages, and `php artisan test` passes.
+- [x] Running the job creates one `Scheduled` PM Task per eligible Equipment, with the Site Vendor, EIC, checklist version and Site/Equipment Snapshots, due at `installedOn` + the Site's frequency.
+- [x] Running it twice (or concurrently) creates no duplicates. Test both the DB unique constraint or lock and a repeated run.
+- [x] An Equipment whose latest task is `Completed` with Work Done Date D gets a successor due at D + frequency. The completed task is still there.
+- [x] An Equipment with no `installedOn` and no PM history gets no task. Once the fake directory gives it an `installedOn`, the next run creates it.
+- [x] Equipment at a Site with no PM Frequency, no Site Vendor or no EIC gets no task.
+- [x] An Equipment whose category has no active checklist gets a task flagged `no checklist`, with no checklist version.
+- [x] An open task whose Equipment no longer exists in the directory is kept, flagged `equipment_removed`, and not cancelled.
+- [x] Changing a Site's frequency re-dates only its `Scheduled` tasks, and the others keep their due date.
+- [x] The job is registered in the scheduler to run daily. Tests use the directory fake. No new packages, and `php artisan test` passes.
 
 ## Comments
 
 - 2026-11-22 (product-owner): Moved in from issue 06: re-dating `Scheduled` tasks on a frequency change (see What to build).
 - 2026-11-22 (product-owner): The human answered the last blocking question, so the status is back to **ready-for-agent**. If an Equipment has no installation date and no PM history, **don't generate a task**. List it on the admin "Needs Setup" list until a start date is set. I've rewritten the body into final acceptance criteria and removed the stale "Open questions" and draft sections; the answers are kept under Decisions. The list itself is issue 32, so this slice only skips the Equipment. Who can "set a start date" (only the external API, or also an admin in PSS) is issue 33 (needs-info). It doesn't block this slice, because either way the job just uses the start date once it exists.
+- 2026-11-22 (qa): QA PASS. `php artisan test` from backend/ gives 368 passed (1308 assertions), 0 failed. `tests/Feature/PmTaskGenerationTest.php` gives 28 passed (63 assertions). Every acceptance criterion maps to a test that asserts it. A unique index on the nullable `open_equipment_id` allows at most one open PM Task per Equipment, and a run that loses the race is skipped. The job is queued and scheduled daily at 00:00 (covered by a schedule test). Re-dating counts from the stored `due_from_date`.
 
 ## Decisions (grilling, 2026-11-22)
 - Q1: a newly registered Equipment's **first PM Task is due one Site PM Frequency interval after its installation date**. After that, the schedule slides from each Work Done Date.
