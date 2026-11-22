@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\ECall;
+use App\Models\SiteSetting;
 use App\Models\User;
 
 /**
@@ -29,10 +30,11 @@ class ECallPolicy
 
     /**
      * Only the Site's CURRENT EIC (site settings, read at request time) approves, returns or rejects the FSR and BOQ.
-     * The EIC captured at filing is history only. ECall::reviewProposal repeats this check under a lock.
+     * Uses SiteSetting::isActingEic (never vendor staff). The EIC captured at filing is history only.
+     * ECall::reviewProposal repeats this check under a lock.
      */
     public function review(User $user, ECall $eCall): bool
     {
-        return ECall::isReviewer($eCall->site_id, $user);
+        return SiteSetting::isActingEic($eCall->site_id, $user);
     }
 }

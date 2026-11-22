@@ -162,7 +162,7 @@ class PmTask extends Model implements ApprovalSubject
         return DB::transaction(function () use ($task, $eic, $action, $toStatus, $remarks): self {
             $lockedTask = static::query()->lockForUpdate()->findOrFail($task->id);
 
-            if (! SiteSetting::isCurrentEic($lockedTask->site_id, $eic, lockForUpdate: true)) {
+            if (! SiteSetting::isActingEic($lockedTask->site_id, $eic, lockForUpdate: true)) {
                 throw new AuthorizationException("Only the Site's current EIC can approve or return this PM Task.");
             }
 
