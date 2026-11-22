@@ -76,6 +76,16 @@ class ECall extends Model
     }
 
     /**
+     * The Site Vendor's FSR + BOQ revisions.
+     *
+     * @return HasMany<ECallProposal, $this>
+     */
+    public function proposals(): HasMany
+    {
+        return $this->hasMany(ECallProposal::class);
+    }
+
+    /**
      * Vendor staff only see E-Calls routed to their Vendor. Everyone else is not scoped yet (issue 04).
      *
      * @param  Builder<ECall>  $query

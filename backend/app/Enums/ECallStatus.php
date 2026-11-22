@@ -14,4 +14,12 @@ enum ECallStatus: string
     case Returned = 'returned';
     case Rejected = 'rejected';
     case Cancelled = 'cancelled';
+
+    /**
+     * Whether the Site Vendor may submit an FSR and BOQ revision in this status.
+     */
+    public function acceptsProposal(): bool
+    {
+        return $this === self::ForVendorAssessment || $this === self::Returned;
+    }
 }

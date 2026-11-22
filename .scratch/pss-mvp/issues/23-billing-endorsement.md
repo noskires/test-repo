@@ -30,3 +30,4 @@ PRD §8.5: after the EIC's validation, the Work Order goes through 2, 3 or 4 bil
 - The required levels are **recalculated against the current Billing Thresholds** at each step, not frozen. If a threshold change means the levels already done are enough, the Work Order Closes immediately. The approvers themselves are still the chain fixed at submission (issue 19).
 - Q1 and Q2 answered above (the creator's chain; levels recalculated).
 - Q3 answered: a Return from billing level 1 goes **back to the EIC** (status `Implemented`) to re-validate the actual quantities. That is "back one step".
+- 2026-11-22 (product-owner): Rounding decided by the human (docs/adr/0002-money-rounding.md). The number of levels is decided by comparing the **rounded** Billing Amount (integer centavos, from issue 21) with the Billing Thresholds. The status is unchanged (open questions 1 to 3 remain).

@@ -18,9 +18,10 @@ Endpoints: `POST /api/work-orders/{wo}/validate-completion` (approve, with valid
 ## Acceptance criteria
 
 - [ ] Only the Work Order's EIC can act. Others get 403. Actions only work from `Implemented`.
-- [ ] Approve requires a validated qty >= 0 for every line, and computes the Billing Amount exactly.
+- [ ] Approve requires a validated qty >= 0 for every line. The Billing Amount is the exact sum of validated qty x unit price, rounded once to the whole centavo, half-up (ADR 0002).
 - [ ] The Billing Amount is stored separately from the estimated (approved) amount. Both are readable on the Work Order.
 - [ ] Return sets `For Implementation`. Reject sets `Rejected`. Remarks are required for both.
 - [ ] Approval Records are written for every action.
 
 ## Comments
+- 2026-11-22 (product-owner): Rounding decided by the human (docs/adr/0002-money-rounding.md). Per-line amounts stay exact, and only the Billing Amount is rounded to the centavo, half-up. Acceptance criterion updated.
