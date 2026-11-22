@@ -17,16 +17,17 @@ Endpoints: `POST /api/pm-tasks/{task}/approve`, `POST /api/pm-tasks/{task}/retur
 
 ## Acceptance criteria
 
-- [ ] Only the **current** Site EIC (from the Site settings at the time of the request) can approve or return. Others get 403.
-- [ ] After the Site's EIC is replaced while a task is `For Validation`, the **new** EIC can approve or return it, and the **old** EIC (the one captured on the task) gets 403. The task's captured `eic_employee_id` is left unchanged, as history.
-- [ ] Approve or Return on a task not in `For Validation` returns 422.
-- [ ] Approve sets `Completed`, keeps the vendor's Work Done Date, writes an Approval Record, and fires `PmTaskCompleted` (`Event::fake()` test).
-- [ ] Return without remarks returns 422. With remarks, it sets `Returned` and writes an Approval Record.
-- [ ] There is no reject endpoint for PM Tasks.
-- [ ] Approval Records hold approver, action, remarks, previous and resulting status, and timestamp, and are listed in chronological order.
-- [ ] The Approval Record logic is a reusable component (trait/service) with its own unit test.
+- [x] Only the **current** Site EIC (from the Site settings at the time of the request) can approve or return. Others get 403.
+- [x] After the Site's EIC is replaced while a task is `For Validation`, the **new** EIC can approve or return it, and the **old** EIC (the one captured on the task) gets 403. The task's captured `eic_employee_id` is left unchanged, as history.
+- [x] Approve or Return on a task not in `For Validation` returns 422.
+- [x] Approve sets `Completed`, keeps the vendor's Work Done Date, writes an Approval Record, and fires `PmTaskCompleted` (`Event::fake()` test).
+- [x] Return without remarks returns 422. With remarks, it sets `Returned` and writes an Approval Record.
+- [x] There is no reject endpoint for PM Tasks.
+- [x] Approval Records hold approver, action, remarks, previous and resulting status, and timestamp, and are listed in chronological order.
+- [x] The Approval Record logic is a reusable component (trait/service) with its own unit test.
 
 ## Comments
+- 2026-11-22 (qa): QA PASS (final, replaces the earlier withdrawn PASSes). `php artisan test` from backend/ gives 526 passed (1889 assertions), 0 failed. `tests/Feature/PmTaskValidationApiTest.php` and `tests/Unit/Approvals` give 49 passed (197 assertions). Every acceptance criterion maps to a test that asserts it. The current Site EIC is checked by the policy, then again inside the transaction with the task and settings rows locked. An EIC replaced after the policy check gets 403 with no record, no event and no status change. The new EIC can act, the old EIC gets 403, and so does everyone when the Site has no EIC or no settings row. `pm_tasks.eic_employee_id` is kept as history.
 
 ## Decisions (grilling, 2026-11-22)
 - The reviewer is the **Site's EIC**, the same engineer who reviews E-Calls at that Site.
