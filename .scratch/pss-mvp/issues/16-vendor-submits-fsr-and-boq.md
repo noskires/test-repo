@@ -14,13 +14,13 @@ Endpoint: `POST /api/e-calls/{eCall}/proposal`. Allowed when the E-Call Status i
 
 ## Acceptance criteria
 
-- [ ] Only staff of the E-Call's Site Vendor can submit. Others get 403.
-- [ ] Submitting in any other status returns 422.
-- [ ] Using a Price List item from another Vendor, or an inactive one, returns 422.
-- [ ] A quantity <= 0 returns 422. A missing FSR file returns 422.
-- [ ] Line totals and the BOQ total are computed by the server exactly (test with decimal quantities and prices).
-- [ ] Changing a Price List price after submission does not change the BOQ.
-- [ ] Status becomes `For EIC Review`. Resubmitting after `Returned` creates a new BOQ revision and keeps the old one readable.
+- [x] Only staff of the E-Call's Site Vendor can submit. Others get 403.
+- [x] Submitting in any other status returns 422.
+- [x] Using a Price List item from another Vendor, or an inactive one, returns 422.
+- [x] A quantity <= 0 returns 422. A missing FSR file returns 422.
+- [x] Line totals and the BOQ total are computed by the server exactly (test with decimal quantities and prices).
+- [x] Changing a Price List price after submission does not change the BOQ.
+- [x] Status becomes `For EIC Review`. Resubmitting after `Returned` creates a new BOQ revision and keeps the old one readable.
 
 ## Comments
 
@@ -33,3 +33,4 @@ Endpoint: `POST /api/e-calls/{eCall}/proposal`. Allowed when the E-Call Status i
   - **Who counts as Site Vendor staff**: a user whose `vendor_id` equals the E-Call's captured `vendor_id` (as in `ECallPolicy`). Any other user, including the EIC and the Requestor, gets 403.
   - **`Returned` status**: only issue 17 sets it. Tests put the E-Call into `Returned` directly.
   - Write no Approval Record here. Approval Records come in issue 11, and 16 isn't blocked by it. Record the submitter and submission time on the revision itself.
+- 2026-11-22 (qa): QA PASS. Ran `php artisan test` from backend/: 326 passed (1203 assertions), 0 failed. `tests/Feature/ECallProposalApiTest.php` and `tests/Unit/Billing/BoqQuantityTest.php`: 63 passed (214 assertions). Every acceptance criterion maps to a test that asserts it. Quantities allow up to 3 decimal places (`pss.boq.quantity_decimal_places`), a BOQ holds at most 200 lines (`pss.boq.max_lines`), and totals are stored exactly as integer millicentavos. Rounding to whole centavos is still open for issues 18 and 21.
