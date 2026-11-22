@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\PmFrequency;
 use App\Enums\SiteAssignment;
+use App\Events\SitePmFrequencyChanged;
 use App\MasterData\Data\Employee;
 use App\MasterData\Data\Site;
 use Database\Factories\SiteSettingFactory;
@@ -13,10 +15,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
 /**
- * PSS-owned settings for one external Site: its current Site Vendor and EIC, plus a Snapshot of the Site name.
+ * PSS-owned settings for one external Site: its current Site Vendor, EIC and PM Frequency, plus a Snapshot of the Site name.
  * Every change is logged in SiteAssignmentChange so past jobs can be traced to the vendor or EIC of the time.
  */
-#[Fillable(['site_id', 'site_name_snapshot', 'vendor_id', 'eic_employee_id'])]
+#[Fillable(['site_id', 'site_name_snapshot', 'vendor_id', 'eic_employee_id', 'pm_frequency'])]
 class SiteSetting extends Model
 {
     /** @use HasFactory<SiteSettingFactory> */
@@ -31,6 +33,7 @@ class SiteSetting extends Model
     {
         return [
             'vendor_id' => 'integer',
+            'pm_frequency' => PmFrequency::class,
         ];
     }
 
@@ -83,6 +86,33 @@ class SiteSetting extends Model
             ]);
 
             $setting->eic_employee_id = $engineer->id;
+        });
+    }
+
+    /**
+     * Set the Site's PM Frequency. A real change is recorded and announced with SitePmFrequencyChanged
+     * (after commit). Setting the current value again does neither.
+     */
+    public static function assignPmFrequency(Site $site, PmFrequency $frequency, User $changedBy): self
+    {
+        return static::changeAssignment($site, function (self $setting) use ($frequency, $changedBy): void {
+            $oldFrequency = $setting->pm_frequency;
+
+            if ($oldFrequency === $frequency) {
+                return;
+            }
+
+            SiteAssignmentChange::create([
+                'site_id' => $setting->site_id,
+                'assignment' => SiteAssignment::PmFrequency,
+                'old_pm_frequency' => $oldFrequency,
+                'new_pm_frequency' => $frequency,
+                'changed_by_user_id' => $changedBy->id,
+            ]);
+
+            $setting->pm_frequency = $frequency;
+
+            SitePmFrequencyChanged::dispatch($setting->site_id, $oldFrequency, $frequency);
         });
     }
 

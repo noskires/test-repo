@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\PmFrequency;
 use App\Enums\SiteAssignment;
+use App\Events\SitePmFrequencyChanged;
 use App\MasterData\Data\Employee;
 use App\MasterData\Data\Site;
 use App\MasterData\InMemoryMasterDataDirectory;
@@ -12,6 +14,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -82,6 +85,7 @@ class SiteSettingsApiTest extends TestCase
             'show settings' => ['get', '/api/sites/S-unknown/settings', []],
             'set vendor' => ['put', '/api/sites/S-unknown/settings/vendor', ['vendor_id' => 1]],
             'set eic' => ['put', '/api/sites/S-unknown/settings/eic', ['employee_id' => 'P-1']],
+            'set pm frequency' => ['put', '/api/sites/S-unknown/settings/pm-frequency', ['pm_frequency' => 'monthly']],
         ];
     }
 
@@ -265,6 +269,7 @@ class SiteSettingsApiTest extends TestCase
         return [
             'set vendor' => ['/api/sites/S-1/settings/vendor', ['vendor_id' => null]],
             'set eic' => ['/api/sites/S-1/settings/eic', ['employee_id' => 'P-1']],
+            'set pm frequency' => ['/api/sites/S-1/settings/pm-frequency', ['pm_frequency' => 'monthly']],
         ];
     }
 
@@ -294,6 +299,7 @@ class SiteSettingsApiTest extends TestCase
                 'site_name' => 'Makati Office',
                 'vendor' => null,
                 'eic' => null,
+                'pm_frequency' => null,
             ]]);
     }
 
@@ -312,7 +318,151 @@ class SiteSettingsApiTest extends TestCase
                 'site_name' => 'Makati Office',
                 'vendor' => ['id' => $currentVendor->id, 'name' => $currentVendor->name],
                 'eic' => ['employee_id' => 'P-2', 'name' => 'Ella Engineer'],
+                'pm_frequency' => null,
             ]]);
+    }
+
+    public function test_setting_the_pm_frequency_stores_it_and_show_returns_it(): void
+    {
+        $this->actingAsSiteSettingsManager();
+
+        $this->putJson('/api/sites/S-1/settings/pm-frequency', ['pm_frequency' => 'quarterly'])
+            ->assertOk()
+            ->assertJsonPath('data.site_id', 'S-1')
+            ->assertJsonPath('data.pm_frequency', 'quarterly');
+
+        $this->assertDatabaseHas('site_settings', ['site_id' => 'S-1', 'site_name_snapshot' => 'Makati Office', 'pm_frequency' => 'quarterly']);
+
+        $this->getJson('/api/sites/S-1/settings')
+            ->assertOk()
+            ->assertJsonPath('data.pm_frequency', 'quarterly')
+            ->assertJsonPath('data.vendor', null);
+    }
+
+    public function test_every_mvp_pm_frequency_is_accepted(): void
+    {
+        $this->actingAsSiteSettingsManager();
+
+        foreach (PmFrequency::cases() as $frequency) {
+            $this->putJson('/api/sites/S-1/settings/pm-frequency', ['pm_frequency' => $frequency->value])
+                ->assertOk()
+                ->assertJsonPath('data.pm_frequency', $frequency->value);
+        }
+    }
+
+    /**
+     * @return array<string, array{array<string, mixed>}>
+     */
+    public static function invalidPmFrequencyPayloads(): array
+    {
+        return [
+            'unknown value' => [['pm_frequency' => 'weekly']],
+            'missing pm_frequency' => [[]],
+            'null' => [['pm_frequency' => null]],
+            'custom interval' => [['pm_frequency' => 30]],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    #[DataProvider('invalidPmFrequencyPayloads')]
+    public function test_an_invalid_pm_frequency_returns_422(array $payload): void
+    {
+        Event::fake([SitePmFrequencyChanged::class]);
+        $this->actingAsSiteSettingsManager();
+
+        $this->putJson('/api/sites/S-1/settings/pm-frequency', $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['pm_frequency']);
+
+        $this->assertDatabaseCount('site_settings', 0);
+        $this->assertDatabaseCount('site_assignment_changes', 0);
+        Event::assertNotDispatched(SitePmFrequencyChanged::class);
+    }
+
+    public function test_changing_the_pm_frequency_records_history_and_dispatches_an_event(): void
+    {
+        Event::fake([SitePmFrequencyChanged::class]);
+        $user = $this->actingAsSiteSettingsManager();
+
+        $this->putJson('/api/sites/S-1/settings/pm-frequency', ['pm_frequency' => 'monthly'])->assertOk();
+        $this->putJson('/api/sites/S-1/settings/pm-frequency', ['pm_frequency' => 'annual'])->assertOk();
+
+        $changes = SiteAssignmentChange::query()->where('site_id', 'S-1')->orderBy('id')->get();
+        $this->assertCount(2, $changes);
+
+        $this->assertSame(SiteAssignment::PmFrequency, $changes[0]->assignment);
+        $this->assertNull($changes[0]->old_pm_frequency);
+        $this->assertSame(PmFrequency::Monthly, $changes[0]->new_pm_frequency);
+
+        $change = $changes[1];
+        $this->assertSame(SiteAssignment::PmFrequency, $change->assignment);
+        $this->assertSame(PmFrequency::Monthly, $change->old_pm_frequency);
+        $this->assertSame(PmFrequency::Annual, $change->new_pm_frequency);
+        $this->assertSame($user->id, $change->changed_by_user_id);
+        $this->assertNotNull($change->created_at);
+        $this->assertNull($change->new_vendor_id);
+        $this->assertNull($change->new_eic_employee_id);
+
+        Event::assertDispatchedTimes(SitePmFrequencyChanged::class, 2);
+        Event::assertDispatched(
+            SitePmFrequencyChanged::class,
+            fn (SitePmFrequencyChanged $event): bool => $event->siteId === 'S-1'
+                && $event->oldFrequency === null
+                && $event->newFrequency === PmFrequency::Monthly,
+        );
+        Event::assertDispatched(
+            SitePmFrequencyChanged::class,
+            fn (SitePmFrequencyChanged $event): bool => $event->siteId === 'S-1'
+                && $event->oldFrequency === PmFrequency::Monthly
+                && $event->newFrequency === PmFrequency::Annual,
+        );
+    }
+
+    public function test_setting_the_same_pm_frequency_again_records_nothing_and_dispatches_nothing(): void
+    {
+        $this->actingAsSiteSettingsManager();
+        $this->putJson('/api/sites/S-1/settings/pm-frequency', ['pm_frequency' => 'monthly'])->assertOk();
+
+        Event::fake([SitePmFrequencyChanged::class]);
+
+        $this->putJson('/api/sites/S-1/settings/pm-frequency', ['pm_frequency' => 'monthly'])
+            ->assertOk()
+            ->assertJsonPath('data.pm_frequency', 'monthly');
+
+        $this->assertDatabaseCount('site_assignment_changes', 1);
+        Event::assertNotDispatched(SitePmFrequencyChanged::class);
+    }
+
+    public function test_setting_the_pm_frequency_keeps_the_vendor_and_eic(): void
+    {
+        $this->actingAsSiteSettingsManager();
+        $vendor = Vendor::factory()->create();
+        $this->putJson('/api/sites/S-1/settings/vendor', ['vendor_id' => $vendor->id])->assertOk();
+        $this->putJson('/api/sites/S-1/settings/eic', ['employee_id' => 'P-1'])->assertOk();
+
+        $this->putJson('/api/sites/S-1/settings/pm-frequency', ['pm_frequency' => 'semi_annual'])
+            ->assertOk()
+            ->assertJsonPath('data.vendor.id', $vendor->id)
+            ->assertJsonPath('data.eic.employee_id', 'P-1');
+
+        $this->assertDatabaseHas('site_settings', [
+            'site_id' => 'S-1',
+            'vendor_id' => $vendor->id,
+            'eic_employee_id' => 'P-1',
+            'pm_frequency' => 'semi_annual',
+        ]);
+    }
+
+    public function test_changing_the_vendor_does_not_dispatch_a_pm_frequency_event(): void
+    {
+        Event::fake([SitePmFrequencyChanged::class]);
+        $this->actingAsSiteSettingsManager();
+
+        $this->putJson('/api/sites/S-1/settings/vendor', ['vendor_id' => Vendor::factory()->create()->id])->assertOk();
+
+        Event::assertNotDispatched(SitePmFrequencyChanged::class);
     }
 
     /**
@@ -324,13 +474,14 @@ class SiteSettingsApiTest extends TestCase
             'show settings' => ['get', '/api/sites/S-1/settings'],
             'set vendor' => ['put', '/api/sites/S-1/settings/vendor'],
             'set eic' => ['put', '/api/sites/S-1/settings/eic'],
+            'set pm frequency' => ['put', '/api/sites/S-1/settings/pm-frequency'],
         ];
     }
 
     #[DataProvider('allEndpoints')]
     public function test_every_endpoint_returns_401_when_unauthenticated(string $method, string $uri): void
     {
-        $this->json($method, $uri, ['vendor_id' => 1, 'employee_id' => 'P-1'])->assertUnauthorized();
+        $this->json($method, $uri, ['vendor_id' => 1, 'employee_id' => 'P-1', 'pm_frequency' => 'monthly'])->assertUnauthorized();
 
         $this->assertDatabaseCount('site_settings', 0);
     }

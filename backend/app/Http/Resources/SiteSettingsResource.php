@@ -24,7 +24,7 @@ class SiteSettingsResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @return array{site_id: string, site_name: string, vendor: array{id: int, name: string}|null, eic: array{employee_id: string, name: string|null}|null}
+     * @return array{site_id: string, site_name: string, vendor: array{id: int, name: string}|null, eic: array{employee_id: string, name: string|null}|null, pm_frequency: string|null}
      */
     public function toArray(Request $request): array
     {
@@ -36,6 +36,7 @@ class SiteSettingsResource extends JsonResource
             'site_name' => $this->site->name,
             'vendor' => $vendor === null ? null : ['id' => $vendor->id, 'name' => $vendor->name],
             'eic' => $engineerEmployeeId === null ? null : ['employee_id' => $engineerEmployeeId, 'name' => $this->engineer?->name],
+            'pm_frequency' => $this->setting?->pm_frequency?->value,
         ];
     }
 }

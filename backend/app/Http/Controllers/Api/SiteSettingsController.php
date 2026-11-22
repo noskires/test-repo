@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateSiteEicRequest;
+use App\Http\Requests\UpdateSitePmFrequencyRequest;
 use App\Http\Requests\UpdateSiteVendorRequest;
 use App\Http\Resources\SiteSettingsResource;
 use App\MasterData\Data\Site;
@@ -11,7 +12,7 @@ use App\MasterData\MasterDataDirectory;
 use App\Models\SiteSetting;
 
 /**
- * A Site's Site Vendor and EIC. Changing them needs the manage-site-settings Gate.
+ * A Site's Site Vendor, EIC and PM Frequency. Changing them needs the manage-site-settings Gate.
  */
 class SiteSettingsController extends Controller
 {
@@ -45,6 +46,16 @@ class SiteSettingsController extends Controller
         $site = $this->findSiteOrFail($siteId);
 
         return $this->settingsResource($site, SiteSetting::assignEic($site, $request->engineer(), $request->user()));
+    }
+
+    /**
+     * Set or replace the Site's PM Frequency.
+     */
+    public function updatePmFrequency(UpdateSitePmFrequencyRequest $request, string $siteId): SiteSettingsResource
+    {
+        $site = $this->findSiteOrFail($siteId);
+
+        return $this->settingsResource($site, SiteSetting::assignPmFrequency($site, $request->frequency(), $request->user()));
     }
 
     private function findSiteOrFail(string $siteId): Site

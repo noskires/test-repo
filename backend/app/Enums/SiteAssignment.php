@@ -9,4 +9,5 @@ enum SiteAssignment: string
 {
     case Vendor = 'vendor';
     case Eic = 'eic';
+    case PmFrequency = 'pm_frequency';
 }
