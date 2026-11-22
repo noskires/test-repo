@@ -18,15 +18,16 @@ Endpoints: `POST /api/e-calls/{eCall}/work-order`, `PATCH /api/work-orders/{wo}`
 
 ## Acceptance criteria
 
-- [ ] Creating from an E-Call that isn't `Approved` returns 422. A second Work Order for the same E-Call returns 422.
-- [ ] Only the E-Call's Requestor can create. Others, including the EIC, get 403 (see Decisions).
-- [ ] On creation, the E-Call is `Closed` and the Work Order is `Open`, linked to the E-Call, FSR and BOQ revision.
-- [ ] A line referencing something not in the approved BOQ returns 422. A quantity <= 0, or greater than that BOQ line's quantity, returns 422.
-- [ ] The same BOQ line can't appear twice on one Work Order (422). Otherwise splitting a line would get round the quantity cap. Since a BOQ revision has no duplicate Price List items (issue 16), this also means each Price List item appears at most once.
-- [ ] Line totals are exact and computed by the server. The estimated amount is their exact sum, rounded once to the whole centavo, half-up (ADR 0002).
-- [ ] Only the creator can PATCH, and only while `Open`. Otherwise 403 / 422.
+- [x] Creating from an E-Call that isn't `Approved` returns 422. A second Work Order for the same E-Call returns 422.
+- [x] Only the E-Call's Requestor can create. Others, including the EIC, get 403 (see Decisions).
+- [x] On creation, the E-Call is `Closed` and the Work Order is `Open`, linked to the E-Call, FSR and BOQ revision.
+- [x] A line referencing something not in the approved BOQ returns 422. A quantity <= 0, or greater than that BOQ line's quantity, returns 422.
+- [x] The same BOQ line can't appear twice on one Work Order (422). Otherwise splitting a line would get round the quantity cap. Since a BOQ revision has no duplicate Price List items (issue 16), this also means each Price List item appears at most once.
+- [x] Line totals are exact and computed by the server. The estimated amount is their exact sum, rounded once to the whole centavo, half-up (ADR 0002).
+- [x] Only the creator can PATCH, and only while `Open`. Otherwise 403 / 422.
 
 ## Comments
+- 2026-11-22 (qa): QA PASS. `php artisan test` from backend/ gives 638 passed (2412 assertions), 0 failed. `tests/Feature/WorkOrderApiTest.php` gives 50 passed (211 assertions). Every acceptance criterion maps to a test that asserts it. Only the Requestor can create (the EIC, vendor staff and others get 403), and this is re-checked inside the E-Call lock. A unique `e_call_id` plus the in-lock check makes a second create or a lost race return 422, not 500. Lines come only from `approved_proposal_id`'s lines, each at most once, with 0 < qty <= the BOQ qty. Line totals are exact, and the estimated amount is rounded half-up once (2 x 50.5 = 101, 50.5 -> 51). The E-Call becomes Closed and the Work Order Open in one transaction. PATCH is creator-only and Open-only.
 
 ## Decisions (grilling, 2026-11-22) — supersedes the "Requestor or EIC" rule above
 - **Only the E-Call's Requestor** (the person who filed it) creates the Work Order. The EIC does not. Others, including the EIC, get 403.
