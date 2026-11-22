@@ -48,6 +48,7 @@ Equipment, Sites, Equipment Categories, employees (with each one's Immediate Hea
 - **Equipment with no start date**: an Equipment with no installation date and no PM history in PSS gets **no PM Task**. It is listed on the admin **Needs Setup** list (issue 32) until a start date is set. Whether admins can enter that start date in PSS is open (issue 33).
 - **No duplicate lines** (confirmed): the same Price List item can't appear twice in one BOQ revision (422). The vendor combines the quantities into one line. Likewise, a Work Order can't repeat a BOQ line (issue 18).
 - **The current Site EIC acts on pending items**: if a Site's EIC is replaced, the current Site EIC (from Site settings at the time of the action) approves, returns, validates or cancels pending PM Tasks, E-Calls and Work Orders. The EIC captured on a record is history only (issue 11).
+- **Work Order endorsement** (issue 19, 2026-11-23): endorsers come from the **E-Call Requestor's** Immediate Head chain (L1 = their Immediate Head, L2 = that person's head), are **resolved current at each step** (amends ADR 0001), and a short or missing chain **blocks and flags**: a 422, plus the Work Order on the Needs Setup list (issue 32). Billing endorsement (issue 23) probably follows the same rules, which still needs confirming.
 - **Application timezone is Asia/Manila** (docs/adr/0003-application-timezone-asia-manila.md), switched before go-live (issue 35). "Today", the Work Done Date window, PM due dates, PM Timeliness and the daily generation job all use Manila time.
 
 ## Issues

@@ -64,7 +64,7 @@ A Vendor's contract-agreed list of priced items, covering both materials/consuma
 An amount boundary that decides how many billing approval levels a Work Order needs (initially ₱200,000 and ₱1,000,000). Administrators can change them.
 
 ## Immediate Head
-The person a given employee reports to. Approvals go up this chain: Requestor → Supervisor/Team Head → Division Head → Center Head → Sector Head.
+The person a given employee reports to. Approvals go up this chain: Requestor → Supervisor/Team Head → Division Head → Center Head → Sector Head. It lives in the external system. PSS reads it at the moment each approver acts and never stores it. If a needed level is missing, the record is blocked and shown on the Needs Setup list until the chain is fixed upstream.
 
 ## Work Order
 The approved, priced job created from exactly one approved E-Call. The Requestor who filed that E-Call creates it, and its Endorsements and Billing Endorsements follow that Requestor's Immediate Head chain. Creating it closes that E-Call. Additional work needs a new E-Call.
@@ -104,7 +104,8 @@ What the Site Vendor submits for a PM Task: the PM Checklist responses, the Work
 Which workflow step an E-Call is on: For Vendor Assessment → For EIC Review → Approved → Closed (when its Work Order is created), plus Returned and Rejected. The PRD only names CLOSED. The other names are proposed in `.scratch/pss-mvp/`.
 
 ## Endorsement
-An approver's sign-off as a Work Order moves up the Immediate Head chain. There are two kinds: the 2-level endorsement before implementation, and the Billing Endorsement after the EIC validates the completed work.
+An approver's sign-off as a Work Order moves up the Immediate Head chain. There are two kinds: the 2-level endorsement before implementation, and the Billing Endorsement after the EIC validates the completed work. For the 2-level endorsement, Level 1 is the E-Call Requestor's Immediate Head and Level 2 is that person's Immediate Head. Each endorser is whoever holds that position when it's their turn, not whoever held it at submission.
+_Avoid:_ treating the endorsers as fixed when the Work Order is submitted
 
 ## Billing Endorsement
 The 2, 3 or 4 levels of Endorsement a Work Order goes through after completion, chosen by its Billing Amount against the Billing Thresholds. The last one Closes the Work Order.
@@ -116,4 +117,4 @@ The permanent log entry for every Approve, Return or Reject (and cancellation): 
 A copy of an external Site's or Equipment's details (name, category, location) stored on a PSS record, so history still reads correctly after the item is renamed or removed in the external system.
 
 ## Needs Setup list
-An administrator's list of what stops PM Tasks from being generated: Sites with a PM Frequency but no Site Vendor or EIC, and Equipment with no installation date and no PM history. It's worked out live, not stored.
+An administrator's list of what stops PM Tasks from being generated: Sites with a PM Frequency but no Site Vendor or EIC, Equipment with no installation date and no PM history, and Work Orders waiting on an endorsement level that the Requestor's Immediate Head chain can't fill. It's worked out live, not stored.
