@@ -18,3 +18,4 @@ PRD §6.10: while reviewing a PM Task, the EIC can file an E-Call straight from 
 - [ ] `GET /api/pm-tasks/{task}` lists the E-Calls filed from it.
 
 ## Comments
+- 2026-11-22 (product-owner): Human decision (issue 11 Decisions, spec.md): when a Site's EIC is replaced, the **current Site EIC** (`site_settings.eic_employee_id` at the time of the request) acts on pending items. The EIC captured on the record is history only and isn't used for authorization. "The PM Task's EIC" in the criteria means the **current Site EIC** of the task's Site. Add a test where a replaced EIC gets 403.

@@ -47,6 +47,7 @@ Equipment, Sites, Equipment Categories, employees (with each one's Immediate Hea
 - **Money rounding** (docs/adr/0002-money-rounding.md): line totals stay exact. Only document totals (BOQ total, Work Order estimated amount, Billing Amount) are rounded, once, to the centavo, half-up. Billing Thresholds compare against the rounded Billing Amount. Quantities have up to 3 decimal places.
 - **Equipment with no start date**: an Equipment with no installation date and no PM history in PSS gets **no PM Task**. It is listed on the admin **Needs Setup** list (issue 32) until a start date is set. Whether admins can enter that start date in PSS is open (issue 33).
 - **No duplicate lines** (confirmed): the same Price List item can't appear twice in one BOQ revision (422). The vendor combines the quantities into one line. Likewise, a Work Order can't repeat a BOQ line (issue 18).
+- **The current Site EIC acts on pending items**: if a Site's EIC is replaced, the current Site EIC (from Site settings at the time of the action) approves, returns, validates or cancels pending PM Tasks, E-Calls and Work Orders. The EIC captured on a record is history only (issue 11).
 - **Application timezone is Asia/Manila** (docs/adr/0003-application-timezone-asia-manila.md), switched before go-live (issue 35). "Today", the Work Done Date window, PM due dates, PM Timeliness and the daily generation job all use Manila time.
 
 ## Issues

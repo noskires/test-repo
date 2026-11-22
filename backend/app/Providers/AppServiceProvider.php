@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\MasterData\InMemoryMasterDataDirectory;
 use App\MasterData\MasterDataDirectory;
 use App\MasterData\SampleMasterData;
+use App\Models\PmTask;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -38,6 +40,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->registerMorphMap();
+    }
+
+    /**
+     * Stable aliases for polymorphic rows (Approval Record subjects), so stored data never depends on class names.
+     * Enforced: a polymorphic relation to an unmapped model throws instead of storing its class name.
+     * Later issues add e_call and work_order here.
+     */
+    private function registerMorphMap(): void
+    {
+        Relation::enforceMorphMap([
+            'pm_task' => PmTask::class,
+        ]);
     }
 }

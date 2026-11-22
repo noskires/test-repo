@@ -32,3 +32,4 @@ PRD §8.2 and lifecycle §5: the creator submits an `Open` Work Order.
 - Q1 answered: the **Work Order creator's chain**, and the creator is always the E-Call's Requestor (issue 18). Billing endorsement uses the same chain.
 - Q2 answered (earlier grilling): if a required level is missing from the chain, the Work Order is **blocked** at that step until the chain is fixed. The Immediate Head now lives in the external system, so the fix happens there. Q3 is still open.
 - Q3 answered: **approvers are fixed when the Work Order is submitted** (the chain is captured then). Later org-chart changes don't re-route a Work Order that's in flight.
+- 2026-11-22 (product-owner): FYI. The human decided that the **current Site EIC** acts on pending items, and the EIC captured on a record is history only (issue 11 Decisions). Endorsers here come from the Immediate Head chain, not the EIC, so nothing changes unless the chain question (Q1) ends up starting from the EIC.

@@ -23,3 +23,4 @@ Build it as an extensible list of "waiting item providers", so that later issues
 - [ ] Adding a new provider requires no change to the endpoint, shown by a test with a dummy provider.
 
 ## Comments
+- 2026-11-22 (product-owner): Human decision (issue 11 Decisions, spec.md): when a Site's EIC is replaced, the **current Site EIC** (`site_settings.eic_employee_id` at the time of the request) acts on pending items. The EIC captured on the record is history only and isn't used for authorization. "Where I am the EIC" means where I am the **current** Site EIC. A replaced EIC's pending items move to the new EIC's list.

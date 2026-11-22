@@ -2,8 +2,14 @@
 
 namespace App\Models;
 
+use App\Approvals\ApprovalRecorder;
+use App\Approvals\ApprovalSubject;
+use App\Approvals\HasApprovalRecords;
+use App\Enums\ApprovalAction;
 use App\Enums\PmStatus;
+use App\Events\PmTaskCompleted;
 use Database\Factories\PmTaskFactory;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,8 +30,10 @@ use Illuminate\Validation\ValidationException;
     'vendor_id', 'eic_employee_id', 'checklist_template_version_id', 'no_checklist', 'equipment_removed',
     'status', 'due_from_date', 'due_date', 'work_done_date', 'started_at',
 ])]
-class PmTask extends Model
+class PmTask extends Model implements ApprovalSubject
 {
+    use HasApprovalRecords;
+
     /** @use HasFactory<PmTaskFactory> */
     use HasFactory;
 
@@ -109,6 +117,60 @@ class PmTask extends Model
             }
 
             $lockedTask->update(['status' => PmStatus::InProgress, 'started_at' => now()]);
+
+            return $lockedTask;
+        });
+    }
+
+    /**
+     * The EIC approves the PM Report: Completed, keeping the vendor's Work Done Date as reported. Writes an
+     * Approval Record and announces PmTaskCompleted after commit. Releasing the open-task key happens in the
+     * saving hook.
+     *
+     * @throws AuthorizationException when the actor is no longer the Site's current EIC.
+     * @throws ValidationException when the task is not For Validation.
+     */
+    public static function approveReport(PmTask $task, User $eic, ?string $remarks): self
+    {
+        $task = static::validateReport($task, $eic, ApprovalAction::Approve, PmStatus::Completed, $remarks);
+
+        PmTaskCompleted::dispatch($task->id, $task->equipment_id, $task->work_done_date);
+
+        return $task;
+    }
+
+    /**
+     * The EIC returns the PM Report to the vendor with remarks: Returned. Writes an Approval Record.
+     *
+     * @throws AuthorizationException when the actor is no longer the Site's current EIC.
+     * @throws ValidationException when the task is not For Validation.
+     */
+    public static function returnReport(PmTask $task, User $eic, string $remarks): self
+    {
+        return static::validateReport($task, $eic, ApprovalAction::Return, PmStatus::Returned, $remarks);
+    }
+
+    /**
+     * Lock the task and the Site's settings row, re-check that the actor is still the Site's current EIC (an EIC
+     * replaced after the policy check passed is refused), check the task is For Validation, and record the
+     * decision. The locks are held until the recorder has written the new status and its record.
+     *
+     * @throws AuthorizationException when the actor is no longer the Site's current EIC.
+     */
+    private static function validateReport(PmTask $task, User $eic, ApprovalAction $action, PmStatus $toStatus, ?string $remarks): self
+    {
+        return DB::transaction(function () use ($task, $eic, $action, $toStatus, $remarks): self {
+            $lockedTask = static::query()->lockForUpdate()->findOrFail($task->id);
+
+            if (! SiteSetting::isCurrentEic($lockedTask->site_id, $eic, lockForUpdate: true)) {
+                throw new AuthorizationException("Only the Site's current EIC can approve or return this PM Task.");
+            }
+
+            if ($lockedTask->status !== PmStatus::ForValidation) {
+                throw ValidationException::withMessages(['pm_task' => 'Only a PM Task that is For Validation can be approved or returned.']);
+            }
+
+            app(ApprovalRecorder::class)->transition($lockedTask, $eic, $action, $toStatus, $remarks);
 
             return $lockedTask;
         });

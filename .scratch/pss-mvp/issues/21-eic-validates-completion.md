@@ -25,3 +25,4 @@ Endpoints: `POST /api/work-orders/{wo}/validate-completion` (approve, with valid
 
 ## Comments
 - 2026-11-22 (product-owner): Rounding decided by the human (docs/adr/0002-money-rounding.md). Per-line amounts stay exact, and only the Billing Amount is rounded to the centavo, half-up. Acceptance criterion updated.
+- 2026-11-22 (product-owner): Human decision (issue 11 Decisions, spec.md): when a Site's EIC is replaced, the **current Site EIC** (`site_settings.eic_employee_id` at the time of the request) acts on pending items. The EIC captured on the record is history only and isn't used for authorization. "The Work Order's EIC" means the current Site EIC of its Site. Add a test where the EIC is replaced while the Work Order is `Implemented`: the new EIC can act, and the old one gets 403.

@@ -49,7 +49,8 @@ Any user who files an E-Call. They don't need to be an engineer.
 
 ## EIC (Engineer-in-Charge)
 The engineer assigned to a Site. They review every PM Report at that Site, and, for every E-Call there (whoever filed it), the vendor's field report and quote and the finished work.
-_Avoid:_ treating whoever filed the E-Call as its reviewer
+If the Site's EIC is replaced, the new (current) EIC takes over every pending item at that Site. The EIC recorded on an item when it was created is kept only as history.
+_Avoid:_ treating whoever filed the E-Call as its reviewer; treating the EIC recorded on an item as the one who must act on it
 
 ## PM Frequency
 How often check-ups happen. One frequency is set per Site, and every Equipment at that Site follows it.

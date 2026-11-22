@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ECallController;
 use App\Http\Controllers\Api\ECallProposalController;
 use App\Http\Controllers\Api\PmReportController;
 use App\Http\Controllers\Api\PmTaskController;
+use App\Http\Controllers\Api\PmTaskValidationController;
 use App\Http\Controllers\Api\PriceListItemController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
@@ -41,6 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::post('pm-tasks/{pmTask}/start', [PmTaskController::class, 'start'])->name('pm-tasks.start');
     Route::get('pm-tasks/{pmTask}/reports', [PmReportController::class, 'index'])->name('pm-tasks.reports.index');
     Route::post('pm-tasks/{pmTask}/report', [PmReportController::class, 'store'])->name('pm-tasks.report.store');
+    Route::post('pm-tasks/{pmTask}/approve', [PmTaskValidationController::class, 'approve'])->name('pm-tasks.approve');
+    Route::post('pm-tasks/{pmTask}/return', [PmTaskValidationController::class, 'returnToVendor'])->name('pm-tasks.return');
+    Route::get('pm-tasks/{pmTask}/approvals', [PmTaskValidationController::class, 'approvals'])->name('pm-tasks.approvals.index');
 
     Route::get('settings/billing-thresholds', [BillingThresholdController::class, 'show'])->name('settings.billing-thresholds.show');
     Route::put('settings/billing-thresholds', [BillingThresholdController::class, 'update'])->name('settings.billing-thresholds.update');
