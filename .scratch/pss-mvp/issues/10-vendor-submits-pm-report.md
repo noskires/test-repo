@@ -22,14 +22,14 @@ Note: this issue only depends on 08 for the PM Task table and model. Tests can c
 
 ## Acceptance criteria
 
-- [ ] Vendor staff see only their own Vendor's tasks. Another vendor's task returns 403 for start and report.
-- [ ] Start works only from `Scheduled`. Any other status returns 422.
-- [ ] A report missing a mandatory item, missing remarks on a failed item, or missing a required photo returns 422, naming the item.
-- [ ] Numeric readings outside the acceptable range count as failed.
-- [ ] A Work Done Date in the future returns 422.
-- [ ] A valid submission stores responses against the checklist version, stores the attachments, and sets status `For Validation`.
-- [ ] Resubmitting from `Returned` replaces the current responses and keeps the earlier submission in history.
-- [ ] Feature tests use `Storage::fake()`.
+- [x] Vendor staff see only their own Vendor's tasks. Another vendor's task returns 403 for start and report.
+- [x] Start works only from `Scheduled`. Any other status returns 422.
+- [x] A report missing a mandatory item, missing remarks on a failed item, or missing a required photo returns 422, naming the item.
+- [x] Numeric readings outside the acceptable range count as failed.
+- [x] A Work Done Date in the future returns 422.
+- [x] A valid submission stores responses against the checklist version, stores the attachments, and sets status `For Validation`.
+- [x] Resubmitting from `Returned` replaces the current responses and keeps the earlier submission in history.
+- [x] Feature tests use `Storage::fake()`.
 
 ## Comments
 
@@ -45,3 +45,4 @@ Note: this issue only depends on 08 for the PM Task table and model. Tests can c
     1. Is the **PM Service Report file mandatory**? The criteria don't require it, so this slice treats it as optional.
     2. May the Work Done Date be **earlier than the task's start**, or earlier than the previous task's Work Done Date? This slice only rejects future dates.
     3. Can the vendor still start or report a task flagged `equipment_removed`? This slice doesn't block it. The EIC decides whether to cancel (issue 25).
+- 2026-11-22 (qa): QA PASS. `php artisan test` from backend/ gives 452 passed (1584 assertions), 0 failed. `tests/Feature/PmReportApiTest.php` and `tests/Unit/Checklists/ChecklistResponseEvaluatorTest.php` give 84 passed (265 assertions). Every acceptance criterion, and each product-owner clarification above, maps to a test that asserts it. The three open questions are built as stated: the PM Service Report file is optional, only future Work Done Dates are rejected, and tasks flagged `equipment_removed` aren't blocked.
