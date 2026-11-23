@@ -9,6 +9,7 @@ use App\MasterData\Data\Employee;
 use App\MasterData\Data\Site;
 use Database\Factories\SiteSettingFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -68,6 +69,23 @@ class SiteSetting extends Model
             ->value('eic_employee_id');
 
         return $currentEicEmployeeId !== null && $user->actsAsEmployee($currentEicEmployeeId);
+    }
+
+    /**
+     * The bulk form of isActingEic for lists (issue 24): the IDs of every Site where the user is the CURRENT EIC, as
+     * a subquery. Same rule: vendor staff and users without an employee ID act as EIC nowhere. Keep the two in step.
+     *
+     * @return Builder<SiteSetting>
+     */
+    public static function siteIdsWhereActingEic(User $user): Builder
+    {
+        return static::query()
+            ->select('site_id')
+            ->when(
+                $user->isInternalEmployee(),
+                fn (Builder $query) => $query->where('eic_employee_id', $user->employee_id),
+                fn (Builder $query) => $query->whereRaw('1 = 0'),
+            );
     }
 
     /**
