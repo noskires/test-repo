@@ -41,6 +41,7 @@ Equipment, Sites, Equipment Categories, employees (with each one's Immediate Hea
 | Billing basis "to be confirmed" (§8.5) | **Billing Amount** = the validated actual cost. |
 | Next PM date from configured frequency | **Sliding schedule**: the next due date counts from the previous task's **Work Done Date**. |
 | BOQ lines that aren't on the Price List are allowed but flagged for the EIC (PRD v2 §10) | **Resolved: glossary** (human, 2026-11-22). A **BOQ** lists only the Site Vendor's own active **Price List** items. Off-list lines are not wanted. |
+| Approvers are locked in when the Work Order is submitted; billing uses the chain locked in at submission (PRD v2 §8.2, §8.3) | **Resolved: current at each step** (human, 2026-11-23; GLOSSARY "Immediate Head", "Endorsement", ADR 0001 amendment). Endorsers and billing approvers are whoever holds the position on the Requestor's chain when it's their turn. |
 
 ## Decisions from the human (2026-11-22)
 
