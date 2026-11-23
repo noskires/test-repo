@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\PmTask;
+use App\Scheduling\PmTimelinessRule;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,6 +32,8 @@ class PmTaskResource extends JsonResource
                 'location' => $this->equipment_location_snapshot,
             ],
             'status' => $this->status->value,
+            // Computed on read against today in the app timezone (Asia/Manila); null when not in the window or closed.
+            'timeliness' => PmTimelinessRule::timeliness($this->due_date, today(), $this->status, $this->work_done_date)?->value,
             'due_date' => $this->due_date->toDateString(),
             'work_done_date' => $this->work_done_date?->toDateString(),
             'started_at' => $this->started_at,
