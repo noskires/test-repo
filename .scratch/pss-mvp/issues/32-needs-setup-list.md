@@ -19,13 +19,13 @@ Endpoint: `GET /api/needs-setup`, behind the `manage-site-settings` Gate. Each e
 
 ## Acceptance criteria
 
-- [ ] A Site with a PM Frequency and no Site Vendor appears with `no_site_vendor`. One with no EIC appears with `no_eic`. Both reasons are listed when both are missing.
-- [ ] A Site with no PM Frequency does not appear, and neither does its Equipment.
-- [ ] An Equipment with no `installedOn` and no PM Task appears with `no_start_date`. Once the fake directory gives it an `installedOn`, it no longer appears.
-- [ ] An Equipment with no `installedOn` that already has PM history does not appear.
-- [ ] A Work Order whose Requestor has no level-2 Immediate Head appears with `missing_endorser_level_2`. Once the fake directory fixes the chain, it no longer appears. `For Implementation`, `Rejected` and later Work Orders never appear.
-- [ ] A Work Order in `Implemented` or `For Billing Endorsement LVLn` whose required billing level n has no Immediate Head appears with `missing_billing_endorser_level_<n>`, and it no longer appears once the fake directory fixes the chain. (Added from the 2026-11-23 comment below.)
-- [ ] 403 when the Gate denies, 401 when unauthenticated. Tests use the directory fake. No new packages, and `php artisan test` passes.
+- [x] A Site with a PM Frequency and no Site Vendor appears with `no_site_vendor`. One with no EIC appears with `no_eic`. Both reasons are listed when both are missing.
+- [x] A Site with no PM Frequency does not appear, and neither does its Equipment.
+- [x] An Equipment with no `installedOn` and no PM Task appears with `no_start_date`. Once the fake directory gives it an `installedOn`, it no longer appears.
+- [x] An Equipment with no `installedOn` that already has PM history does not appear.
+- [x] A Work Order whose Requestor has no level-2 Immediate Head appears with `missing_endorser_level_2`. Once the fake directory fixes the chain, it no longer appears. `For Implementation`, `Rejected` and later Work Orders never appear.
+- [x] A Work Order in `Implemented` or `For Billing Endorsement LVLn` whose required billing level n has no Immediate Head appears with `missing_billing_endorser_level_<n>`, and it no longer appears once the fake directory fixes the chain. (Added from the 2026-11-23 comment below.)
+- [x] 403 when the Gate denies, 401 when unauthenticated. Tests use the directory fake. No new packages, and `php artisan test` passes.
 
 ## Comments
 
@@ -42,6 +42,8 @@ Endpoint: `GET /api/needs-setup`, behind the `manage-site-settings` Gate. Each e
   6. **Billing entries.** Only levels 1 to the levels required now (current thresholds, rounded Billing Amount). Use `missing_billing_endorser_level_<n>` for the **lowest** level that's missing, at or after the level the Work Order waits at now: level 1 for `Implemented`, level n for `For Billing Endorsement LVLn`. A billing **conflict** (the same person at two billing levels, or the Requestor as a billing endorser) isn't in the agreed reasons, so don't list it here. It's an open question for the human, not part of this issue.
   7. **Gate.** `manage-site-settings` is only defined in tests until issue 04 (SSO and roles). Do the same here: define it in the test, and check 403 and 401 as the other admin endpoints do (`backend/tests/Feature/SiteSettingsApiTest.php`).
   8. **Read-only and live.** No migration and no new table. Order the results: sites, then equipment, then work orders, each by ID.
+
+- 2026-11-23 (qa): QA PASS. `php artisan test --compact tests/Feature/NeedsSetupApiTest.php`: 26 passed (77 assertions). Full `php artisan test --compact`: 973 passed (4474 assertions). No existing test file was modified.
 
 ## Implementation decisions
 
