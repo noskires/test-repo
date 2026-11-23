@@ -7,8 +7,8 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **40 — "Waiting for me": Work Order items** (PR #37, 2026-11-23)
-- In flight: none
-- Ready now (`ready-for-agent`, every blocker done), in number order: **25, 26, 27, 28, 32**
+- In flight: **32 — Admin "Needs Setup" list** (picked 2026-11-23)
+- Ready now (`ready-for-agent`, every blocker done), in number order: **25, 26, 27, 28**
 - Waiting on the human (`needs-info`): 03, 04, 15, 31, 33. The open questions are in each issue file.
 - Doc follow-ups: none open
 
@@ -79,3 +79,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-23: issue 39 merged as PR #36.
 - 2026-11-23: product-owner picked 40 (completes the "Waiting for me" list; Work Order endorsers otherwise have no way to see their queue).
 - 2026-11-23: issue 40 merged as PR #37.
+- 2026-11-23: product-owner picked 32. It provides the "flag" half of the human's "block and flag" decisions on 08, 19 and 23: generation and endorsement already block, but nothing shows admins why. It also unblocks 33. Added the billing-gap acceptance criterion and the hand-off clarifications.
