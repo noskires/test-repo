@@ -10,10 +10,14 @@ use App\Models\PmTask;
 use App\Models\WorkOrder;
 use App\Waiting\ApprovedECallsProvider;
 use App\Waiting\ECallsForEicReviewProvider;
+use App\Waiting\ImplementedWorkOrdersProvider;
+use App\Waiting\OpenWorkOrdersProvider;
 use App\Waiting\PmTasksForValidationProvider;
 use App\Waiting\VendorECallsProvider;
 use App\Waiting\VendorPmTasksProvider;
+use App\Waiting\VendorWorkOrdersProvider;
 use App\Waiting\WaitingItemProvider;
+use App\Waiting\WorkOrderEndorsementsProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -39,6 +43,10 @@ class AppServiceProvider extends ServiceProvider
             VendorECallsProvider::class,
             ECallsForEicReviewProvider::class,
             ApprovedECallsProvider::class,
+            OpenWorkOrdersProvider::class,
+            WorkOrderEndorsementsProvider::class,
+            VendorWorkOrdersProvider::class,
+            ImplementedWorkOrdersProvider::class,
         ], WaitingItemProvider::TAG);
     }
 

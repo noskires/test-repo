@@ -11,9 +11,18 @@ use InvalidArgumentException;
  *
  * A chain that loops back on itself (an employee ID repeating while walking up, e.g. A -> B -> A or A -> A) is a
  * broken chain: headAtLevel() returns null from the repeating level on, and repeatedEmployeeAt() names the repeat.
+ *
+ * Each instance looks every employee up in the directory at most once (issue 40), so one instance shared across a
+ * list resolves each Requestor's chain once. Resolve a fresh instance per action or request: never keep one longer,
+ * or it would miss org changes.
  */
 final class ImmediateHeadChain
 {
+    /**
+     * @var array<string, ?Employee>
+     */
+    private array $employees = [];
+
     public function __construct(private readonly MasterDataDirectory $directory) {}
 
     /**
@@ -45,7 +54,7 @@ final class ImmediateHeadChain
             throw new InvalidArgumentException("Immediate Head level must be at least 1, got {$level}.");
         }
 
-        $current = $this->directory->findEmployee($employeeId);
+        $current = $this->findEmployee($employeeId);
 
         if ($current === null) {
             return ['head' => null, 'repeated' => null];
@@ -64,7 +73,7 @@ final class ImmediateHeadChain
                 return ['head' => null, 'repeated' => $headId];
             }
 
-            $current = $this->directory->findEmployee($headId);
+            $current = $this->findEmployee($headId);
 
             if ($current === null) {
                 return ['head' => null, 'repeated' => null];
@@ -75,5 +84,14 @@ final class ImmediateHeadChain
         }
 
         return ['head' => $current, 'repeated' => null];
+    }
+
+    private function findEmployee(string $employeeId): ?Employee
+    {
+        if (! array_key_exists($employeeId, $this->employees)) {
+            $this->employees[$employeeId] = $this->directory->findEmployee($employeeId);
+        }
+
+        return $this->employees[$employeeId];
     }
 }
