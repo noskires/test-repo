@@ -16,19 +16,21 @@ The PRD lists `CANCELLED` for Work Orders and other requests ("withdrawn or canc
 
 ## Acceptance criteria
 
-- [ ] The E-Call's Requestor can cancel it in each of `For Vendor Assessment`, `For EIC Review` and `Returned` (a test each). It becomes `Cancelled`.
-- [ ] The current Site EIC can cancel an E-Call. A former Site EIC (replaced in Site settings) gets 403. Vendor staff, including the Site Vendor's staff, get 403, as do other users.
-- [ ] Cancelling an E-Call that is `Approved`, `Closed`, `Rejected` or already `Cancelled` returns 422 and changes nothing.
-- [ ] The Work Order's creator can cancel it in each of `Open`, `For Lvl1 Endorsement` and `For Lvl2 Endorsement` (a test each). It becomes `Cancelled`.
-- [ ] The current Site EIC (of the Work Order's E-Call's Site) can cancel a Work Order. Immediate Heads, vendor staff, a former Site EIC and other users get 403.
-- [ ] Cancelling a Work Order in `For Implementation` or any later status (`Implemented`, any `For Billing Endorsement LVLn`, `Closed`, `Rejected`, `Cancelled`) returns 422 and changes nothing.
-- [ ] A missing or blank `remarks` returns 422 on both endpoints and changes nothing.
-- [ ] Each successful cancel writes exactly one Approval Record: action `cancel`, the actor, the remarks, the previous status and `cancelled`. It shows in `GET /api/e-calls/{eCall}/approvals` / `GET /api/work-orders/{workOrder}/approvals`.
-- [ ] Cancelling a Work Order leaves its E-Call `Closed`, and creating a second Work Order for that E-Call still returns 422 (more work needs a new E-Call).
-- [ ] A cancelled E-Call no longer accepts an FSR/BOQ revision, Approve, Return or Reject (422). A cancelled Work Order can't be edited, submitted, approved, returned or rejected (422).
-- [ ] Cancelled E-Calls and Work Orders don't appear on the "Waiting for me" list.
+- [x] The E-Call's Requestor can cancel it in each of `For Vendor Assessment`, `For EIC Review` and `Returned` (a test each). It becomes `Cancelled`.
+- [x] The current Site EIC can cancel an E-Call. A former Site EIC (replaced in Site settings) gets 403. Vendor staff, including the Site Vendor's staff, get 403, as do other users.
+- [x] Cancelling an E-Call that is `Approved`, `Closed`, `Rejected` or already `Cancelled` returns 422 and changes nothing.
+- [x] The Work Order's creator can cancel it in each of `Open`, `For Lvl1 Endorsement` and `For Lvl2 Endorsement` (a test each). It becomes `Cancelled`.
+- [x] The current Site EIC (of the Work Order's E-Call's Site) can cancel a Work Order. Immediate Heads, vendor staff, a former Site EIC and other users get 403.
+- [x] Cancelling a Work Order in `For Implementation` or any later status (`Implemented`, any `For Billing Endorsement LVLn`, `Closed`, `Rejected`, `Cancelled`) returns 422 and changes nothing.
+- [x] A missing or blank `remarks` returns 422 on both endpoints and changes nothing.
+- [x] Each successful cancel writes exactly one Approval Record: action `cancel`, the actor, the remarks, the previous status and `cancelled`. It shows in `GET /api/e-calls/{eCall}/approvals` / `GET /api/work-orders/{workOrder}/approvals`.
+- [x] Cancelling a Work Order leaves its E-Call `Closed`, and creating a second Work Order for that E-Call still returns 422 (more work needs a new E-Call).
+- [x] A cancelled E-Call no longer accepts an FSR/BOQ revision, Approve, Return or Reject (422). A cancelled Work Order can't be edited, submitted, approved, returned or rejected (422).
+- [x] Cancelled E-Calls and Work Orders don't appear on the "Waiting for me" list.
 
 ## Comments
+
+- 2026-11-24 (qa-25): QA PASS. `php artisan test --compact` (backend/): 1040 passed (4912 assertions). `vendor/bin/pint --test` passed. New files ECallCancellationApiTest + WorkOrderCancellationApiTest: 66 passed. Every criterion maps to a real test; frontend untouched.
 
 ## Decisions (grilling, 2026-11-22)
 - **Who**: the record's creator (the Requestor, for E-Calls and Work Orders) or the Site's EIC. A system-generated PM Task has no human creator, so for those it's the EIC.
