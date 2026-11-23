@@ -241,7 +241,7 @@ class WorkOrder extends Model implements ApprovalSubject
      *
      * @throws ValidationException naming the conflict, or when the Requestor has no employee ID.
      */
-    private function assertBillingChainSound(int $levels): void
+    private function assertBillingChainSound(int $levels, ?ImmediateHeadChain $chain = null): void
     {
         $requestorEmployeeId = $this->requestorEmployeeId();
 
@@ -249,7 +249,7 @@ class WorkOrder extends Model implements ApprovalSubject
             throw static::requestorHasNoEmployeeId(1);
         }
 
-        $chain = app(ImmediateHeadChain::class);
+        $chain ??= app(ImmediateHeadChain::class);
         $seen = [];
 
         for ($level = 1; $level <= $levels; $level++) {
@@ -275,7 +275,7 @@ class WorkOrder extends Model implements ApprovalSubject
      * The Requestor's head at the billing level, resolved now. Throws a 422 naming the level when the Requestor has
      * no employee ID or the chain stops short (block and flag, issue 23).
      */
-    private function billingEndorserAtLevel(int $level): Employee
+    private function billingEndorserAtLevel(int $level, ?ImmediateHeadChain $chain = null): Employee
     {
         $requestorEmployeeId = $this->requestorEmployeeId();
 
@@ -283,7 +283,7 @@ class WorkOrder extends Model implements ApprovalSubject
             throw static::requestorHasNoEmployeeId($level);
         }
 
-        return app(ImmediateHeadChain::class)->headAtLevel($requestorEmployeeId, $level)
+        return ($chain ?? app(ImmediateHeadChain::class))->headAtLevel($requestorEmployeeId, $level)
             ?? throw ValidationException::withMessages(['work_order' => "No level {$level} billing endorser: the Requestor's Immediate Head chain stops before level {$level}."]);
     }
 
@@ -604,6 +604,50 @@ class WorkOrder extends Model implements ApprovalSubject
     }
 
     /**
+     * Whether this Work Order waits for the user's endorsement right now ("Waiting for me", issue 40): the user is the
+     * current endorser of the pending endorsement or billing level, resolved with the same rules WorkOrder::endorse
+     * uses, and endorse would let them approve (they haven't approved a different level this round). False when no
+     * endorsement is pending, the Requestor has no employee ID, the level doesn't resolve or the chain conflicts.
+     * Pass one ImmediateHeadChain for a whole list so each employee is looked up once.
+     */
+    public function isWaitingForEndorsementBy(User $user, ?ImmediateHeadChain $chain = null): bool
+    {
+        if (! $user->isInternalEmployee()) {
+            return false;
+        }
+
+        $chain ??= app(ImmediateHeadChain::class);
+        $billingLevel = $this->pendingBillingLevel();
+
+        if ($billingLevel !== null) {
+            try {
+                $this->assertBillingChainSound($this->requiredBillingLevels(), $chain);
+                $head = $this->billingEndorserAtLevel($billingLevel, $chain);
+            } catch (ValidationException) {
+                return false;
+            }
+
+            return $user->actsAsEmployee($head->id) && $this->billingLevelApprovedThisRoundByOtherThan($user, $billingLevel) === null;
+        }
+
+        $level = $this->pendingEndorsementLevel();
+
+        if ($level === null) {
+            return false;
+        }
+
+        try {
+            $this->assertNoChainConflict($chain);
+        } catch (ValidationException) {
+            return false;
+        }
+
+        $head = $this->resolveEndorser($level, $chain);
+
+        return $head !== null && $user->actsAsEmployee($head->id) && $this->levelApprovedThisRoundByOtherThan($user, $level) === null;
+    }
+
+    /**
      * Separation of duties (issue 38): refuse a chain where level 1 and level 2 are the same person, or where either
      * is the Requestor. Walking up from the Requestor, such a chain repeats an employee ID within two steps, which
      * ImmediateHeadChain reports. The equality check after resolving is a backstop. Plain gaps (a missing level) are
@@ -611,7 +655,7 @@ class WorkOrder extends Model implements ApprovalSubject
      *
      * @throws ValidationException naming the conflict.
      */
-    private function assertNoChainConflict(): void
+    private function assertNoChainConflict(?ImmediateHeadChain $chain = null): void
     {
         $requestorEmployeeId = $this->requestorEmployeeId();
 
@@ -619,7 +663,7 @@ class WorkOrder extends Model implements ApprovalSubject
             return;
         }
 
-        $chain = app(ImmediateHeadChain::class);
+        $chain ??= app(ImmediateHeadChain::class);
 
         foreach ([1, 2] as $level) {
             $repeated = $chain->repeatedEmployeeAt($requestorEmployeeId, $level);
@@ -700,15 +744,19 @@ class WorkOrder extends Model implements ApprovalSubject
             ?? throw ValidationException::withMessages(['work_order' => "No level {$level} endorser: the Requestor's Immediate Head chain stops before level {$level}."]);
     }
 
-    private function resolveEndorser(int $level): ?Employee
+    private function resolveEndorser(int $level, ?ImmediateHeadChain $chain = null): ?Employee
     {
         $requestorEmployeeId = $this->requestorEmployeeId();
 
-        return $requestorEmployeeId === null ? null : app(ImmediateHeadChain::class)->headAtLevel($requestorEmployeeId, $level);
+        return $requestorEmployeeId === null ? null : ($chain ?? app(ImmediateHeadChain::class))->headAtLevel($requestorEmployeeId, $level);
     }
 
     private function requestorEmployeeId(): ?string
     {
+        if ($this->relationLoaded('eCall')) {
+            return $this->eCall?->requestor_employee_id;
+        }
+
         return ECall::query()->whereKey($this->e_call_id)->value('requestor_employee_id');
     }
 
