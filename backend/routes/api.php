@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ECallCancellationController;
 use App\Http\Controllers\Api\ECallController;
 use App\Http\Controllers\Api\ECallProposalController;
 use App\Http\Controllers\Api\ECallReviewController;
+use App\Http\Controllers\Api\EquipmentHistoryController;
 use App\Http\Controllers\Api\NeedsSetupController;
 use App\Http\Controllers\Api\PmReportController;
 use App\Http\Controllers\Api\PmTaskController;
@@ -34,6 +35,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('sites', [SiteController::class, 'index'])->name('sites.index');
     Route::get('sites/{site}/equipment', [SiteController::class, 'equipment'])->name('sites.equipment.index');
+    Route::get('equipment/{equipmentId}/history', EquipmentHistoryController::class)->name('equipment.history.index');
     Route::get('sites/{site}/settings', [SiteSettingsController::class, 'show'])->name('sites.settings.show');
     Route::put('sites/{site}/settings/vendor', [SiteSettingsController::class, 'updateVendor'])->name('sites.settings.vendor.update');
     Route::put('sites/{site}/settings/eic', [SiteSettingsController::class, 'updateEic'])->name('sites.settings.eic.update');
