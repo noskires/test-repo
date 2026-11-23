@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Gate;
  */
 class WorkOrderController extends Controller
 {
-    private const array RELATIONS = ['lines', 'attachments', 'proposal'];
+    private const array RELATIONS = WorkOrderResource::RELATIONS;
 
     /**
      * Create the E-Call's Work Order. The E-Call is Closed.

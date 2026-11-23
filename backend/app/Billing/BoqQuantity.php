@@ -60,6 +60,14 @@ final class BoqQuantity
     }
 
     /**
+     * Format a signed quantity difference in thousandths with three decimals, e.g. "-2.500" or "0.250".
+     */
+    public static function fromSignedThousandths(int $thousandths): string
+    {
+        return ($thousandths < 0 ? '-' : '').self::fromThousandths(abs($thousandths));
+    }
+
+    /**
      * The exact line total in millicentavos. Throws when it does not fit in a 64-bit integer.
      */
     public static function lineTotalMillicentavos(int $quantityThousandths, int $unitPriceCentavos): int

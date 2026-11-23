@@ -43,4 +43,12 @@ final class PesoAmount
     {
         return intdiv($millicentavos, 100_000).'.'.str_pad((string) ($millicentavos % 100_000), 5, '0', STR_PAD_LEFT);
     }
+
+    /**
+     * Format a signed exact amount (e.g. a quantity difference times a unit price) with five decimals, e.g. "-2.52500".
+     */
+    public static function fromSignedMillicentavos(int $millicentavos): string
+    {
+        return ($millicentavos < 0 ? '-' : '').self::fromMillicentavos(abs($millicentavos));
+    }
 }

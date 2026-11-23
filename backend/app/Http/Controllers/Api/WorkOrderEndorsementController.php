@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Gate;
  */
 class WorkOrderEndorsementController extends Controller
 {
-    private const array RELATIONS = ['lines', 'attachments', 'proposal'];
+    private const array RELATIONS = WorkOrderResource::RELATIONS;
 
     /**
      * The creator submits an Open Work Order: For LVL1 Endorsement.

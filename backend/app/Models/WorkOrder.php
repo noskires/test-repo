@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Approvals\ApprovalRecorder;
 use App\Approvals\ApprovalSubject;
 use App\Approvals\HasApprovalRecords;
+use App\Billing\BillingLevels;
 use App\Billing\BoqQuantity;
 use App\Enums\ApprovalAction;
 use App\Enums\ECallStatus;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -32,6 +34,7 @@ use Throwable;
 #[Fillable([
     'e_call_id', 'e_call_proposal_id', 'status', 'created_by_user_id',
     'estimated_amount_millicentavos', 'estimated_amount_centavos', 'submitted_at', 'endorsement_round_after_record_id',
+    'billing_amount_millicentavos', 'billing_amount_centavos',
 ])]
 class WorkOrder extends Model implements ApprovalSubject
 {
@@ -53,6 +56,8 @@ class WorkOrder extends Model implements ApprovalSubject
             'estimated_amount_centavos' => 'integer',
             'submitted_at' => 'immutable_datetime',
             'endorsement_round_after_record_id' => 'integer',
+            'billing_amount_millicentavos' => 'integer',
+            'billing_amount_centavos' => 'integer',
         ];
     }
 
@@ -98,6 +103,164 @@ class WorkOrder extends Model implements ApprovalSubject
     public function completions(): HasMany
     {
         return $this->hasMany(WorkOrderCompletion::class);
+    }
+
+    /**
+     * The latest completion revision: its actual quantities are the ones the EIC reviews (issue 21).
+     *
+     * @return HasOne<WorkOrderCompletion, $this>
+     */
+    public function latestCompletion(): HasOne
+    {
+        return $this->hasOne(WorkOrderCompletion::class)->ofMany('revision', 'max');
+    }
+
+    /**
+     * The current Site EIC validates the completed work: stores a validated quantity per line and the Billing Amount
+     * (exact sum of validated quantity x unit price, rounded once half-up to centavos, ADR 0002), and moves the Work
+     * Order into billing endorsement. Inside the lock: the acting EIC (403), the Implemented status (422), then the
+     * billing chain for the levels the amount needs right now (separation of duties, then level 1 resolves; 422).
+     * Nothing is stored unless every check passes.
+     *
+     * @param  list<array{line: WorkOrderLine, quantity_thousandths: int}>  $lines  One per Work Order line.
+     *
+     * @throws AuthorizationException when the user is no longer the current Site EIC.
+     * @throws ValidationException when not Implemented, the amount overflows, or billing can't start.
+     */
+    public static function validateCompletion(WorkOrder $workOrder, User $eic, array $lines, ?string $remarks): self
+    {
+        return static::reviewCompletion($workOrder, $eic, function (self $locked) use ($eic, $lines, $remarks): void {
+            $lineTotals = [];
+
+            foreach ($lines as ['line' => $line, 'quantity_thousandths' => $quantity]) {
+                if ($line->work_order_id !== $locked->id) {
+                    throw ValidationException::withMessages(['lines' => 'Every validated line must belong to this Work Order.']);
+                }
+
+                $lineTotals[$line->id] = [$quantity, $locked->exactly(fn (): int => BoqQuantity::lineTotalMillicentavos($quantity, $line->unit_price_centavos))];
+            }
+
+            $exactTotal = $locked->exactly(fn (): int => BoqQuantity::sumMillicentavos(array_column($lineTotals, 1)));
+            $billingAmountCentavos = BoqQuantity::roundHalfUpToCentavos($exactTotal);
+
+            $locked->assertCanEnterBilling($billingAmountCentavos);
+
+            foreach ($lineTotals as $lineId => [$quantity, $total]) {
+                $locked->lines()->whereKey($lineId)->update([
+                    'validated_quantity_thousandths' => $quantity,
+                    'validated_line_total_millicentavos' => $total,
+                ]);
+            }
+
+            $locked->update(['billing_amount_millicentavos' => $exactTotal, 'billing_amount_centavos' => $billingAmountCentavos]);
+
+            app(ApprovalRecorder::class)->transition($locked, $eic, ApprovalAction::Approve, WorkOrderStatus::ForBillingEndorsementLvl1, $remarks);
+        });
+    }
+
+    /**
+     * The current Site EIC returns the completed work for rework: For Implementation (the vendor resubmits).
+     *
+     * @throws AuthorizationException when the user is no longer the current Site EIC.
+     * @throws ValidationException when not Implemented.
+     */
+    public static function returnCompletion(WorkOrder $workOrder, User $eic, string $remarks): self
+    {
+        return static::reviewCompletion($workOrder, $eic, fn (self $locked) => app(ApprovalRecorder::class)
+            ->transition($locked, $eic, ApprovalAction::Return, WorkOrderStatus::ForImplementation, $remarks));
+    }
+
+    /**
+     * The current Site EIC rejects the completed work: Rejected, final.
+     *
+     * @throws AuthorizationException when the user is no longer the current Site EIC.
+     * @throws ValidationException when not Implemented.
+     */
+    public static function rejectCompletion(WorkOrder $workOrder, User $eic, string $remarks): self
+    {
+        return static::reviewCompletion($workOrder, $eic, fn (self $locked) => app(ApprovalRecorder::class)
+            ->transition($locked, $eic, ApprovalAction::Reject, WorkOrderStatus::Rejected, $remarks));
+    }
+
+    /**
+     * Whether the user may act as the Work Order's EIC: the current Site EIC of its E-Call's Site (issue 37 rule).
+     */
+    public function isActingEic(User $user, bool $lockForUpdate = false): bool
+    {
+        $siteId = ECall::query()->whereKey($this->e_call_id)->value('site_id');
+
+        return $siteId !== null && SiteSetting::isActingEic($siteId, $user, $lockForUpdate);
+    }
+
+    /**
+     * Lock the Work Order, re-check the acting EIC and the Implemented status, then apply the decision.
+     *
+     * @param  callable(self): void  $decide
+     */
+    private static function reviewCompletion(WorkOrder $workOrder, User $eic, callable $decide): self
+    {
+        return DB::transaction(function () use ($workOrder, $eic, $decide): self {
+            $locked = static::query()->lockForUpdate()->findOrFail($workOrder->id);
+
+            if (! $locked->isActingEic($eic, lockForUpdate: true)) {
+                throw new AuthorizationException("Only the Site's current EIC can validate this Work Order's completion.");
+            }
+
+            if ($locked->getRawOriginal('status') !== WorkOrderStatus::Implemented->value) {
+                throw static::notImplemented();
+            }
+
+            $decide($locked);
+
+            return $locked;
+        });
+    }
+
+    public static function notImplemented(): ValidationException
+    {
+        return ValidationException::withMessages(['work_order' => 'Completed work can only be validated, returned or rejected while the Work Order is Implemented.']);
+    }
+
+    /**
+     * Entering billing endorsement (issues 21, 23, 38): for the billing levels the amount needs under the CURRENT
+     * thresholds, the Requestor's heads must not repeat and none may be the Requestor (separation of duties), and the
+     * level 1 head must resolve now. Levels above 1 that don't resolve yet are checked by issue 23 when reached.
+     *
+     * @throws ValidationException naming the problem.
+     */
+    private function assertCanEnterBilling(int $billingAmountCentavos): void
+    {
+        $requestorEmployeeId = $this->requestorEmployeeId();
+
+        if ($requestorEmployeeId === null) {
+            throw ValidationException::withMessages(['work_order' => 'The Requestor has no employee ID, so the level 1 billing endorser cannot be found.']);
+        }
+
+        $chain = app(ImmediateHeadChain::class);
+        $levels = BillingLevels::requiredBillingLevels($billingAmountCentavos, BillingThresholdSetting::current());
+        $seen = [];
+
+        for ($level = 1; $level <= $levels; $level++) {
+            $repeated = $chain->repeatedEmployeeAt($requestorEmployeeId, $level);
+            $head = $repeated === null ? $chain->headAtLevel($requestorEmployeeId, $level) : null;
+            $employeeId = $repeated ?? $head?->id;
+
+            if ($employeeId === $requestorEmployeeId) {
+                throw ValidationException::withMessages(['work_order' => "The level {$level} billing endorser would be the Requestor ({$employeeId}). Separation of duties requires someone else."]);
+            }
+
+            if ($employeeId !== null && isset($seen[$employeeId])) {
+                throw ValidationException::withMessages(['work_order' => "Two billing endorsement levels resolve to the same person ({$employeeId}). Separation of duties requires different endorsers."]);
+            }
+
+            if ($employeeId !== null) {
+                $seen[$employeeId] = true;
+            }
+        }
+
+        if ($chain->headAtLevel($requestorEmployeeId, 1) === null) {
+            throw ValidationException::withMessages(['work_order' => "No level 1 billing endorser: the Requestor's Immediate Head chain stops before level 1."]);
+        }
     }
 
     /**
