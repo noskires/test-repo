@@ -1,6 +1,7 @@
 # 24 — "Waiting for me" list
 
-Status: ready-for-agent
+Status: done
+Merged: PR #34 (b6ece16), 2026-11-23
 Blocked by: 11
 Type: task
 

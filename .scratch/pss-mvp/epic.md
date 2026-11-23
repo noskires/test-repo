@@ -6,9 +6,9 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **13 — EIC files an E-Call from a PM Task's findings** (PR #32, 2026-11-23)
-- In flight: **24 — "Waiting for me" list** (handed off 2026-11-23)
-- Ready now (`ready-for-agent`, every blocker done), in number order: **24, 25, 26, 27, 28, 32**
+- Last merged: **24 — "Waiting for me" list** (PR #34, 2026-11-23)
+- In flight: none
+- Ready now (`ready-for-agent`, every blocker done), in number order: **25, 26, 27, 28, 32, 39, 40**
 - Waiting on the human (`needs-info`): 03, 04, 15, 31, 33. The open questions are in each issue file.
 - Doc follow-ups: none open
 
@@ -39,7 +39,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 21 | EIC validates completed work, sets Billing Amount | done | 20, 38 | #27 |
 | 22 | Configure Billing Thresholds | done | none | #6 |
 | 23 | Multi-level billing endorsement, close Work Order | done | 21 | #28 |
-| 24 | "Waiting for me" list | ready-for-agent | 11 | |
+| 24 | "Waiting for me" list | done | 11 | #34 |
 | 25 | Cancelling PM Tasks, E-Calls and Work Orders | ready-for-agent | 08, 12, 18 | |
 | 26 | Equipment maintenance history | ready-for-agent | 11, 13, 18 | |
 | 27 | Dashboard: operational counts | ready-for-agent | 11, 17, 21 | |
@@ -74,3 +74,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-23: product-owner cleared the 09 GLOSSARY follow-up (PM Timeliness rules) and picked 13 (unblocks 26, then 29; closes the unchecked `pm_task_id` on POST /api/e-calls).
 - 2026-11-23: issue 13 merged as PR #32; unblocks 26.
 - 2026-11-23: product-owner cleared the 13 GLOSSARY follow-up (E-Call from a PM Task), picked 24 (no email in the MVP, so this list is how users find their work; unblocks the new 39 and 40), split the E-Call and Work Order items into 39 and 40, and added the billing entries to 32 because 23 merged first.
+- 2026-11-23: issue 24 merged as PR #34; unblocks 39 and 40.
