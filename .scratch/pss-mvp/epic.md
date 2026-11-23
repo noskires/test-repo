@@ -7,7 +7,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **24 — "Waiting for me" list** (PR #34, 2026-11-23)
-- In flight: none
+- In flight: **39 — "Waiting for me": E-Call items** (handed off 2026-11-23)
 - Ready now (`ready-for-agent`, every blocker done), in number order: **25, 26, 27, 28, 32, 39, 40**
 - Waiting on the human (`needs-info`): 03, 04, 15, 31, 33. The open questions are in each issue file.
 - Doc follow-ups: none open
@@ -75,3 +75,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-23: issue 13 merged as PR #32; unblocks 26.
 - 2026-11-23: product-owner cleared the 13 GLOSSARY follow-up (E-Call from a PM Task), picked 24 (no email in the MVP, so this list is how users find their work; unblocks the new 39 and 40), split the E-Call and Work Order items into 39 and 40, and added the billing entries to 32 because 23 merged first.
 - 2026-11-23: issue 24 merged as PR #34; unblocks 39 and 40.
+- 2026-11-23: product-owner picked 39 (finishes the main use of the "Waiting for me" list; smaller than 40, and adds the `priority` field that 40 doesn't need).
