@@ -37,6 +37,7 @@ The process of fixing, replacing or improving things in response to a need: an E
 
 ## E-Call
 A request for corrective work at a Site, whatever its urgency. It may name a specific Equipment or none at all (e.g. "build a new fence around the Cebu site"). Emergency is one of its Priority levels, not a separate kind of request.
+The Site EIC can also file one straight from a PM Task that is For Validation or Returned, for example from the vendor's findings. That E-Call keeps a link to the PM Task, and filing it never changes the PM Task's status. This is the only way to link an E-Call to a PM Task.
 _Avoid:_ Emergency Call (as a name for all requests), ticket, CM request
 
 ## Priority
