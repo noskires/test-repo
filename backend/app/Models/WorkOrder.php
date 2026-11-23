@@ -6,6 +6,7 @@ use App\Approvals\ApprovalRecorder;
 use App\Approvals\ApprovalSubject;
 use App\Approvals\HasApprovalRecords;
 use App\Billing\BillingLevels;
+use App\Billing\BillingThresholds;
 use App\Billing\BoqQuantity;
 use App\Enums\ApprovalAction;
 use App\Enums\ECallStatus;
@@ -283,7 +284,7 @@ class WorkOrder extends Model implements ApprovalSubject
             throw static::requestorHasNoEmployeeId($level);
         }
 
-        return ($chain ?? app(ImmediateHeadChain::class))->headAtLevel($requestorEmployeeId, $level)
+        return $this->resolveEndorser($level, $chain)
             ?? throw ValidationException::withMessages(['work_order' => "No level {$level} billing endorser: the Requestor's Immediate Head chain stops before level {$level}."]);
     }
 
@@ -294,10 +295,11 @@ class WorkOrder extends Model implements ApprovalSubject
 
     /**
      * The billing levels the rounded Billing Amount needs under the CURRENT thresholds (recomputed at every action).
+     * A Work Order not yet validated has no Billing Amount and counts as 0: the 2 levels every amount needs.
      */
-    private function requiredBillingLevels(): int
+    private function requiredBillingLevels(?BillingThresholds $thresholds = null): int
     {
-        return BillingLevels::requiredBillingLevels((int) $this->billing_amount_centavos, BillingThresholdSetting::current());
+        return BillingLevels::requiredBillingLevels((int) $this->billing_amount_centavos, $thresholds ?? BillingThresholdSetting::current());
     }
 
     /**
@@ -648,6 +650,62 @@ class WorkOrder extends Model implements ApprovalSubject
     }
 
     /**
+     * Why this Work Order is stuck on its Requestor's Immediate Head chain right now (Needs Setup list, issue 32), as
+     * reason codes; empty when nothing blocks. Uses the same resolvers and checks as submit, endorse and the billing
+     * endorsement, so the list and the actions can't disagree.
+     *
+     * Open, For LVL1 and For LVL2 Endorsement: each remaining endorsement level (1 and 2, or 2 at LVL2) that doesn't
+     * resolve (`missing_endorser_level_<n>`; a loop shows as missing), then `endorsement_chain_conflict` when
+     * separation of duties refuses the chain. Implemented and For Billing Endorsement LVLn: the lowest billing level
+     * from the one it waits at now (1 for Implemented) up to the levels the rounded Billing Amount needs under
+     * $thresholds that doesn't resolve (`missing_billing_endorser_level_<n>`). Billing conflicts are not reported
+     * (open question, issue 32). `no_requestor_employee_id` alone when the Requestor has no employee ID. Other
+     * statuses: empty.
+     *
+     * @return list<string>
+     */
+    public function chainSetupProblems(ImmediateHeadChain $chain, BillingThresholds $thresholds): array
+    {
+        $status = WorkOrderStatus::tryFrom((string) $this->getRawOriginal('status'));
+        $firstEndorsementLevel = $status === WorkOrderStatus::Open ? 1 : $status?->endorsementLevel();
+        $firstBillingLevel = $status === WorkOrderStatus::Implemented ? 1 : $status?->billingLevel();
+
+        if ($firstEndorsementLevel === null && $firstBillingLevel === null) {
+            return [];
+        }
+
+        if ($this->requestorEmployeeId() === null) {
+            return ['no_requestor_employee_id'];
+        }
+
+        if ($firstEndorsementLevel !== null) {
+            $problems = [];
+
+            for ($level = $firstEndorsementLevel; $level <= 2; $level++) {
+                if ($this->resolveEndorser($level, $chain) === null) {
+                    $problems[] = "missing_endorser_level_{$level}";
+                }
+            }
+
+            if ($this->endorsementChainConflict($chain) !== null) {
+                $problems[] = 'endorsement_chain_conflict';
+            }
+
+            return $problems;
+        }
+
+        $lastBillingLevel = max($firstBillingLevel, $this->requiredBillingLevels($thresholds));
+
+        for ($level = $firstBillingLevel; $level <= $lastBillingLevel; $level++) {
+            if ($this->resolveEndorser($level, $chain) === null) {
+                return ["missing_billing_endorser_level_{$level}"];
+            }
+        }
+
+        return [];
+    }
+
+    /**
      * Separation of duties (issue 38): refuse a chain where level 1 and level 2 are the same person, or where either
      * is the Requestor. Walking up from the Requestor, such a chain repeats an employee ID within two steps, which
      * ImmediateHeadChain reports. The equality check after resolving is a backstop. Plain gaps (a missing level) are
@@ -657,10 +715,23 @@ class WorkOrder extends Model implements ApprovalSubject
      */
     private function assertNoChainConflict(?ImmediateHeadChain $chain = null): void
     {
+        $conflict = $this->endorsementChainConflict($chain);
+
+        if ($conflict !== null) {
+            throw $conflict;
+        }
+    }
+
+    /**
+     * The reporting form of assertNoChainConflict (shared with the Needs Setup list, issue 32): the 422 naming the
+     * conflict, or null when the chain doesn't conflict or the Requestor has no employee ID.
+     */
+    private function endorsementChainConflict(?ImmediateHeadChain $chain = null): ?ValidationException
+    {
         $requestorEmployeeId = $this->requestorEmployeeId();
 
         if ($requestorEmployeeId === null) {
-            return;
+            return null;
         }
 
         $chain ??= app(ImmediateHeadChain::class);
@@ -669,7 +740,7 @@ class WorkOrder extends Model implements ApprovalSubject
             $repeated = $chain->repeatedEmployeeAt($requestorEmployeeId, $level);
 
             if ($repeated !== null) {
-                throw $repeated === $requestorEmployeeId ? static::requestorEndorses($level, $repeated) : static::sameEndorserTwice($repeated);
+                return $repeated === $requestorEmployeeId ? static::requestorEndorses($level, $repeated) : static::sameEndorserTwice($repeated);
             }
         }
 
@@ -678,13 +749,15 @@ class WorkOrder extends Model implements ApprovalSubject
 
         foreach ([1 => $levelOne, 2 => $levelTwo] as $level => $head) {
             if ($head?->id === $requestorEmployeeId) {
-                throw static::requestorEndorses($level, $requestorEmployeeId);
+                return static::requestorEndorses($level, $requestorEmployeeId);
             }
         }
 
         if ($levelOne !== null && $levelOne->id === $levelTwo?->id) {
-            throw static::sameEndorserTwice($levelOne->id);
+            return static::sameEndorserTwice($levelOne->id);
         }
+
+        return null;
     }
 
     private static function requestorEndorses(int $level, string $employeeId): ValidationException

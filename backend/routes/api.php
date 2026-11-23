@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ChecklistTemplateController;
 use App\Http\Controllers\Api\ECallController;
 use App\Http\Controllers\Api\ECallProposalController;
 use App\Http\Controllers\Api\ECallReviewController;
+use App\Http\Controllers\Api\NeedsSetupController;
 use App\Http\Controllers\Api\PmReportController;
 use App\Http\Controllers\Api\PmTaskController;
 use App\Http\Controllers\Api\PmTaskECallController;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
     Route::get('me/waiting', WaitingListController::class)->name('me.waiting.index');
+    Route::get('needs-setup', NeedsSetupController::class)->name('needs-setup.index');
 
     Route::apiResource('vendors', VendorController::class)->except(['destroy']);
     Route::get('vendors/{vendor}/price-list-items', [PriceListItemController::class, 'index'])->name('vendors.price-list-items.index');
