@@ -12,14 +12,16 @@ Endpoint: `GET /api/equipment/{equipmentId}/history`, newest first, with optiona
 
 ## Acceptance criteria
 
-- [ ] PM Tasks, E-Calls and Work Orders for that Equipment are returned in one list, newest first by entry date (see clarifications). Records for other Equipment aren't included. Records in every status are included, including `Cancelled` and `Rejected`.
-- [ ] Each entry has its type (`pm_task` / `e_call` / `work_order`), record ID, entry date, status, and the type's fields: PM Task Work Done Date and findings (latest PM Report revision); E-Call priority; Work Order estimated amount and Billing Amount (null until set), as exact money values.
-- [ ] An E-Call filed from a PM Task shows the link to that PM Task. A Work Order entry shows its E-Call ID.
-- [ ] Removing the Equipment from the directory fake still returns its history, with the snapshot name. The endpoint never calls the directory.
-- [ ] `from` and `to` (inclusive, `Y-m-d`) narrow the list by entry date, a test each. `from` after `to`, or a bad date, returns 422.
-- [ ] Vendor staff see only records of their own Vendor. Internal users see all. An Equipment ID with no records returns 200 with an empty list.
+- [x] PM Tasks, E-Calls and Work Orders for that Equipment are returned in one list, newest first by entry date (see clarifications). Records for other Equipment aren't included. Records in every status are included, including `Cancelled` and `Rejected`.
+- [x] Each entry has its type (`pm_task` / `e_call` / `work_order`), record ID, entry date, status, and the type's fields: PM Task Work Done Date and findings (latest PM Report revision); E-Call priority; Work Order estimated amount and Billing Amount (null until set), as exact money values.
+- [x] An E-Call filed from a PM Task shows the link to that PM Task. A Work Order entry shows its E-Call ID.
+- [x] Removing the Equipment from the directory fake still returns its history, with the snapshot name. The endpoint never calls the directory.
+- [x] `from` and `to` (inclusive, `Y-m-d`) narrow the list by entry date, a test each. `from` after `to`, or a bad date, returns 422.
+- [x] Vendor staff see only records of their own Vendor. Internal users see all. An Equipment ID with no records returns 200 with an empty list.
 
 ## Comments
+
+- 2026-11-24 (qa-26): QA PASS. `php artisan test --compact` (backend/): 1063 passed (5015 assertions). `vendor/bin/pint --test` passed. EquipmentHistoryApiTest: 23 tests. Every criterion maps to a real test; frontend untouched.
 
 - 2026-11-24 (product-owner): **Clarifications for dev-lead** (checked against main at 4ae2d21):
   - **Entry date** (sort key and what `from` / `to` filter): PM Task = `due_date`; E-Call = the date it was filed (`created_at` as a Manila date, ADR 0003); Work Order = the date it was created (`created_at`, Manila date). Ties: newer `created_at` first, then higher ID. This is a product-owner reading of "newest first", listed under "Decisions to confirm" for the PR.
