@@ -109,6 +109,7 @@ class WaitingListApiTest extends TestCase
                 'title' => 'Chiller 1',
                 'site' => ['id' => 'S-1', 'name' => 'North Plant'],
                 'status' => 'for_validation',
+                'priority' => null,
                 'timeliness' => 'overdue',
                 'waiting_since' => CarbonImmutable::parse('2026-11-21 09:00:00')->toJSON(),
             ]]]);

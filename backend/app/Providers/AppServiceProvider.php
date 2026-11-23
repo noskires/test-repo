@@ -8,7 +8,10 @@ use App\MasterData\SampleMasterData;
 use App\Models\ECall;
 use App\Models\PmTask;
 use App\Models\WorkOrder;
+use App\Waiting\ApprovedECallsProvider;
+use App\Waiting\ECallsForEicReviewProvider;
 use App\Waiting\PmTasksForValidationProvider;
+use App\Waiting\VendorECallsProvider;
 use App\Waiting\VendorPmTasksProvider;
 use App\Waiting\WaitingItemProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -33,6 +36,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->tag([
             PmTasksForValidationProvider::class,
             VendorPmTasksProvider::class,
+            VendorECallsProvider::class,
+            ECallsForEicReviewProvider::class,
+            ApprovedECallsProvider::class,
         ], WaitingItemProvider::TAG);
     }
 
