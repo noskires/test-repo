@@ -1,6 +1,7 @@
 # 26 — Equipment maintenance history
 
-Status: ready-for-agent
+Status: done
+Merged: PR #41 (993c5a2), 2026-11-24
 Blocked by: 11, 13, 18
 Type: task
 
