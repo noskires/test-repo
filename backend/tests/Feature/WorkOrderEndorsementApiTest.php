@@ -653,7 +653,7 @@ class WorkOrderEndorsementApiTest extends TestCase
     public function test_the_work_order_statuses(): void
     {
         $this->assertSame(
-            ['open', 'for_lvl1_endorsement', 'for_lvl2_endorsement', 'for_implementation', 'implemented', 'for_billing_endorsement_lvl1', 'for_billing_endorsement_lvl2', 'for_billing_endorsement_lvl3', 'for_billing_endorsement_lvl4', 'closed', 'rejected'],
+            ['open', 'for_lvl1_endorsement', 'for_lvl2_endorsement', 'for_implementation', 'implemented', 'for_billing_endorsement_lvl1', 'for_billing_endorsement_lvl2', 'for_billing_endorsement_lvl3', 'for_billing_endorsement_lvl4', 'closed', 'rejected', 'cancelled'],
             array_column(WorkOrderStatus::cases(), 'value'),
         );
     }

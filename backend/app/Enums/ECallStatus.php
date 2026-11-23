@@ -22,4 +22,13 @@ enum ECallStatus: string
     {
         return $this === self::ForVendorAssessment || $this === self::Returned;
     }
+
+    /**
+     * Whether the Requestor or the current Site EIC may cancel the E-Call: until the EIC approves the FSR and BOQ
+     * (issue 25).
+     */
+    public function isCancellable(): bool
+    {
+        return in_array($this, [self::ForVendorAssessment, self::ForEicReview, self::Returned], true);
+    }
 }

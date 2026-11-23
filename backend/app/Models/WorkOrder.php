@@ -184,6 +184,43 @@ class WorkOrder extends Model implements ApprovalSubject
     }
 
     /**
+     * The creator or the current Site EIC cancels the Work Order with remarks: Cancelled, final (issue 25). Allowed
+     * only before implementation is authorised (Open, For Lvl1 or Lvl2 Endorsement). The row is locked while the
+     * actor and the status are re-checked, so a cancel racing an LVL2 approval can't both succeed. The E-Call stays
+     * Closed: more work needs a new E-Call.
+     *
+     * @throws AuthorizationException when the actor is neither the creator nor the current Site EIC.
+     * @throws ValidationException when the Work Order is past the point where it can be cancelled.
+     */
+    public static function cancel(WorkOrder $workOrder, User $actor, string $remarks): self
+    {
+        return DB::transaction(function () use ($workOrder, $actor, $remarks): self {
+            $locked = static::query()->lockForUpdate()->findOrFail($workOrder->id);
+
+            if (! $locked->mayBeCancelledBy($actor, lockForUpdate: true)) {
+                throw new AuthorizationException("Only the Work Order's creator or the Site's current EIC can cancel this Work Order.");
+            }
+
+            if (! WorkOrderStatus::tryFrom((string) $locked->getRawOriginal('status'))?->isCancellable()) {
+                throw ValidationException::withMessages(['work_order' => 'A Work Order can only be cancelled while it is Open, For Lvl1 Endorsement or For Lvl2 Endorsement.']);
+            }
+
+            app(ApprovalRecorder::class)->transition($locked, $actor, ApprovalAction::Cancel, WorkOrderStatus::Cancelled, $remarks);
+
+            return $locked;
+        });
+    }
+
+    /**
+     * Whether the user may cancel the Work Order: its creator (by user ID) or the current Site EIC of its E-Call's
+     * Site (isActingEic, which never matches vendor staff). The status is checked separately.
+     */
+    public function mayBeCancelledBy(User $user, bool $lockForUpdate = false): bool
+    {
+        return $user->id === $this->created_by_user_id || $this->isActingEic($user, $lockForUpdate);
+    }
+
+    /**
      * Whether the user may act as the Work Order's EIC: the current Site EIC of its E-Call's Site (issue 37 rule).
      */
     public function isActingEic(User $user, bool $lockForUpdate = false): bool

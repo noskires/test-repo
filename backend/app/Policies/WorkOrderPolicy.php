@@ -58,6 +58,16 @@ class WorkOrderPolicy
     }
 
     /**
+     * Determine whether the user can cancel the Work Order (issue 25): its creator or the current Site EIC of its
+     * E-Call's Site, whatever its status (a wrong status is a 422 for them). Callers authorize `view` first.
+     * WorkOrder::cancel repeats this under a lock.
+     */
+    public function cancel(User $user, WorkOrder $workOrder): bool
+    {
+        return $workOrder->mayBeCancelledBy($user);
+    }
+
+    /**
      * Early 403 for approve / return / reject: denied when the current level's endorser is known and isn't this
      * user. No pending level, or an endorser that can't be resolved, is reported as 422 by WorkOrder::endorse.
      * Every endorsement endpoint authorizes `view` first (issue 38), so a user who can't see the Work Order always

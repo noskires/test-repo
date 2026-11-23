@@ -600,7 +600,7 @@ class WorkOrderBillingEndorsementApiTest extends TestCase
             [
                 'open', 'for_lvl1_endorsement', 'for_lvl2_endorsement', 'for_implementation', 'implemented',
                 'for_billing_endorsement_lvl1', 'for_billing_endorsement_lvl2', 'for_billing_endorsement_lvl3',
-                'for_billing_endorsement_lvl4', 'closed', 'rejected',
+                'for_billing_endorsement_lvl4', 'closed', 'rejected', 'cancelled',
             ],
             array_column(WorkOrderStatus::cases(), 'value'),
         );

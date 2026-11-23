@@ -184,6 +184,7 @@ class WaitingListWorkOrderApiTest extends TestCase
             'billing lvl4' => [WorkOrderStatus::ForBillingEndorsementLvl4, ['P-L4']],
             'closed: nobody' => [WorkOrderStatus::Closed, []],
             'rejected: nobody' => [WorkOrderStatus::Rejected, []],
+            'cancelled: nobody' => [WorkOrderStatus::Cancelled, []],
         ];
     }
 
