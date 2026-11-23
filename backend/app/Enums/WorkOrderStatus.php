@@ -8,6 +8,7 @@ namespace App\Enums;
  * Implemented (issue 20). The EIC's validation moves Implemented to For Billing Endorsement LVL1 (issue 21); billing
  * endorsement climbs LVL1..LVL4 as the Billing Amount requires, and the last required approval Closes the Work Order
  * (issue 23). endorsementLevel() covers the pre-implementation endorsement, billingLevel() the billing endorsement.
+ * Cancelled (issue 25) is final, like Rejected.
  */
 enum WorkOrderStatus: string
 {
@@ -22,6 +23,16 @@ enum WorkOrderStatus: string
     case ForBillingEndorsementLvl4 = 'for_billing_endorsement_lvl4';
     case Closed = 'closed';
     case Rejected = 'rejected';
+    case Cancelled = 'cancelled';
+
+    /**
+     * Whether the creator or the current Site EIC may cancel the Work Order: only before implementation is
+     * authorised (issue 25). After that, the only way to end it is Reject.
+     */
+    public function isCancellable(): bool
+    {
+        return in_array($this, [self::Open, self::ForLvl1Endorsement, self::ForLvl2Endorsement], true);
+    }
 
     /**
      * The billing endorsement level that must act now (1-4), or null when no billing endorsement is pending.

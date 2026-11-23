@@ -46,4 +46,13 @@ class ECallPolicy
     {
         return $user->id === $eCall->requestor_user_id;
     }
+
+    /**
+     * Only the E-Call's Requestor or the Site's CURRENT EIC cancels it (issue 25), whatever its status: a wrong
+     * status is a 422 for them. ECall::cancel repeats this under a lock.
+     */
+    public function cancel(User $user, ECall $eCall): bool
+    {
+        return $eCall->mayBeCancelledBy($user);
+    }
 }

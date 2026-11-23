@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\BillingThresholdController;
 use App\Http\Controllers\Api\ChecklistTemplateController;
+use App\Http\Controllers\Api\ECallCancellationController;
 use App\Http\Controllers\Api\ECallController;
 use App\Http\Controllers\Api\ECallProposalController;
 use App\Http\Controllers\Api\ECallReviewController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
 use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\WaitingListController;
+use App\Http\Controllers\Api\WorkOrderCancellationController;
 use App\Http\Controllers\Api\WorkOrderCompletionController;
 use App\Http\Controllers\Api\WorkOrderCompletionValidationController;
 use App\Http\Controllers\Api\WorkOrderController;
@@ -52,6 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::post('e-calls/{eCall}/return', [ECallReviewController::class, 'returnToVendor'])->name('e-calls.return');
     Route::post('e-calls/{eCall}/reject', [ECallReviewController::class, 'reject'])->name('e-calls.reject');
     Route::get('e-calls/{eCall}/approvals', [ECallReviewController::class, 'approvals'])->name('e-calls.approvals.index');
+    Route::post('e-calls/{eCall}/cancel', [ECallCancellationController::class, 'store'])->name('e-calls.cancel');
     Route::post('e-calls/{eCall}/work-order', [WorkOrderController::class, 'store'])->name('e-calls.work-order.store');
     Route::get('work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
     Route::patch('work-orders/{workOrder}', [WorkOrderController::class, 'update'])->name('work-orders.update');
@@ -59,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::post('work-orders/{workOrder}/approve', [WorkOrderEndorsementController::class, 'approve'])->name('work-orders.approve');
     Route::post('work-orders/{workOrder}/return', [WorkOrderEndorsementController::class, 'returnOneStep'])->name('work-orders.return');
     Route::post('work-orders/{workOrder}/reject', [WorkOrderEndorsementController::class, 'reject'])->name('work-orders.reject');
+    Route::post('work-orders/{workOrder}/cancel', [WorkOrderCancellationController::class, 'store'])->name('work-orders.cancel');
     Route::get('work-orders/{workOrder}/approvals', [WorkOrderEndorsementController::class, 'approvals'])->name('work-orders.approvals.index');
     Route::post('work-orders/{workOrder}/completion', [WorkOrderCompletionController::class, 'store'])->name('work-orders.completion.store');
     Route::get('work-orders/{workOrder}/completions', [WorkOrderCompletionController::class, 'index'])->name('work-orders.completions.index');

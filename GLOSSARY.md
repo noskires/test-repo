@@ -75,7 +75,7 @@ The person a given employee reports to. Approvals go up this chain: Requestor â†
 The approved, priced job created from exactly one approved E-Call. The Requestor who filed that E-Call creates it, and its Endorsements and Billing Endorsements follow that Requestor's Immediate Head chain. Creating it closes that E-Call. Additional work needs a new E-Call.
 
 ## Cancel
-Withdrawing an E-Call, PM Task or Work Order before the vendor has started the work, with a mandatory reason. Its creator (the Requestor, for E-Calls and Work Orders) or the Site's EIC can do it. Once work has started, the only way to end it is a Reject.
+Withdrawing an E-Call, PM Task or Work Order before the vendor has started the work, with a mandatory reason. Its creator (the Requestor, for E-Calls and Work Orders) or the current Site EIC can do it. An E-Call can be cancelled until the EIC approves its FSR/BOQ (For Vendor Assessment, For EIC Review, Returned). A Work Order can be cancelled while Open, For Lvl1 Endorsement or For Lvl2 Endorsement, never from For Implementation on; cancelling it leaves its E-Call Closed. Each cancel writes an Approval Record. Once work has started, the only way to end it is a Reject.
 
 ## Return
 An approver's "fix it and resend" action. The record goes back exactly one step, to the previous approver (or to the creator if it was the first approver), and stays alive.
@@ -126,4 +126,4 @@ The permanent log entry for every Approve, Return or Reject (and cancellation): 
 A copy of an external Site's or Equipment's details (name, category, location) stored on a PSS record, so history still reads correctly after the item is renamed or removed in the external system.
 
 ## Needs Setup list
-An administrator's list of what stops PM Tasks from being generated: Sites with a PM Frequency but no Site Vendor or EIC, Equipment with no installation date and no PM history, and Work Orders waiting on an endorsement level that the Requestor's Immediate Head chain can't fill. It's worked out live, not stored.
+An administrator's list of what stops work from moving: Sites with a PM Frequency but no Site Vendor or EIC, and Equipment with no installation date and no PM history (both stop PM Tasks from being generated). It also lists Work Orders whose Endorsement or Billing Endorsement level can't be filled from the Requestor's Immediate Head chain. It's worked out live, not stored, and only administrators who can manage Site settings can see it (`GET /api/needs-setup`).

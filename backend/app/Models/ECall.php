@@ -111,6 +111,43 @@ class ECall extends Model implements ApprovalSubject
     }
 
     /**
+     * The Requestor or the Site's current EIC cancels the E-Call with remarks: Cancelled, final (issue 25). Allowed
+     * until the EIC approves the FSR and BOQ. The E-Call row (and, for a non-Requestor, the Site's settings row) is
+     * locked while the actor and the status are re-checked, so a cancel racing an Approve can't both succeed.
+     * A PM Task link (issue 13) is kept and the PM Task itself is not touched.
+     *
+     * @throws AuthorizationException when the actor is neither the Requestor nor the Site's current EIC.
+     * @throws ValidationException when the E-Call is past the point where it can be cancelled.
+     */
+    public static function cancel(ECall $eCall, User $actor, string $remarks): self
+    {
+        return DB::transaction(function () use ($eCall, $actor, $remarks): self {
+            $lockedECall = static::query()->lockForUpdate()->findOrFail($eCall->id);
+
+            if (! $lockedECall->mayBeCancelledBy($actor, lockForUpdate: true)) {
+                throw new AuthorizationException("Only the E-Call's Requestor or the Site's current EIC can cancel this E-Call.");
+            }
+
+            if (! $lockedECall->status->isCancellable()) {
+                throw ValidationException::withMessages(['e_call' => 'An E-Call can only be cancelled while it is For Vendor Assessment, For EIC Review or Returned.']);
+            }
+
+            app(ApprovalRecorder::class)->transition($lockedECall, $actor, ApprovalAction::Cancel, ECallStatus::Cancelled, $remarks);
+
+            return $lockedECall;
+        });
+    }
+
+    /**
+     * Whether the user may cancel the E-Call: its Requestor (by user ID) or the Site's current EIC
+     * (SiteSetting::isActingEic, which never matches vendor staff). The status is checked separately.
+     */
+    public function mayBeCancelledBy(User $user, bool $lockForUpdate = false): bool
+    {
+        return $user->id === $this->requestor_user_id || SiteSetting::isActingEic($this->site_id, $user, $lockForUpdate);
+    }
+
+    /**
      * Lock the E-Call and the Site's settings row, re-check that the actor is still the Site's current EIC and that
      * the E-Call is still For EIC Review, apply any extra change, then record the decision. The locks are held until
      * the new status, the extra change and the Approval Record are all written.
