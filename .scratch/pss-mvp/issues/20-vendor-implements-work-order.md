@@ -16,11 +16,11 @@ Note: this issue only depends on 19 for a Work Order to reach `For Implementatio
 
 ## Acceptance criteria
 
-- [ ] Only staff of the Work Order's Site Vendor can submit: `user.vendor_id` equals the `vendor_id` captured on the Work Order's E-Call (not null). A user who can't `view` the Work Order gets a plain 403 first, whatever its status (no status oracle, as in issue 38). A viewer who isn't that Vendor's staff also gets 403.
-- [ ] It only works from `For Implementation`, re-checked inside a transaction that locks the Work Order row. Any other status returns 422 (shown only to users who can view the Work Order).
-- [ ] Every Work Order line needs an actual quantity >= 0, with at most 3 decimal places (`BoqQuantity`, `pss.boq.quantity_decimal_places`). A missing line, a duplicate line, or a line from another Work Order returns 422. At least one completion document is required.
-- [ ] Success sets `Implemented` and stores the actual quantities and files. A resubmission after Return keeps the earlier submission in history.
-- [ ] `GET /api/vendor/work-orders` lists only Work Orders whose E-Call's `vendor_id` is the caller's Vendor. Non-vendor users get 403.
+- [x] Only staff of the Work Order's Site Vendor can submit: `user.vendor_id` equals the `vendor_id` captured on the Work Order's E-Call (not null). A user who can't `view` the Work Order gets a plain 403 first, whatever its status (no status oracle, as in issue 38). A viewer who isn't that Vendor's staff also gets 403.
+- [x] It only works from `For Implementation`, re-checked inside a transaction that locks the Work Order row. Any other status returns 422 (shown only to users who can view the Work Order).
+- [x] Every Work Order line needs an actual quantity >= 0, with at most 3 decimal places (`BoqQuantity`, `pss.boq.quantity_decimal_places`). A missing line, a duplicate line, or a line from another Work Order returns 422. At least one completion document is required.
+- [x] Success sets `Implemented` and stores the actual quantities and files. A resubmission after Return keeps the earlier submission in history.
+- [x] `GET /api/vendor/work-orders` lists only Work Orders whose E-Call's `vendor_id` is the caller's Vendor. Non-vendor users get 403.
 
 ## Comments
 - 2026-11-23 (product-owner): Re-checked before hand-off (main 911cff9). Blockers 19 and 38 are merged; I added 38 to "Blocked by" for its view-first and actor-helper rules. Still ready-for-agent. Clarifications, scope unchanged:
@@ -35,3 +35,4 @@ Note: this issue only depends on 19 for a Work Order to reach `For Implementatio
   - Open, **non-blocking** questions for the human (build as described, and don't add a rule):
     1. May the vendor report an **actual quantity greater than** the Work Order's approved quantity (e.g. more material needed)? This slice allows any qty ≥ 0. The EIC validates in issue 21.
     2. PRD v2 §8.2 says a Work Order is visible to its Site Vendor's staff **from `For Implementation`**, but the current `WorkOrderPolicy::view` (which follows the E-Call) lets them see it from `Open`. Should vendor staff be hidden from Work Orders before `For Implementation`? This slice follows the existing policy.
+- 2026-11-23 (qa): QA PASS. `php artisan test` from backend/ gives 754 passed (3086 assertions), 0 failed. `tests/Feature/WorkOrderCompletionApiTest.php` and `tests/Feature/WorkOrderEndorsementApiTest.php` give 89 passed (474 assertions). Every acceptance criterion maps to a test that asserts it. Outsiders get a plain 403 in every status. Only the E-Call's captured Vendor's staff can submit (the requestor, the EIC and other internal users get 403). The status is re-checked in the lock and reported alone before payload errors. Each line must be reported exactly once, with qty >= 0 and up to 3dp, and at least one document is required. Success sets Implemented, and resubmitting creates revision 2. The vendor list is limited to the caller's Vendor, and no Approval Record is written. An actual qty above the approved qty is accepted (open question 1).
