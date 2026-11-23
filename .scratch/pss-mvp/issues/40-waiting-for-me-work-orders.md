@@ -16,14 +16,16 @@ Add a Work Order provider to the "Waiting for me" list (issue 24). It plugs into
 
 ## Acceptance criteria
 
-- [ ] Each status above shows the Work Order to exactly the right user and to nobody else (one test per status group).
-- [ ] When the fake directory changes who holds a level's Immediate Head position, the item moves to the new holder.
-- [ ] A Work Order with a broken chain appears for nobody, and the endpoint doesn't error.
-- [ ] Closed and Rejected Work Orders appear for nobody.
-- [ ] Item shape: `type` = `work_order`, `id`, `title`, `site` (from the Snapshot), `status`, and `waiting_since` = the latest of the Work Order's `created_at` and its latest Approval Record's `created_at`. Items sort together with the other types, oldest first.
-- [ ] No change to the `GET /api/me/waiting` controller. Resolve the chain once per Requestor per request, not once per Work Order per level. `php artisan test` passes.
+- [x] Each status above shows the Work Order to exactly the right user and to nobody else (one test per status group).
+- [x] When the fake directory changes who holds a level's Immediate Head position, the item moves to the new holder.
+- [x] A Work Order with a broken chain appears for nobody, and the endpoint doesn't error.
+- [x] Closed and Rejected Work Orders appear for nobody.
+- [x] Item shape: `type` = `work_order`, `id`, `title`, `site` (from the Snapshot), `status`, and `waiting_since` = the latest of the Work Order's `created_at` and its latest Approval Record's `created_at`. Items sort together with the other types, oldest first.
+- [x] No change to the `GET /api/me/waiting` controller. Resolve the chain once per Requestor per request, not once per Work Order per level. `php artisan test` passes.
 
 ## Comments
+
+- 2026-11-23 (qa): PASS. `php artisan test --compact` 947 passed (4394 assertions); WaitingListWorkOrderApiTest 23 passed. Every criterion maps to a real test.
 - 2026-11-23 (product-owner): Split out of issue 24, because issues 18–23 shipped without adding providers. Each rule comes from shipped behaviour (the endorsers are the current holders, issue 19 decisions; a broken chain is blocked and flagged, issue 19/23 decisions); there are no open questions.
 - 2026-11-23 (product-owner): Clarifications for dev-lead, re-checked against main e400211 (issues 24 and 39 shipped).
   - Plug in the way 24 and 39 did: provider classes in `app/Waiting/` (see `ECallWaitingItems` + `ECallsForEicReviewProvider` / `VendorECallsProvider` / `ApprovedECallsProvider`), registered in `AppServiceProvider::registerWaitingItemProviders()`. `timeliness` and `priority` are null for Work Orders. You may set `priority` from the E-Call if that's simple, but it isn't required.
