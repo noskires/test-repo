@@ -9,7 +9,7 @@ use App\MasterData\MasterDataDirectory;
 use App\Models\ChecklistTemplate;
 use App\Models\PmTask;
 use App\Models\SiteSetting;
-use Carbon\CarbonImmutable;
+use App\Scheduling\PmStartDates;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Queue\Queueable;
@@ -21,7 +21,8 @@ use Illuminate\Support\Facades\DB;
  * pm_tasks rejects a second open task, and a losing insert is skipped.
  *
  * Eligible: the Site has a PM Frequency, a Site Vendor and an EIC, and the Equipment has a start date
- * (the latest Completed task's Work Done Date, else its installation date).
+ * (PmStartDates: the latest Completed task's Work Done Date, else its installation date). Equipment skipped for
+ * lack of a start date shows on the Needs Setup list (issue 32), which uses the same PmStartDates rule.
  */
 class GeneratePmTasks implements ShouldQueue
 {
@@ -33,8 +34,13 @@ class GeneratePmTasks implements ShouldQueue
     /** @var array<string, string> category name per category ID, for this run */
     private array $categoryNames = [];
 
+    /** The shared open-task and start-date rule (issue 32), for this run */
+    private PmStartDates $startDates;
+
     public function handle(MasterDataDirectory $directory): void
     {
+        $this->startDates = new PmStartDates;
+
         foreach ($directory->listEquipmentCategories() as $category) {
             $this->categoryNames[$category->id] = $category->name;
         }
@@ -63,11 +69,11 @@ class GeneratePmTasks implements ShouldQueue
 
     private function ensureOpenTask(Site $site, Equipment $equipment, SiteSetting $setting): void
     {
-        if (PmTask::query()->open()->where('equipment_id', $equipment->id)->exists()) {
+        if ($this->startDates->hasOpenTask($equipment->id)) {
             return;
         }
 
-        $dueFrom = $this->dueFromDate($equipment);
+        $dueFrom = $this->startDates->dueFromDate($equipment);
 
         if ($dueFrom === null) {
             return;
@@ -95,24 +101,6 @@ class GeneratePmTasks implements ShouldQueue
         } catch (UniqueConstraintViolationException) {
             // A concurrent run created this Equipment's open task first.
         }
-    }
-
-    /**
-     * The latest Completed task's Work Done Date, else the installation date, else null (Needs Setup, issue 32).
-     */
-    private function dueFromDate(Equipment $equipment): ?CarbonImmutable
-    {
-        $lastWorkDoneDate = PmTask::query()
-            ->where('equipment_id', $equipment->id)
-            ->where('status', PmStatus::Completed)
-            ->whereNotNull('work_done_date')
-            ->max('work_done_date');
-
-        if ($lastWorkDoneDate !== null) {
-            return CarbonImmutable::parse($lastWorkDoneDate)->startOfDay();
-        }
-
-        return $equipment->installedOn === null ? null : CarbonImmutable::instance($equipment->installedOn)->startOfDay();
     }
 
     /**
