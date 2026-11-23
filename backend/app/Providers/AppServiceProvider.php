@@ -8,6 +8,9 @@ use App\MasterData\SampleMasterData;
 use App\Models\ECall;
 use App\Models\PmTask;
 use App\Models\WorkOrder;
+use App\Waiting\PmTasksForValidationProvider;
+use App\Waiting\VendorPmTasksProvider;
+use App\Waiting\WaitingItemProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -19,6 +22,18 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->registerMasterDataDirectory();
+        $this->registerWaitingItemProviders();
+    }
+
+    /**
+     * The "Waiting for me" sources (issue 24). A new workflow adds its provider here; the endpoint needs no change.
+     */
+    private function registerWaitingItemProviders(): void
+    {
+        $this->app->tag([
+            PmTasksForValidationProvider::class,
+            VendorPmTasksProvider::class,
+        ], WaitingItemProvider::TAG);
     }
 
     /**

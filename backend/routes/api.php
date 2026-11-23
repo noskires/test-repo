@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\PriceListItemController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
 use App\Http\Controllers\Api\VendorController;
+use App\Http\Controllers\Api\WaitingListController;
 use App\Http\Controllers\Api\WorkOrderCompletionController;
 use App\Http\Controllers\Api\WorkOrderCompletionValidationController;
 use App\Http\Controllers\Api\WorkOrderController;
@@ -20,6 +21,8 @@ use App\Http\Controllers\Api\WorkOrderEndorsementController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
+    Route::get('me/waiting', WaitingListController::class)->name('me.waiting.index');
+
     Route::apiResource('vendors', VendorController::class)->except(['destroy']);
     Route::get('vendors/{vendor}/price-list-items', [PriceListItemController::class, 'index'])->name('vendors.price-list-items.index');
     Route::post('vendors/{vendor}/price-list-items', [PriceListItemController::class, 'store'])->name('vendors.price-list-items.store');
