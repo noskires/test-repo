@@ -1,6 +1,7 @@
 # 40 — "Waiting for me": Work Order items
 
-Status: ready-for-agent
+Status: done
+Merged: PR #37 (be70722), 2026-11-23
 Blocked by: 24
 Type: task
 
