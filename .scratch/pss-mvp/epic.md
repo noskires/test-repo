@@ -6,9 +6,9 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **24 — "Waiting for me" list** (PR #34, 2026-11-23)
-- In flight: **39 — "Waiting for me": E-Call items** (handed off 2026-11-23)
-- Ready now (`ready-for-agent`, every blocker done), in number order: **25, 26, 27, 28, 32, 39, 40**
+- Last merged: **39 — "Waiting for me": E-Call items** (PR #36, 2026-11-23)
+- In flight: none
+- Ready now (`ready-for-agent`, every blocker done), in number order: **25, 26, 27, 28, 32, 40**
 - Waiting on the human (`needs-info`): 03, 04, 15, 31, 33. The open questions are in each issue file.
 - Doc follow-ups: none open
 
@@ -54,7 +54,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 36 | Concurrent-safe backend test suite (chore) | done | none | #20 |
 | 37 | Vendor staff can never act as EIC (chore) | done | none | #22 |
 | 38 | Shared vendor-staff rule, endorsement hardening (chore) | done | none | #25 |
-| 39 | "Waiting for me": E-Call items | ready-for-agent | 24 | |
+| 39 | "Waiting for me": E-Call items | done | 24 | #36 |
 | 40 | "Waiting for me": Work Order items | ready-for-agent | 24 | |
 
 Other merged PRs: #1 PRD v2 docs, #2 project scaffold, #3 unblock answered issues, #15 no-duplicate-lines decision.
@@ -76,3 +76,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-23: product-owner cleared the 13 GLOSSARY follow-up (E-Call from a PM Task), picked 24 (no email in the MVP, so this list is how users find their work; unblocks the new 39 and 40), split the E-Call and Work Order items into 39 and 40, and added the billing entries to 32 because 23 merged first.
 - 2026-11-23: issue 24 merged as PR #34; unblocks 39 and 40.
 - 2026-11-23: product-owner picked 39 (finishes the main use of the "Waiting for me" list; smaller than 40, and adds the `priority` field that 40 doesn't need).
+- 2026-11-23: issue 39 merged as PR #36.
