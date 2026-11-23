@@ -1,6 +1,7 @@
 # 09 — PM Timeliness (Upcoming / Due / Overdue)
 
-Status: ready-for-agent
+Status: done
+Merged: PR #30 (528b72d), 2026-11-23
 Blocked by: 08
 Type: task
 

@@ -8,9 +8,9 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 - Last merged: **23 — Multi-level billing endorsement** (PR #28, main 283820d, 2026-11-23)
 - In flight: **09 — PM Timeliness** (handed off 2026-11-23)
-- Ready now (`ready-for-agent`, every blocker done), in number order: **09, 13, 24, 25, 27, 32**
+- Ready now (`ready-for-agent`, every blocker done), in number order: **13, 24, 25, 27, 28, 32**
 - Waiting on the human (`needs-info`): 03, 04, 15, 31, 33. The open questions are in each issue file.
-- Doc follow-ups: none recorded
+- Doc follow-ups: 1 open (see Doc follow-ups)
 
 ## Board
 
@@ -24,7 +24,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 06 | Site PM Frequency | done | 05 | #12 |
 | 07 | PM Checklist templates | done | 02 | #9 |
 | 08 | Automatic PM Task generation | done | 05, 06, 07 | #14 |
-| 09 | PM Timeliness (Upcoming / Due / Overdue) | ready-for-agent | 08 | |
+| 09 | PM Timeliness (Upcoming / Due / Overdue) | done | 08 | #30 |
 | 10 | Site Vendor submits the PM Report | done | 07, 08 | #16 |
 | 11 | EIC validates a PM Report (Approval Records) | done | 10, 34 | #19 |
 | 12 | File an E-Call | done | 05 | #11 |
@@ -61,9 +61,10 @@ Other merged PRs: #1 PRD v2 docs, #2 project scaffold, #3 unblock answered issue
 
 Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product-owner clears them before picking the next issue. Format: `- [ ] <file>: <what's missing> (found in issue NN)`.
 
-_None yet._
+- [ ] GLOSSARY.md: PM Timeliness entry lacks the rules (Upcoming = 7 days before due, Due = due date, Overdue = after; For Validation judged by Work Done Date; Manila today) (found in issue 09)
 
 ## Log
 
 - 2026-11-23: board created and backfilled from merge history (PRs #4–#28).
 - 2026-11-23: product-owner picked 09 (unblocks 28, then 29; used by calendar and dashboard). Acceptance criteria finalised.
+- 2026-11-23: issue 09 merged as PR #30; unblocks 28.
