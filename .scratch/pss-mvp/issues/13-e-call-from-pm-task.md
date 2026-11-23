@@ -12,12 +12,14 @@ PRD §6.10: while reviewing a PM Task, the EIC can file an E-Call straight from 
 
 ## Acceptance criteria
 
-- [ ] Only the PM Task's EIC can do this. Others get 403.
-- [ ] The created E-Call has the PM Task's Site and Equipment and a `pm_task_id` reference, and follows issue 12's rules (routing, snapshot, initial status).
-- [ ] The PM Task's status is identical before and after (tested for `For Validation` and `Returned`).
-- [ ] `GET /api/pm-tasks/{task}` lists the E-Calls filed from it.
+- [x] Only the PM Task's EIC can do this. Others get 403.
+- [x] The created E-Call has the PM Task's Site and Equipment and a `pm_task_id` reference, and follows issue 12's rules (routing, snapshot, initial status).
+- [x] The PM Task's status is identical before and after (tested for `For Validation` and `Returned`).
+- [x] `GET /api/pm-tasks/{task}` lists the E-Calls filed from it.
 
 ## Comments
+
+- 2026-11-23 (qa): PASS. `php artisan test --compact` 896 passed (3951 assertions); PmTaskECallApiTest + ECallApiTest 67 passed (299 assertions). Every criterion maps to a real test.
 - 2026-11-22 (product-owner): Human decision (issue 11 Decisions, spec.md): when a Site's EIC is replaced, the **current Site EIC** (`site_settings.eic_employee_id` at the time of the request) acts on pending items. The EIC captured on the record is history only and isn't used for authorization. "The PM Task's EIC" in the criteria means the **current Site EIC** of the task's Site. Add a test where a replaced EIC gets 403.
 - 2026-11-23 (product-owner): Clarifications for dev-lead, re-checked against main 7845107.
   - **Statuses (provisional, see the open question below):** filing is allowed only while the PM Task is `For Validation` or `Returned` (the PRD's "EIC reviews the finding"). Any other status gives 422 with a clear message. It's easier to widen this later than to narrow it.
