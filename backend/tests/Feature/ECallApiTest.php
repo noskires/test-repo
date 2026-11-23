@@ -163,13 +163,24 @@ class ECallApiTest extends TestCase
             ->assertJsonPath('data.equipment.name', 'Lobby Aircon');
     }
 
-    public function test_an_optional_pm_task_reference_is_stored(): void
+    public function test_the_generic_endpoint_refuses_a_pm_task_reference(): void
     {
         $this->actingAsRequestor();
 
         $this->postJson('/api/e-calls', $this->validPayload(['pm_task_id' => 42]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['pm_task_id' => 'prohibited']);
+
+        $this->assertDatabaseCount('e_calls', 0);
+    }
+
+    public function test_an_e_call_filed_through_the_generic_endpoint_has_no_pm_task(): void
+    {
+        $this->actingAsRequestor();
+
+        $this->postJson('/api/e-calls', $this->validPayload())
             ->assertCreated()
-            ->assertJsonPath('data.pm_task_id', 42);
+            ->assertJsonPath('data.pm_task_id', null);
     }
 
     /**
@@ -186,7 +197,7 @@ class ECallApiTest extends TestCase
             'missing priority' => [['priority' => null], 'priority'],
             'missing nature of issue' => [['nature_of_issue' => null], 'nature_of_issue'],
             'missing description' => [['description' => null], 'description'],
-            'pm task that is not an id' => [['pm_task_id' => 'abc'], 'pm_task_id'],
+            'pm task reference of any kind' => [['pm_task_id' => 'abc'], 'pm_task_id'],
         ];
     }
 
