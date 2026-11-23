@@ -1,6 +1,7 @@
 # 32 — Admin "Needs Setup" list
 
-Status: ready-for-agent
+Status: done
+Merged: PR #38 (b2a3234), 2026-11-23
 Blocked by: 08, 19
 Type: task
 

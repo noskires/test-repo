@@ -6,11 +6,11 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **40 — "Waiting for me": Work Order items** (PR #37, 2026-11-23)
-- In flight: **32 — Admin "Needs Setup" list** (picked 2026-11-23)
+- Last merged: **32 — Admin "Needs Setup" list** (PR #38, 2026-11-23)
+- In flight: none
 - Ready now (`ready-for-agent`, every blocker done), in number order: **25, 26, 27, 28**
 - Waiting on the human (`needs-info`): 03, 04, 15, 31, 33. The open questions are in each issue file.
-- Doc follow-ups: none open
+- Doc follow-ups: 1 open (see "Doc follow-ups")
 
 ## Board
 
@@ -47,7 +47,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 29 | Reports and export | ready-for-agent | 04, 26, 27, 28 | |
 | 30 | Local dev master data fake | done | 02 | #7 |
 | 31 | Seed the fixed MVP PM Checklists | needs-info | 07 | |
-| 32 | Admin "Needs Setup" list | ready-for-agent | 08, 19 | |
+| 32 | Admin "Needs Setup" list | done | 08, 19 | #38 |
 | 33 | PM start date for Equipment with no installation date | needs-info | 08, 32 | |
 | 34 | PM Report: Service Report + Work Done Date | done | 10 | #17 |
 | 35 | Application timezone Asia/Manila | done | none | #18 |
@@ -65,6 +65,7 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 
 - [x] GLOSSARY.md: PM Timeliness entry lacks the rules (Upcoming = 7 days before due, Due = due date, Overdue = after; For Validation judged by Work Done Date; Manila today) (found in issue 09)
 - [x] GLOSSARY.md: the E-Call entry doesn't say an E-Call can be filed from a PM Task by the Site EIC (For Validation or Returned) and keeps a link to it (found in issue 13)
+- [ ] GLOSSARY.md: the Needs Setup list entry says it lists what stops PM Tasks, but it now also lists Work Orders with a billing chain gap (Implemented / For Billing Endorsement LVLn), and the endpoint is `GET /api/needs-setup` behind `manage-site-settings` (found in issue 32)
 
 ## Log
 
@@ -80,3 +81,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-23: product-owner picked 40 (completes the "Waiting for me" list; Work Order endorsers otherwise have no way to see their queue).
 - 2026-11-23: issue 40 merged as PR #37.
 - 2026-11-23: product-owner picked 32. It provides the "flag" half of the human's "block and flag" decisions on 08, 19 and 23: generation and endorsement already block, but nothing shows admins why. It also unblocks 33. Added the billing-gap acceptance criterion and the hand-off clarifications.
+- 2026-11-23: issue 32 merged as PR #38; unblocks 33 (still needs-info, waiting on the human).
