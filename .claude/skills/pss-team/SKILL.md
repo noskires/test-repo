@@ -17,6 +17,6 @@ Why this shape: a teammate's whole history is re-sent on every call. One long-li
 3. Per issue, when product-owner hands you an issue path:
    a. Spawn a FRESH `dev-lead` and a FRESH `qa` in one message (subagent_type and name = role). The prompt is just the issue path plus "Follow your role instructions." For an issue product-owner calls a small chore, you may pass `model: "sonnet"` to dev-lead.
    b. Don't send git-sync or "main is at X" messages. Dev-lead pulls main itself. Message a teammate only with something it can't read from files (a human decision for the in-flight issue).
-   c. When the releaser reports the merge, relay the PR URL and merge hash, then stop `dev-lead` and `qa` with TaskStop. Tell product-owner the issue merged so it can pick the next one.
+   c. When the releaser reports the merge, relay the PR URL and merge hash, then stop `dev-lead` and `qa` with TaskStop. Don't message product-owner: the releaser's merge report already tells it to pick the next issue, and a second message wakes it twice.
    d. Every ~5 issues (or sooner if a usage-limit pause happened), restart `product-owner` and `releaser` between issues the same way: TaskStop, then spawn fresh. Their state lives in the issue files, spec.md and git.
 4. Tell the user who is doing what, then relay hand-offs, questions for the human and final results. Don't relay idle pings that add nothing new.
