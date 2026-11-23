@@ -9,6 +9,8 @@ Issues and specs for this repo live as markdown files in `.scratch/`.
 - Implementation issues are one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- When an issue's PR merges, its `Status:` becomes `done` with a `Merged: PR #n (hash), date` line under it
+- The epic board is `.scratch/<feature-slug>/epic.md`: one row per issue, a "Resume here" section (last merged, in flight, ready now, waiting on the human) and "Doc follow-ups". Read it first when resuming work.
 
 ## When a skill says "publish to the issue tracker"
 

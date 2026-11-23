@@ -1,6 +1,7 @@
 # 35 — Set the application timezone to Asia/Manila
 
-Status: ready-for-agent
+Status: done
+Merged: PR #18 (2314ae4), 2026-11-22
 Blocked by: none
 Type: task
 

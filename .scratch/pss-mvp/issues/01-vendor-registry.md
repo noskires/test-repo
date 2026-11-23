@@ -1,6 +1,7 @@
 # 01 — Vendor registry
 
-Status: ready-for-agent
+Status: done
+Merged: PR #4 (52a8118), 2026-11-22
 Blocked by: none
 Type: task
 

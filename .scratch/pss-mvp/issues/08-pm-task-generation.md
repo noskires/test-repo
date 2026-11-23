@@ -1,6 +1,7 @@
 # 08 — Automatic PM Task generation
 
-Status: ready-for-agent
+Status: done
+Merged: PR #14 (32d9bda), 2026-11-22
 Blocked by: 05, 06, 07
 Type: task
 

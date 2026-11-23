@@ -1,6 +1,7 @@
 # 07 — PM Checklist templates with versions (fixed set, read-only API)
 
-Status: ready-for-agent
+Status: done
+Merged: PR #9 (ae7a3b8), 2026-11-22
 Blocked by: 02
 Type: task
 

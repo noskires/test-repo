@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Issues live as local markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+Issues live as local markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`. Progress and the next step: read `.scratch/<feature>/epic.md` "Resume here" first (currently `.scratch/pss-mvp/epic.md`).
 
 ### Triage labels
 

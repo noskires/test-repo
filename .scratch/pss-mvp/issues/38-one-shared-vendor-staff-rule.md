@@ -1,6 +1,7 @@
 # 38 — Shared vendor-staff rule and endorsement hardening
 
-Status: ready-for-agent
+Status: done
+Merged: PR #25 (911cff9), 2026-11-23
 Blocked by: none
 Type: chore
 

@@ -1,6 +1,7 @@
 # 02 — Master data directory port (with in-memory fake)
 
-Status: ready-for-agent
+Status: done
+Merged: PR #5 (fd0a389), 2026-11-22
 Blocked by: none
 Type: task
 

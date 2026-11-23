@@ -57,4 +57,4 @@ Equipment, Sites, Equipment Categories, employees (with each one's Immediate Hea
 
 ## Issues
 
-See `issues/`. Each one has a `Status:` line (`ready-for-agent` / `needs-info`) and a `Blocked by:` line.
+See `issues/`. Each one has a `Status:` line (`ready-for-agent` / `needs-info` / `done`) and a `Blocked by:` line. Progress and what to do next: `epic.md`.

@@ -1,6 +1,7 @@
 # 06 — Set a Site's PM Frequency
 
-Status: ready-for-agent
+Status: done
+Merged: PR #12 (0180d0e), 2026-11-22
 Blocked by: 05
 Type: task
 

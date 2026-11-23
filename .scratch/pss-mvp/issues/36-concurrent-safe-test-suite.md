@@ -1,6 +1,7 @@
 # 36 — Make the backend test suite safe to run concurrently
 
-Status: ready-for-agent
+Status: done
+Merged: PR #20 (0b58fc3), 2026-11-22
 Blocked by: none
 Type: chore
 

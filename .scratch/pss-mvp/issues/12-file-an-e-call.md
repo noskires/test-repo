@@ -1,6 +1,7 @@
 # 12 — File an E-Call
 
-Status: ready-for-agent
+Status: done
+Merged: PR #11 (605c950), 2026-11-22
 Blocked by: 05
 Type: task
 

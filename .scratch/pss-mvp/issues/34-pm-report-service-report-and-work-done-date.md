@@ -1,6 +1,7 @@
 # 34 — PM Report: require the PM Service Report, and Work Done Date ≥ start
 
-Status: ready-for-agent
+Status: done
+Merged: PR #17 (6c0b00b), 2026-11-22
 Blocked by: 10
 Type: task
 
