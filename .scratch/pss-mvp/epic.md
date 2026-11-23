@@ -7,8 +7,8 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **25 — Cancelling E-Calls and Work Orders** (PR #40, 2026-11-24)
-- In flight: none
-- Ready now (`ready-for-agent`, every blocker done), in number order: **26, 27, 28**
+- In flight: **26 — Equipment maintenance history**
+- Ready now (`ready-for-agent`, every blocker done), in number order: **26** (in flight), **27, 28**
 - Waiting on the human (`needs-info`): 03, 04, 15, 31, 33, 41. The open questions are in each issue file.
 - Doc follow-ups: none open
 
@@ -85,3 +85,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-23: issue 32 merged as PR #38; unblocks 33 (still needs-info, waiting on the human).
 - 2026-11-24: product-owner split 25: PM Task cancel moved to the new 41 (needs-info, generation-job question still open). Picked 25 (E-Calls and Work Orders): without Cancel, a mistaken E-Call or Work Order can only be Rejected by an approver, and its creator can't withdraw it. Updated the GLOSSARY Cancel entry with the cut-offs.
 - 2026-11-24: issue 25 merged as PR #40; 41 (PM Task cancel) stays needs-info.
+- 2026-11-24: product-owner picked 26 (the per-Equipment timeline is a core PRD view, §5.3 / §7.1, and it is the best-defined of 26, 27 and 28; it is also one of 29's blockers). Added the hand-off clarifications (entry date, visibility, snapshots).
