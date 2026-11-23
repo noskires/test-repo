@@ -17,14 +17,16 @@ Compute **PM Timeliness** for each open PM Task. It is shown next to PM Status a
 
 ## Acceptance criteria
 
-- [ ] A pure function (no DB, no clock; `today` is passed in) `timeliness(dueDate, today, status, workDoneDate)` returns `upcoming`, `due`, `overdue` or `null`, with unit tests at every boundary: due−8 (null), due−7 (upcoming), due−1 (upcoming), due (due), due+1 (overdue).
-- [ ] Completed and Cancelled tasks have no timeliness (`null`), even when long past the due date.
-- [ ] Scheduled, In Progress and Returned tasks follow the date rule against today. A Returned task past its due date is `overdue` even though it has a Work Done Date (tested).
-- [ ] A For Validation task is judged by its Work Done Date: Work Done Date ≤ due date gives `null` (on time, waiting for the EIC) even when today is after the due date; Work Done Date > due date gives `overdue` (tested both ways).
-- [ ] `PmTaskResource` returns `timeliness` next to `status`, so `GET /api/vendor/pm-tasks` and `POST /api/pm-tasks/{task}/start` include it (feature test).
-- [ ] "Today" is today in Asia/Manila: a feature test with time frozen between 00:00 and 08:00 Manila (16:00–24:00 UTC the day before) gets the Manila date's answer, not the UTC one.
+- [x] A pure function (no DB, no clock; `today` is passed in) `timeliness(dueDate, today, status, workDoneDate)` returns `upcoming`, `due`, `overdue` or `null`, with unit tests at every boundary: due−8 (null), due−7 (upcoming), due−1 (upcoming), due (due), due+1 (overdue).
+- [x] Completed and Cancelled tasks have no timeliness (`null`), even when long past the due date.
+- [x] Scheduled, In Progress and Returned tasks follow the date rule against today. A Returned task past its due date is `overdue` even though it has a Work Done Date (tested).
+- [x] A For Validation task is judged by its Work Done Date: Work Done Date ≤ due date gives `null` (on time, waiting for the EIC) even when today is after the due date; Work Done Date > due date gives `overdue` (tested both ways).
+- [x] `PmTaskResource` returns `timeliness` next to `status`, so `GET /api/vendor/pm-tasks` and `POST /api/pm-tasks/{task}/start` include it (feature test).
+- [x] "Today" is today in Asia/Manila: a feature test with time frozen between 00:00 and 08:00 Manila (16:00–24:00 UTC the day before) gets the Manila date's answer, not the UTC one.
 
 ## Comments
+
+- 2026-11-23 (qa): PASS. `php artisan test` 866 passed (3823 assertions); `php artisan test --filter=PmTimeliness` 25 passed (63 assertions). Every criterion maps to a real test.
 
 ## Decisions (grilling, 2026-11-22)
 - **Upcoming**: from 7 days before the due date, the same for every frequency.
