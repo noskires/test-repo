@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderCompletion;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -35,6 +36,15 @@ class WorkOrderPolicy
     public function submit(User $user, WorkOrder $workOrder): bool
     {
         return $this->update($user, $workOrder);
+    }
+
+    /**
+     * Determine whether the user can declare the Work Order complete: staff of its Site Vendor (the vendor captured
+     * on its E-Call). Callers authorize `view` first. WorkOrderCompletion::submit repeats this under a lock.
+     */
+    public function declareCompletion(User $user, WorkOrder $workOrder): bool
+    {
+        return WorkOrderCompletion::isSiteVendorStaff($user, $workOrder);
     }
 
     /**

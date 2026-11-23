@@ -91,6 +91,16 @@ class WorkOrder extends Model implements ApprovalSubject
     }
 
     /**
+     * The Site Vendor's completion declarations (issue 20), one per revision.
+     *
+     * @return HasMany<WorkOrderCompletion, $this>
+     */
+    public function completions(): HasMany
+    {
+        return $this->hasMany(WorkOrderCompletion::class);
+    }
+
+    /**
      * Create the E-Call's one Work Order and close the E-Call. The E-Call row is locked while the requestor, the
      * Approved status and "no Work Order yet" are re-checked; the unique e_call_id index catches a concurrent create.
      *
