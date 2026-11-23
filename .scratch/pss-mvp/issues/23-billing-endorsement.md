@@ -1,6 +1,7 @@
 # 23 — Multi-level billing endorsement and closing the Work Order
 
-Status: ready-for-agent
+Status: done
+Merged: PR #28 (283820d), 2026-11-23
 Blocked by: 21
 Type: task
 

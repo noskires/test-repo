@@ -1,6 +1,7 @@
 # 20 — Site Vendor implements the Work Order and declares completion
 
-Status: ready-for-agent
+Status: done
+Merged: PR #26 (2ee8bef), 2026-11-23
 Blocked by: 19, 38
 Type: task
 

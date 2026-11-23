@@ -1,6 +1,7 @@
 # 10 — Site Vendor starts a PM Task and submits the PM Report
 
-Status: ready-for-agent
+Status: done
+Merged: PR #16 (3f086d5), 2026-11-22
 Blocked by: 07, 08
 Type: task
 

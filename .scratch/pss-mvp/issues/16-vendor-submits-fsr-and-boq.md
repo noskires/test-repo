@@ -1,6 +1,7 @@
 # 16 — Site Vendor submits the FSR and BOQ for an E-Call
 
-Status: ready-for-agent
+Status: done
+Merged: PR #13 (3c1f988), 2026-11-22
 Blocked by: 12, 14
 Type: task
 

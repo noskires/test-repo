@@ -1,6 +1,7 @@
 # 22 — Configure Billing Thresholds
 
-Status: ready-for-agent
+Status: done
+Merged: PR #6 (a612b50), 2026-11-22
 Blocked by: none
 Type: task
 

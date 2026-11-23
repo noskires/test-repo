@@ -1,6 +1,7 @@
 # 37 — Vendor staff can never act as EIC
 
-Status: ready-for-agent
+Status: done
+Merged: PR #22 (75de780), 2026-11-22
 Blocked by: none
 Type: chore
 

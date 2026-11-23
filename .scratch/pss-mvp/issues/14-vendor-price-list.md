@@ -1,6 +1,7 @@
 # 14 — Vendor Price List (manual entry)
 
-Status: ready-for-agent
+Status: done
+Merged: PR #10 (20cde31), 2026-11-22
 Blocked by: 01
 Type: task
 

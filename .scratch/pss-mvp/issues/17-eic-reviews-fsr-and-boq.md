@@ -1,6 +1,7 @@
 # 17 — EIC reviews the FSR and BOQ
 
-Status: ready-for-agent
+Status: done
+Merged: PR #21 (7027156), 2026-11-22
 Blocked by: 11, 16
 Type: task
 

@@ -1,6 +1,7 @@
 # 19 — Work Order endorsement (2 levels) before implementation
 
-Status: ready-for-agent
+Status: done
+Merged: PR #24 (19d9347), 2026-11-23
 Blocked by: 18
 Type: task
 

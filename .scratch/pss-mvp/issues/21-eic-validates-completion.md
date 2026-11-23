@@ -1,6 +1,7 @@
 # 21 — EIC validates completed work and sets the Billing Amount
 
-Status: ready-for-agent
+Status: done
+Merged: PR #27 (e277214), 2026-11-23
 Blocked by: 20, 38
 Type: task
 

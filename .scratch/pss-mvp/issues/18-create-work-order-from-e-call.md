@@ -1,6 +1,7 @@
 # 18 — Create a Work Order from an approved E-Call
 
-Status: ready-for-agent
+Status: done
+Merged: PR #23 (6e7c1c7), 2026-11-22
 Blocked by: 17, 37
 Type: task
 

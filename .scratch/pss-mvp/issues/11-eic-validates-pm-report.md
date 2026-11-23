@@ -1,6 +1,7 @@
 # 11 — EIC validates a PM Report (and shared Approval Records)
 
-Status: ready-for-agent
+Status: done
+Merged: PR #19 (6b99081), 2026-11-22
 Blocked by: 10, 34
 Type: task
 

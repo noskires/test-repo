@@ -1,6 +1,7 @@
 # 05 — Assign the Site Vendor and Site EIC
 
-Status: ready-for-agent
+Status: done
+Merged: PR #8 (ab0ff0d), 2026-11-22
 Blocked by: 01, 02
 Type: task
 

@@ -1,6 +1,7 @@
 # 30 — Local dev serves master data from a seeded in-memory fake
 
-Status: ready-for-agent
+Status: done
+Merged: PR #7 (2818e97), 2026-11-22
 Blocked by: 02
 Type: task
 
