@@ -1,6 +1,7 @@
 # 25 — Cancelling E-Calls and Work Orders
 
-Status: ready-for-agent
+Status: done
+Merged: PR #40 (1045dbf), 2026-11-24
 Blocked by: 12, 18
 Type: task
 
