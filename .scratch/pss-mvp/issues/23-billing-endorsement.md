@@ -1,34 +1,40 @@
 # 23 — Multi-level billing endorsement and closing the Work Order
 
 Status: ready-for-agent
-Blocked by: 19, 21, 22
+Blocked by: 21
 Type: task
 
 ## What to build
 
 PRD §8.5: after the EIC's validation, the Work Order goes through 2, 3 or 4 billing endorsement levels, depending on the **Billing Amount** and the Billing Thresholds (issue 22):
-- L1 Supervisor / Team Head → L2 Division Head → (L3 Center Head) → (L4 Sector Head), resolved up the Immediate Head chain.
+- L1 Supervisor / Team Head → L2 Division Head → (L3 Center Head) → (L4 Sector Head): levels 1 to 4 up the **E-Call Requestor's** Immediate Head chain (`ImmediateHeadChain::headAtLevel(requestorEmployeeId, n)`), **resolved current at each step**, the same as issue 19.
 - Statuses: `For Billing Endorsement LVL1` → `LVL2` → `LVL3` → `LVL4`, as needed. The last required approval → `Closed`.
-- **Return** goes back exactly one step, to the previous approver (glossary). **Reject** is final.
+- **Return** goes back exactly one step: from L1 to the EIC (`Implemented`), and from Ln to L(n-1). **Reject** is final.
 - Each action writes an Approval Record.
 
-## Open questions (for the human)
+## Acceptance criteria
 
-1. Same as issue 19 Q1: whose Immediate Head chain is used for billing (the E-Call Requestor's, the Work Order creator's, or the EIC's)?
-2. Is the number of levels fixed when the EIC validates (issue 21)? Or recomputed if the Billing Thresholds change mid-way?
-3. When the Level 1 billing approver **Returns**, where does it go: back to the EIC to revalidate the actual quantities (status `Implemented`), or somewhere else?
-
-## Acceptance criteria (draft)
-
-- [ ] For Billing Amounts of 150k / 200k / 1M / 1.2M, the Work Order needs 2 / 3 / 3 / 4 approvals and ends `Closed`.
-- [ ] Only the current level's resolved approver can act.
-- [ ] Return goes back one step. Reject is final. Approval Records are written.
+- [ ] **Required levels** = `BillingLevels::requiredBillingLevels(rounded Billing Amount in centavos, current Billing Thresholds)`, **recalculated at every billing action**. With the default thresholds (₱200,000 / ₱1,000,000), Billing Amounts of ₱150,000 / ₱200,000 / ₱1,000,000 / ₱1,200,000 need 2 / 3 / 3 / 4 approvals and end `Closed`.
+- [ ] **Approve** at level n: if n ≥ the levels required right now, → `Closed`. Otherwise → `For Billing Endorsement LVL(n+1)`. A test changes the thresholds mid-way: lowering the required levels so that the levels already done are enough closes the Work Order on the next approval, and raising them adds a level.
+- [ ] **Only the current level's endorser** can approve, return or reject: a user whose `employee_id` equals `headAtLevel(requestorEmployeeId, n)` **resolved at the time of the action, inside the lock**, and who isn't vendor staff. Others get 403. A test changes the Requestor's head at level n while the Work Order waits there: the new head can act, and the old head gets 403.
+- [ ] **Block and flag**: an approve that would move the Work Order to a level whose endorser doesn't resolve right now (e.g. 4 levels needed and no level-4 head) returns **422 with a clear message** naming the missing level. The status is unchanged and no Approval Record is written. The Work Order shows up on the Needs Setup list (issue 32). This issue adds the billing entries to that list: the `missing_billing_endorser_level_<n>` reasons described in issue 32. If 32 hasn't merged yet, they're added when 32 is built. If the current level's endorser stops resolving while the Work Order waits, every action at that level returns 422. Once the chain is fixed, the then-current endorser can act.
+- [ ] **Return** (remarks required): from LVL1 → `Implemented` (the EIC re-validates the actual quantities, issue 21), and from LVLn → LVL(n-1). **Reject** (remarks required) → `Rejected`, final. Every later action returns 422.
+- [ ] Approve, return and reject each write an Approval Record through `ApprovalRecorder` (the `work_order` alias from issue 19), with previous and resulting status. `GET /api/work-orders/{wo}/approvals` shows them alongside the endorsement records.
+- [ ] Each action re-checks the status, the required levels and the endorser inside a transaction that locks the Work Order. Tests use the directory fake. No new packages, and `php artisan test` passes.
 
 ## Comments
 
 ## Decisions (grilling, 2026-11-22)
-- The required levels are **recalculated against the current Billing Thresholds** at each step, not frozen. If a threshold change means the levels already done are enough, the Work Order Closes immediately. The approvers themselves are still the chain fixed at submission (issue 19).
+- The required levels are **recalculated against the current Billing Thresholds** at each step, not frozen. If a threshold change means the levels already done are enough, the Work Order Closes immediately. ~~The approvers themselves are still the chain fixed at submission (issue 19).~~ **Superseded 2026-11-23 by the human**: billing approvers are resolved current at each step (see Decisions below).
 - Q1 and Q2 answered above (the creator's chain; levels recalculated).
 - Q3 answered: a Return from billing level 1 goes **back to the EIC** (status `Implemented`) to re-validate the actual quantities. That is "back one step".
 - 2026-11-22 (product-owner): Rounding decided by the human (docs/adr/0002-money-rounding.md). The number of levels is decided by comparing the **rounded** Billing Amount (integer centavos, from issue 21) with the Billing Thresholds. The status is unchanged (open questions 1 to 3 remain).
 - 2026-11-23 (product-owner): FYI from the human's issue 19 decisions: Work Order endorsement uses the **E-Call Requestor's** Immediate Head chain, **blocks and flags** a short or missing chain (422 plus the Needs Setup list), and resolves endorsers **current at each step**. Billing endorsement **likely uses the same three rules** (levels L1 to L4 up the same chain). This hasn't been confirmed yet, so **confirm with the human** before this issue is built. It would also answer open question 1 (whose chain) and affects Q2 (whether the level count is fixed at validation).
+
+## Decisions (human, 2026-11-23)
+- **Same rules as issue 19.** Billing approvers come from the **E-Call Requestor's** (= the Work Order creator's) Immediate Head chain and are **resolved current at each step**. This supersedes the "chain fixed at submission" line above.
+- **A missing level blocks and flags.** An action that needs an endorser the chain can't provide (e.g. no Sector Head when 4 levels are needed) returns 422, and the Work Order goes on the Needs Setup list (issue 32) until the chain is fixed upstream.
+- The earlier grilling decisions stand: levels are **recalculated against the current thresholds at each step**, an L1 Return goes **to the EIC (`Implemented`)**, and the comparison uses the **rounded** Billing Amount (ADR 0002).
+
+- 2026-11-23 (product-owner): Open questions 1 to 3 are all resolved, and I replaced the draft with final criteria. **Blocked by is now only 21**, since 19 and 22 are merged. Status: ready-for-agent (once 21 merges). The move **into** billing level 1 happens in issue 21's Approve. I've added a note there asking it to apply the same block-and-flag check for level 1.
+- 2026-11-23 (product-owner): Human decision (issue 38): billing endorsement must apply the **same separation-of-duties checks** as Work Order endorsement. The heads at every required billing level must be **distinct people** (no employee ID repeated across levels 1 to n), and **none may be the Requestor**. A conflict gives 422, no record, and the Work Order on Needs Setup (`endorsement_chain_conflict`). No person may **approve two different billing levels** in the current billing cycle (since entering `For Billing Endorsement LVL1`), matched by user ID or employee ID. Re-approving the same level after a return from the level above is allowed, and Return/Reject aren't blocked (refined 2026-11-23, as in issue 38). Cycles in the chain count as broken (`ImmediateHeadChain`, issue 38). The endpoints authorize `view` first, so outsiders get a plain 403 (no status oracle). Add these as criteria when this issue is picked up.

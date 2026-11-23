@@ -105,10 +105,11 @@ Which workflow step an E-Call is on: For Vendor Assessment â†’ For EIC Review â†
 
 ## Endorsement
 An approver's sign-off as a Work Order moves up the Immediate Head chain. There are two kinds: the 2-level endorsement before implementation, and the Billing Endorsement after the EIC validates the completed work. For the 2-level endorsement, Level 1 is the E-Call Requestor's Immediate Head and Level 2 is that person's Immediate Head. Each endorser is whoever holds that position when it's their turn, not whoever held it at submission.
+Separation of duties: the endorsers at different levels must be different people, none of them may be the Requestor, and nobody approves at two different levels in one round.
 _Avoid:_ treating the endorsers as fixed when the Work Order is submitted
 
 ## Billing Endorsement
-The 2, 3 or 4 levels of Endorsement a Work Order goes through after completion, chosen by its Billing Amount against the Billing Thresholds. The last one Closes the Work Order.
+The 2, 3 or 4 levels of Endorsement a Work Order goes through after completion, chosen by its Billing Amount against the Billing Thresholds. The number of levels is recalculated against the current thresholds at each step. Like the 2-level endorsement, each level is whoever holds that position on the Requestor's Immediate Head chain when it's their turn, and a missing level blocks the Work Order and puts it on the Needs Setup list. The last one Closes the Work Order.
 
 ## Approval Record
 The permanent log entry for every Approve, Return or Reject (and cancellation): who acted, the action, remarks, the previous and resulting status, and when.
