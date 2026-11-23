@@ -6,11 +6,11 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **09 — PM Timeliness** (PR #30, main e43a653, 2026-11-23)
-- In flight: **13 — EIC files an E-Call from a PM Task's findings** (handed off 2026-11-23)
-- Ready now (`ready-for-agent`, every blocker done), in number order: **13, 24, 25, 27, 28, 32**
+- Last merged: **13 — EIC files an E-Call from a PM Task's findings** (PR #32, 2026-11-23)
+- In flight: none
+- Ready now (`ready-for-agent`, every blocker done), in number order: **24, 25, 26, 27, 28, 32**
 - Waiting on the human (`needs-info`): 03, 04, 15, 31, 33. The open questions are in each issue file.
-- Doc follow-ups: none open
+- Doc follow-ups: 1 open (see Doc follow-ups)
 
 ## Board
 
@@ -28,7 +28,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 10 | Site Vendor submits the PM Report | done | 07, 08 | #16 |
 | 11 | EIC validates a PM Report (Approval Records) | done | 10, 34 | #19 |
 | 12 | File an E-Call | done | 05 | #11 |
-| 13 | EIC files an E-Call from a PM Task's findings | ready-for-agent | 11, 12 | |
+| 13 | EIC files an E-Call from a PM Task's findings | done | 11, 12 | #32 |
 | 14 | Vendor Price List (manual entry) | done | 01 | #10 |
 | 15 | Upload a Price List from a file | needs-info | 14 | |
 | 16 | Site Vendor submits the FSR and BOQ | done | 12, 14 | #13 |
@@ -62,6 +62,7 @@ Other merged PRs: #1 PRD v2 docs, #2 project scaffold, #3 unblock answered issue
 Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product-owner clears them before picking the next issue. Format: `- [ ] <file>: <what's missing> (found in issue NN)`.
 
 - [x] GLOSSARY.md: PM Timeliness entry lacks the rules (Upcoming = 7 days before due, Due = due date, Overdue = after; For Validation judged by Work Done Date; Manila today) (found in issue 09)
+- [ ] GLOSSARY.md: the E-Call entry doesn't say an E-Call can be filed from a PM Task by the Site EIC (For Validation or Returned) and keeps a link to it (found in issue 13)
 
 ## Log
 
@@ -69,3 +70,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-23: product-owner picked 09 (unblocks 28, then 29; used by calendar and dashboard). Acceptance criteria finalised.
 - 2026-11-23: issue 09 merged as PR #30; unblocks 28.
 - 2026-11-23: product-owner cleared the 09 GLOSSARY follow-up (PM Timeliness rules) and picked 13 (unblocks 26, then 29; closes the unchecked `pm_task_id` on POST /api/e-calls).
+- 2026-11-23: issue 13 merged as PR #32; unblocks 26.

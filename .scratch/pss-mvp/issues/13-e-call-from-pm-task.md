@@ -1,6 +1,7 @@
 # 13 — EIC files an E-Call from a PM Task's findings
 
-Status: ready-for-agent
+Status: done
+Merged: PR #32 (c9296f4), 2026-11-23
 Blocked by: 11, 12
 Type: task
 
