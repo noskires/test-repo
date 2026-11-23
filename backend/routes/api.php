@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\PriceListItemController;
 use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
 use App\Http\Controllers\Api\VendorController;
+use App\Http\Controllers\Api\WorkOrderCompletionController;
 use App\Http\Controllers\Api\WorkOrderController;
 use App\Http\Controllers\Api\WorkOrderEndorsementController;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +53,9 @@ Route::middleware('auth')->group(function () {
     Route::post('work-orders/{workOrder}/return', [WorkOrderEndorsementController::class, 'returnOneStep'])->name('work-orders.return');
     Route::post('work-orders/{workOrder}/reject', [WorkOrderEndorsementController::class, 'reject'])->name('work-orders.reject');
     Route::get('work-orders/{workOrder}/approvals', [WorkOrderEndorsementController::class, 'approvals'])->name('work-orders.approvals.index');
+    Route::post('work-orders/{workOrder}/completion', [WorkOrderCompletionController::class, 'store'])->name('work-orders.completion.store');
+    Route::get('work-orders/{workOrder}/completions', [WorkOrderCompletionController::class, 'index'])->name('work-orders.completions.index');
+    Route::get('vendor/work-orders', [WorkOrderCompletionController::class, 'vendorIndex'])->name('vendor.work-orders.index');
 
     Route::get('vendor/pm-tasks', [PmTaskController::class, 'vendorIndex'])->name('vendor.pm-tasks.index');
     Route::post('pm-tasks/{pmTask}/start', [PmTaskController::class, 'start'])->name('pm-tasks.start');

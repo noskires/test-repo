@@ -4,7 +4,8 @@ namespace App\Enums;
 
 /**
  * Which workflow step a Work Order is on. Open is the editable draft (GLOSSARY "Open (Work Order)"). Submitting
- * starts the 2-level endorsement (issue 19); later issues add implementation and billing statuses (20+).
+ * starts the 2-level endorsement (issue 19). The Site Vendor's completion declaration moves For Implementation to
+ * Implemented (issue 20); later issues add validation and billing statuses (21+).
  */
 enum WorkOrderStatus: string
 {
@@ -12,6 +13,7 @@ enum WorkOrderStatus: string
     case ForLvl1Endorsement = 'for_lvl1_endorsement';
     case ForLvl2Endorsement = 'for_lvl2_endorsement';
     case ForImplementation = 'for_implementation';
+    case Implemented = 'implemented';
     case Rejected = 'rejected';
 
     /**
