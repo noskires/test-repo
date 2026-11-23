@@ -16,13 +16,15 @@ Build it as an extensible list of "waiting item providers", so that later issues
 
 ## Acceptance criteria
 
-- [ ] An EIC sees only PM Tasks for validation where they are the EIC.
-- [ ] Vendor staff see only their own Vendor's open PM Tasks.
-- [ ] A Completed task disappears from the list.
-- [ ] Items are sorted oldest-waiting first.
-- [ ] Adding a new provider requires no change to the endpoint, shown by a test with a dummy provider.
+- [x] An EIC sees only PM Tasks for validation where they are the EIC.
+- [x] Vendor staff see only their own Vendor's open PM Tasks.
+- [x] A Completed task disappears from the list.
+- [x] Items are sorted oldest-waiting first.
+- [x] Adding a new provider requires no change to the endpoint, shown by a test with a dummy provider.
 
 ## Comments
+
+- 2026-11-23 (qa): PASS. `php artisan test --compact` 909 passed (3996 assertions); WaitingListApiTest 13 passed. Pint passed. Every criterion maps to a real test.
 - 2026-11-22 (product-owner): Human decision (issue 11 Decisions, spec.md): when a Site's EIC is replaced, the **current Site EIC** (`site_settings.eic_employee_id` at the time of the request) acts on pending items. The EIC captured on the record is history only and isn't used for authorization. "Where I am the EIC" means where I am the **current** Site EIC. A replaced EIC's pending items move to the new EIC's list.
 - 2026-11-23 (product-owner): Clarifications for dev-lead, re-checked against main 07e647e.
   - **Scope stays PM Tasks only** (the two providers above), plus the provider mechanism. Issues 12–23 shipped without adding providers, so the E-Call and Work Order items are now separate issues **39** (E-Calls) and **40** (Work Orders), both blocked by 24. Don't build them here.
