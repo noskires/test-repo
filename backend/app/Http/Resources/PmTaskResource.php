@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ECall;
 use App\Models\PmTask;
 use App\Scheduling\PmTimelinessRule;
 use Illuminate\Http\Request;
@@ -42,6 +43,13 @@ class PmTaskResource extends JsonResource
             'checklist_template_version_id' => $this->checklist_template_version_id,
             'no_checklist' => $this->no_checklist,
             'equipment_removed' => $this->equipment_removed,
+            'e_calls' => $this->whenLoaded('eCalls', fn (): array => $this->eCalls->map(fn (ECall $eCall): array => [
+                'id' => $eCall->id,
+                'status' => $eCall->status->value,
+                'priority' => $eCall->priority->value,
+                'nature_of_issue' => $eCall->nature_of_issue,
+                'created_at' => $eCall->created_at,
+            ])->all()),
         ];
     }
 }

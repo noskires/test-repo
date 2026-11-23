@@ -76,7 +76,8 @@ class StoreECallRequest extends FormRequest
             'nature_of_issue' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'max:5000'],
             'priority' => ['required', Rule::enum(ECallPriority::class)],
-            'pm_task_id' => ['nullable', 'integer', 'min:1'],
+            // Linking to a PM Task only goes through POST /api/pm-tasks/{task}/e-calls with its EIC check (issue 13).
+            'pm_task_id' => ['prohibited'],
             'attachments' => ['sometimes', 'array', 'max:'.config('pss.e_call_attachments.max_files')],
             'attachments.*' => [
                 'file',
@@ -122,7 +123,7 @@ class StoreECallRequest extends FormRequest
     }
 
     /**
-     * @return array{nature_of_issue: string, description: string, priority: string, pm_task_id: int|null}
+     * @return array{nature_of_issue: string, description: string, priority: string, pm_task_id: null}
      */
     public function eCallDetails(): array
     {
@@ -130,7 +131,7 @@ class StoreECallRequest extends FormRequest
             'nature_of_issue' => $this->validated('nature_of_issue'),
             'description' => $this->validated('description'),
             'priority' => $this->validated('priority'),
-            'pm_task_id' => $this->validated('pm_task_id'),
+            'pm_task_id' => null,
         ];
     }
 

@@ -102,6 +102,16 @@ class PmTask extends Model implements ApprovalSubject
     }
 
     /**
+     * The E-Calls the EIC filed from this task's findings (issue 13).
+     *
+     * @return HasMany<ECall, $this>
+     */
+    public function eCalls(): HasMany
+    {
+        return $this->hasMany(ECall::class);
+    }
+
+    /**
      * Move a Scheduled task to In Progress and record when it was started. The row is locked so two starts
      * can't both succeed.
      *

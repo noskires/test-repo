@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ECallProposalController;
 use App\Http\Controllers\Api\ECallReviewController;
 use App\Http\Controllers\Api\PmReportController;
 use App\Http\Controllers\Api\PmTaskController;
+use App\Http\Controllers\Api\PmTaskECallController;
 use App\Http\Controllers\Api\PmTaskValidationController;
 use App\Http\Controllers\Api\PriceListItemController;
 use App\Http\Controllers\Api\SiteController;
@@ -62,6 +63,8 @@ Route::middleware('auth')->group(function () {
     Route::post('work-orders/{workOrder}/reject-completion', [WorkOrderCompletionValidationController::class, 'rejectCompletion'])->name('work-orders.reject-completion');
 
     Route::get('vendor/pm-tasks', [PmTaskController::class, 'vendorIndex'])->name('vendor.pm-tasks.index');
+    Route::get('pm-tasks/{pmTask}', [PmTaskController::class, 'show'])->name('pm-tasks.show');
+    Route::post('pm-tasks/{pmTask}/e-calls', [PmTaskECallController::class, 'store'])->name('pm-tasks.e-calls.store');
     Route::post('pm-tasks/{pmTask}/start', [PmTaskController::class, 'start'])->name('pm-tasks.start');
     Route::get('pm-tasks/{pmTask}/reports', [PmReportController::class, 'index'])->name('pm-tasks.reports.index');
     Route::post('pm-tasks/{pmTask}/report', [PmReportController::class, 'store'])->name('pm-tasks.report.store');
