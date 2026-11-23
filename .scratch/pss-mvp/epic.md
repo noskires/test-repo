@@ -6,8 +6,8 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **23 — Multi-level billing endorsement** (PR #28, main 283820d, 2026-11-23)
-- In flight: **09 — PM Timeliness** (handed off 2026-11-23)
+- Last merged: **09 — PM Timeliness** (PR #30, main e43a653, 2026-11-23)
+- In flight: none
 - Ready now (`ready-for-agent`, every blocker done), in number order: **13, 24, 25, 27, 28, 32**
 - Waiting on the human (`needs-info`): 03, 04, 15, 31, 33. The open questions are in each issue file.
 - Doc follow-ups: 1 open (see Doc follow-ups)
