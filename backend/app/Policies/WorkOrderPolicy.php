@@ -40,6 +40,8 @@ class WorkOrderPolicy
     /**
      * Early 403 for approve / return / reject: denied when the current level's endorser is known and isn't this
      * user. No pending level, or an endorser that can't be resolved, is reported as 422 by WorkOrder::endorse.
+     * Every endorsement endpoint authorizes `view` first (issue 38), so a user who can't see the Work Order always
+     * gets a plain 403 and learns nothing about its status or chain.
      */
     public function endorse(User $user, WorkOrder $workOrder): bool
     {

@@ -31,7 +31,7 @@ use Throwable;
  */
 #[Fillable([
     'e_call_id', 'e_call_proposal_id', 'status', 'created_by_user_id',
-    'estimated_amount_millicentavos', 'estimated_amount_centavos',
+    'estimated_amount_millicentavos', 'estimated_amount_centavos', 'submitted_at', 'endorsement_round_after_record_id',
 ])]
 class WorkOrder extends Model implements ApprovalSubject
 {
@@ -51,6 +51,8 @@ class WorkOrder extends Model implements ApprovalSubject
             'created_by_user_id' => 'integer',
             'estimated_amount_millicentavos' => 'integer',
             'estimated_amount_centavos' => 'integer',
+            'submitted_at' => 'immutable_datetime',
+            'endorsement_round_after_record_id' => 'integer',
         ];
     }
 
@@ -210,10 +212,15 @@ class WorkOrder extends Model implements ApprovalSubject
                 throw ValidationException::withMessages(['work_order' => 'Only an Open Work Order can be submitted for endorsement.']);
             }
 
+            $locked->assertNoChainConflict();
             $locked->endorserAtLevel(1);
             $locked->endorserAtLevel(2);
 
-            $locked->update(['status' => WorkOrderStatus::ForLvl1Endorsement]);
+            $locked->update([
+                'status' => WorkOrderStatus::ForLvl1Endorsement,
+                'submitted_at' => now(),
+                'endorsement_round_after_record_id' => (int) ApprovalRecord::query()->max('id'),
+            ]);
 
             return $locked;
         });
@@ -237,8 +244,16 @@ class WorkOrder extends Model implements ApprovalSubject
                 throw ValidationException::withMessages(['work_order' => 'This Work Order is not waiting for an endorsement.']);
             }
 
-            if (! static::isEndorser($endorser, $locked->endorserAtLevel($level))) {
+            $locked->assertNoChainConflict();
+
+            if (! $endorser->actsAsEmployee($locked->endorserAtLevel($level)->id)) {
                 throw new AuthorizationException("Only the Requestor's current level {$level} endorser can act on this Work Order.");
+            }
+
+            $otherLevelApproved = $action === ApprovalAction::Approve ? $locked->levelApprovedThisRoundByOtherThan($endorser, $level) : null;
+
+            if ($otherLevelApproved !== null) {
+                throw ValidationException::withMessages(['work_order' => "You already approved this Work Order at level {$otherLevelApproved} in the current endorsement round. Separation of duties requires a different endorser at each level."]);
             }
 
             app(ApprovalRecorder::class)->transition($locked, $endorser, $action, $locked->status->afterEndorsement($action), $remarks);
@@ -249,8 +264,8 @@ class WorkOrder extends Model implements ApprovalSubject
 
     /**
      * Whether the user is the current endorser for this Work Order's pending level. Used by the policy for the early
-     * 403; true when no endorsement is pending or the endorser can't be resolved, so WorkOrder::endorse reports
-     * those as 422.
+     * 403; true when no endorsement is pending, the chain conflicts (separation of duties) or the endorser can't be
+     * resolved, so WorkOrder::endorse reports those as 422 to every viewer.
      */
     public function mayBeEndorsedBy(User $user): bool
     {
@@ -260,17 +275,93 @@ class WorkOrder extends Model implements ApprovalSubject
             return true;
         }
 
+        try {
+            $this->assertNoChainConflict();
+        } catch (ValidationException) {
+            return true;
+        }
+
         $head = $this->resolveEndorser($level);
 
-        return $head === null || static::isEndorser($user, $head);
+        return $head === null || $user->actsAsEmployee($head->id);
     }
 
     /**
-     * The endorser is the resolved head by employee ID, and never vendor staff (mirrors SiteSetting::isActingEic).
+     * Separation of duties (issue 38): refuse a chain where level 1 and level 2 are the same person, or where either
+     * is the Requestor. Walking up from the Requestor, such a chain repeats an employee ID within two steps, which
+     * ImmediateHeadChain reports. The equality check after resolving is a backstop. Plain gaps (a missing level) are
+     * left to endorserAtLevel's missing-level 422.
+     *
+     * @throws ValidationException naming the conflict.
      */
-    private static function isEndorser(User $user, Employee $head): bool
+    private function assertNoChainConflict(): void
     {
-        return $user->vendor_id === null && $user->employee_id !== null && $user->employee_id === $head->id;
+        $requestorEmployeeId = $this->requestorEmployeeId();
+
+        if ($requestorEmployeeId === null) {
+            return;
+        }
+
+        $chain = app(ImmediateHeadChain::class);
+
+        foreach ([1, 2] as $level) {
+            $repeated = $chain->repeatedEmployeeAt($requestorEmployeeId, $level);
+
+            if ($repeated !== null) {
+                throw $repeated === $requestorEmployeeId ? static::requestorEndorses($level, $repeated) : static::sameEndorserTwice($repeated);
+            }
+        }
+
+        $levelOne = $chain->headAtLevel($requestorEmployeeId, 1);
+        $levelTwo = $chain->headAtLevel($requestorEmployeeId, 2);
+
+        foreach ([1 => $levelOne, 2 => $levelTwo] as $level => $head) {
+            if ($head?->id === $requestorEmployeeId) {
+                throw static::requestorEndorses($level, $requestorEmployeeId);
+            }
+        }
+
+        if ($levelOne !== null && $levelOne->id === $levelTwo?->id) {
+            throw static::sameEndorserTwice($levelOne->id);
+        }
+    }
+
+    private static function requestorEndorses(int $level, string $employeeId): ValidationException
+    {
+        return ValidationException::withMessages(['work_order' => "The level {$level} endorser would be the Requestor ({$employeeId}). Separation of duties requires someone else."]);
+    }
+
+    private static function sameEndorserTwice(string $employeeId): ValidationException
+    {
+        return ValidationException::withMessages(['work_order' => "Level 1 and level 2 resolve to the same person ({$employeeId}). Separation of duties requires two different endorsers."]);
+    }
+
+    /**
+     * Separation of duties within one endorsement round (since the latest submit; team-lead refinement of issue 38):
+     * the level the user already approved at, if it is a DIFFERENT level from $level. Matched by user ID or employee
+     * ID, so a mid-round org change can't let the level 1 approver also approve level 2. Re-approving the same level
+     * (after a level 2 Return) is allowed, and Return / Reject are never checked. Null when nothing blocks.
+     */
+    private function levelApprovedThisRoundByOtherThan(User $user, int $level): ?int
+    {
+        $statuses = $this->approvalRecords()
+            ->where('id', '>', $this->endorsement_round_after_record_id)
+            ->where('action', ApprovalAction::Approve)
+            ->where(function ($query) use ($user): void {
+                $query->where('actor_user_id', $user->id)
+                    ->when($user->employee_id !== null, fn ($query) => $query->orWhere('actor_employee_id', $user->employee_id));
+            })
+            ->pluck('previous_status');
+
+        foreach ($statuses as $status) {
+            $approvedLevel = WorkOrderStatus::tryFrom($status)?->endorsementLevel();
+
+            if ($approvedLevel !== null && $approvedLevel !== $level) {
+                return $approvedLevel;
+            }
+        }
+
+        return null;
     }
 
     private function pendingEndorsementLevel(): ?int

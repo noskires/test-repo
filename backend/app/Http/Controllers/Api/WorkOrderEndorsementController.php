@@ -26,6 +26,7 @@ class WorkOrderEndorsementController extends Controller
      */
     public function submit(Request $request, WorkOrder $workOrder): WorkOrderResource
     {
+        Gate::authorize('view', $workOrder);
         Gate::authorize('submit', $workOrder);
 
         return $this->resource(WorkOrder::submit($workOrder, $request->user()));
