@@ -27,6 +27,10 @@ Which workflow step a PM Task is on (e.g. Scheduled, In Progress, For Validation
 
 ## PM Timeliness
 Whether a PM Task is early or late compared with its due date (Upcoming, Due, Overdue). It's shown next to the PM Status, not instead of it, so a task can be both "Returned" and "Overdue".
+- **Upcoming**: from 7 days before the due date until the day before (the same for every frequency). **Due**: on the due date. **Overdue**: from the day after the due date, with no grace period. Earlier than 7 days before the due date, a task has no timeliness.
+- "Today" means today in Asia/Manila (the application timezone).
+- Completed and Cancelled tasks have no timeliness.
+- A For Validation task is judged by its Work Done Date, not by today: on or before the due date means it has no timeliness (on time, waiting for the EIC); after the due date means Overdue. A Returned task is judged against today again.
 
 ## Corrective Maintenance (CM)
 The process of fixing, replacing or improving things in response to a need: an E-Call followed by a Work Order. CM is the process, not a record.

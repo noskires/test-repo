@@ -7,10 +7,10 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **09 — PM Timeliness** (PR #30, main e43a653, 2026-11-23)
-- In flight: none
+- In flight: **13 — EIC files an E-Call from a PM Task's findings** (handed off 2026-11-23)
 - Ready now (`ready-for-agent`, every blocker done), in number order: **13, 24, 25, 27, 28, 32**
 - Waiting on the human (`needs-info`): 03, 04, 15, 31, 33. The open questions are in each issue file.
-- Doc follow-ups: 1 open (see Doc follow-ups)
+- Doc follow-ups: none open
 
 ## Board
 
@@ -61,10 +61,11 @@ Other merged PRs: #1 PRD v2 docs, #2 project scaffold, #3 unblock answered issue
 
 Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product-owner clears them before picking the next issue. Format: `- [ ] <file>: <what's missing> (found in issue NN)`.
 
-- [ ] GLOSSARY.md: PM Timeliness entry lacks the rules (Upcoming = 7 days before due, Due = due date, Overdue = after; For Validation judged by Work Done Date; Manila today) (found in issue 09)
+- [x] GLOSSARY.md: PM Timeliness entry lacks the rules (Upcoming = 7 days before due, Due = due date, Overdue = after; For Validation judged by Work Done Date; Manila today) (found in issue 09)
 
 ## Log
 
 - 2026-11-23: board created and backfilled from merge history (PRs #4–#28).
 - 2026-11-23: product-owner picked 09 (unblocks 28, then 29; used by calendar and dashboard). Acceptance criteria finalised.
 - 2026-11-23: issue 09 merged as PR #30; unblocks 28.
+- 2026-11-23: product-owner cleared the 09 GLOSSARY follow-up (PM Timeliness rules) and picked 13 (unblocks 26, then 29; closes the unchecked `pm_task_id` on POST /api/e-calls).
