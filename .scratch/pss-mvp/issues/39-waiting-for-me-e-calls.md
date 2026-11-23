@@ -15,13 +15,15 @@ Add an E-Call provider to the "Waiting for me" list (issue 24). It plugs into 24
 
 ## Acceptance criteria
 
-- [ ] Each of the four statuses above shows the E-Call to exactly the right user(s) and to nobody else (one test per status, including another Vendor's staff and a non-EIC employee).
-- [ ] A replaced EIC no longer sees a For EIC Review E-Call, and the new EIC does.
-- [ ] Closed, Rejected and Cancelled E-Calls appear for nobody.
-- [ ] Item shape: `type` = `e_call`, `id`, `title` (nature of issue), `site` (from the Snapshot), `status`, `priority`, and `waiting_since` = the latest of the E-Call's `created_at`, its latest proposal's `submitted_at` and its latest Approval Record's `created_at`. Items sort together with PM Task items, oldest first.
-- [ ] No change to the `GET /api/me/waiting` controller. `php artisan test` passes.
+- [x] Each of the four statuses above shows the E-Call to exactly the right user(s) and to nobody else (one test per status, including another Vendor's staff and a non-EIC employee).
+- [x] A replaced EIC no longer sees a For EIC Review E-Call, and the new EIC does.
+- [x] Closed, Rejected and Cancelled E-Calls appear for nobody.
+- [x] Item shape: `type` = `e_call`, `id`, `title` (nature of issue), `site` (from the Snapshot), `status`, `priority`, and `waiting_since` = the latest of the E-Call's `created_at`, its latest proposal's `submitted_at` and its latest Approval Record's `created_at`. Items sort together with PM Task items, oldest first.
+- [x] No change to the `GET /api/me/waiting` controller. `php artisan test` passes.
 
 ## Comments
+
+- 2026-11-23 (qa): PASS. `php artisan test` 924 passed (4089 assertions); WaitingListECallApiTest + WaitingListApiTest targeted run passed. Every criterion maps to a real test.
 - 2026-11-23 (product-owner): Split out of issue 24, because issues 12–23 shipped without adding providers. Each rule comes from shipped behaviour; there are no open questions.
 - 2026-11-23 (product-owner): Clarifications for dev-lead, re-checked against main b4dd3d2 (issue 24 shipped).
   - Plug in the way 24 did: a new class in `app/Waiting/` that implements `WaitingItemProvider`, added to the tag list in `AppServiceProvider::registerWaitingItemProviders()`. You can split it into one provider per role, as 24 did with `PmTasksForValidationProvider` / `VendorPmTasksProvider`. Look at those two for the bulk-loading pattern.
