@@ -48,6 +48,16 @@ class WorkOrderPolicy
     }
 
     /**
+     * Determine whether the user can validate, return or reject the completed work: the current Site EIC of the
+     * Work Order's E-Call Site (SiteSetting::isActingEic). Callers authorize `view` first. WorkOrder repeats this
+     * under a lock.
+     */
+    public function validateCompletion(User $user, WorkOrder $workOrder): bool
+    {
+        return $workOrder->isActingEic($user);
+    }
+
+    /**
      * Early 403 for approve / return / reject: denied when the current level's endorser is known and isn't this
      * user. No pending level, or an endorser that can't be resolved, is reported as 422 by WorkOrder::endorse.
      * Every endorsement endpoint authorizes `view` first (issue 38), so a user who can't see the Work Order always

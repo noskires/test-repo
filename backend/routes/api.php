@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\SiteSettingsController;
 use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\WorkOrderCompletionController;
+use App\Http\Controllers\Api\WorkOrderCompletionValidationController;
 use App\Http\Controllers\Api\WorkOrderController;
 use App\Http\Controllers\Api\WorkOrderEndorsementController;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +57,9 @@ Route::middleware('auth')->group(function () {
     Route::post('work-orders/{workOrder}/completion', [WorkOrderCompletionController::class, 'store'])->name('work-orders.completion.store');
     Route::get('work-orders/{workOrder}/completions', [WorkOrderCompletionController::class, 'index'])->name('work-orders.completions.index');
     Route::get('vendor/work-orders', [WorkOrderCompletionController::class, 'vendorIndex'])->name('vendor.work-orders.index');
+    Route::post('work-orders/{workOrder}/validate-completion', [WorkOrderCompletionValidationController::class, 'validateCompletion'])->name('work-orders.validate-completion');
+    Route::post('work-orders/{workOrder}/return-completion', [WorkOrderCompletionValidationController::class, 'returnCompletion'])->name('work-orders.return-completion');
+    Route::post('work-orders/{workOrder}/reject-completion', [WorkOrderCompletionValidationController::class, 'rejectCompletion'])->name('work-orders.reject-completion');
 
     Route::get('vendor/pm-tasks', [PmTaskController::class, 'vendorIndex'])->name('vendor.pm-tasks.index');
     Route::post('pm-tasks/{pmTask}/start', [PmTaskController::class, 'start'])->name('pm-tasks.start');

@@ -81,6 +81,9 @@ A Work Order that's still a draft. Its creator can keep editing it until they su
 ## Reject
 An approver's "no" that permanently ends an E-Call or Work Order. To try again, file a new E-Call. PM reports cannot be Rejected, only Approved or Returned.
 
+## Quantity Discrepancy
+The difference between the quantity a Site Vendor reports as actually used on a Work Order line and the approved quantity: over, under or equal. The vendor may report more than approved, and every discrepancy is marked for the EIC to review before validating.
+
 ## Billing Amount
 The actual cost the EIC validated for a Work Order (not its originally approved estimate). It decides how many billing approval levels are needed. It's rounded once to the centavo, half-up (ADR 0002).
 

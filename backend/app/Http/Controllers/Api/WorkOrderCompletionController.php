@@ -32,7 +32,7 @@ class WorkOrderCompletionController extends Controller
         return WorkOrderResource::collection(
             WorkOrder::query()
                 ->whereHas('eCall', fn ($query) => $query->where('vendor_id', $vendorId))
-                ->with(['lines', 'attachments', 'proposal'])
+                ->with(WorkOrderResource::RELATIONS)
                 ->orderByDesc('id')
                 ->get(),
         );
