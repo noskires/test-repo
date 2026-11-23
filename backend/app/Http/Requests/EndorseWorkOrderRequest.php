@@ -17,7 +17,7 @@ class EndorseWorkOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('endorse', $this->workOrder());
+        return Gate::allows('view', $this->workOrder()) && Gate::allows('endorse', $this->workOrder());
     }
 
     /**

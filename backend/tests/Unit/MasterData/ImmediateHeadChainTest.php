@@ -65,6 +65,37 @@ class ImmediateHeadChainTest extends TestCase
         $this->assertNull($this->chain()->headAtLevel('NOBODY', 1));
     }
 
+    public function test_a_two_step_cycle_is_a_broken_chain_at_the_repeating_level(): void
+    {
+        $chain = new ImmediateHeadChain((new InMemoryMasterDataDirectory)
+            ->addEmployee(new Employee(id: 'A', name: 'A', immediateHeadId: 'B'))
+            ->addEmployee(new Employee(id: 'B', name: 'B', immediateHeadId: 'A')));
+
+        $this->assertSame('B', $chain->headAtLevel('A', 1)?->id);
+        $this->assertNull($chain->headAtLevel('A', 2), 'A -> B -> A repeats A at level 2.');
+        $this->assertNull($chain->headAtLevel('A', 3));
+    }
+
+    public function test_a_self_loop_is_a_broken_chain_at_level_one(): void
+    {
+        $chain = new ImmediateHeadChain((new InMemoryMasterDataDirectory)
+            ->addEmployee(new Employee(id: 'A', name: 'A', immediateHeadId: 'A')));
+
+        $this->assertNull($chain->headAtLevel('A', 1));
+    }
+
+    public function test_a_cycle_above_the_requested_level_does_not_matter(): void
+    {
+        $chain = new ImmediateHeadChain((new InMemoryMasterDataDirectory)
+            ->addEmployee(new Employee(id: 'REQ', name: 'Requestor', immediateHeadId: 'X'))
+            ->addEmployee(new Employee(id: 'X', name: 'X', immediateHeadId: 'Y'))
+            ->addEmployee(new Employee(id: 'Y', name: 'Y', immediateHeadId: 'X')));
+
+        $this->assertSame('X', $chain->headAtLevel('REQ', 1)?->id);
+        $this->assertSame('Y', $chain->headAtLevel('REQ', 2)?->id);
+        $this->assertNull($chain->headAtLevel('REQ', 3), 'X repeats at level 3.');
+    }
+
     public function test_it_rejects_a_level_below_one(): void
     {
         $this->expectException(InvalidArgumentException::class);
