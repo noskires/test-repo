@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('content_fingerprint', 64);
             $table->timestamps();
 
-            $table->unique(['checklist_template_id', 'version_number']);
+            $table->unique(['checklist_template_id', 'version_number'], 'checklist_template_versions_template_version_unique');
         });
 
         Schema::create('checklist_items', function (Blueprint $table) {
