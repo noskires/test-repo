@@ -7,6 +7,25 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## PSS: sign-in setup
+
+PSS signs users in with JWT (`tymon/jwt-auth`). See `docs/adr/0004-jwt-login-and-pss-roles.md` at the repo root.
+
+1. **JWT secret, once per deployment:** run `php artisan jwt:secret`. `.env.example` has only the placeholder `JWT_SECRET=change-me`. Never commit a real secret.
+2. **Token lifetimes:** `JWT_TTL=60` (access token, minutes) and `JWT_REFRESH_TTL=20160` (refresh window, minutes = 14 days).
+3. **Logout blacklist needs a shared cache store.** Logout blacklists the token in the cache. Use a store that every app server shares (e.g. `CACHE_STORE=database` or Redis). A per-server store such as `file` or `array` lets a logged-out token keep working on another server.
+4. **First System Administrator:** set `PSS_FIRST_ADMIN_EMPLOYEE_ID` to an employee ID from the external master data, then run `php artisan pss:setup-first-admin`. It's safe to run again. After that, admins grant roles and link vendor staff through `/api/admin/users`.
+5. **Local demo accounts** (local environment only; `php artisan db:seed` runs `DemoAccountsSeeder`). All use the password `password`:
+
+   | Employee ID | Account |
+   |---|---|
+   | `EMP-9001` | System Administrator |
+   | `EMP-9002` | Management / Viewer |
+   | `EMP-1001` | Ordinary employee (Requestor) |
+   | `EMP-8001` | Vendor staff, linked to the demo Vendor |
+
+The local credential checker works only in `local` and `testing`. Sign-in in other environments needs the external credential checker (issue 44).
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

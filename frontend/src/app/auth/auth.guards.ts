@@ -1,0 +1,46 @@
+import { inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { CanActivateFn, Router } from '@angular/router';
+import { map } from 'rxjs';
+import { AuthService, ROLE_MANAGEMENT_VIEWER, ROLE_SYSTEM_ADMINISTRATOR } from './auth.service';
+
+/**
+ * Builds a guard that requires a signed-in user and, when `roles` is non-empty, at least
+ * one of those roles. Unauthenticated users go to `/login`; signed-in users without the
+ * role go to the dashboard (`/`).
+ *
+ * During server rendering there is no token (localStorage is browser-only), so the guard
+ * lets the route render and leaves the decision to the browser.
+ */
+export function requireRoles(roles: readonly string[] = []): CanActivateFn {
+  return () => {
+    if (!isPlatformBrowser(inject(PLATFORM_ID))) {
+      return true;
+    }
+    const auth = inject(AuthService);
+    const router = inject(Router);
+
+    return auth.ensureUser().pipe(
+      map((user) => {
+        if (!user) {
+          return router.parseUrl('/login');
+        }
+        if (roles.length > 0 && !auth.hasAnyRole(roles)) {
+          return router.parseUrl('/');
+        }
+        return true;
+      }),
+    );
+  };
+}
+
+export const authGuard: CanActivateFn = requireRoles();
+
+/** Admin pages: System Administrator only. */
+export const adminGuard: CanActivateFn = requireRoles([ROLE_SYSTEM_ADMINISTRATOR]);
+
+/** Reports (issue 29): System Administrator or Management/Viewer (Q11). */
+export const reportsGuard: CanActivateFn = requireRoles([
+  ROLE_SYSTEM_ADMINISTRATOR,
+  ROLE_MANAGEMENT_VIEWER,
+]);

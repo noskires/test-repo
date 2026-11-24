@@ -6,11 +6,11 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **04 — Login (JWT) and PSS roles (backend)** (PR #43, 2026-11-24)
+- Last merged: **43 — Angular login screen, token handling, role-aware menu** (PR #44, 2026-11-24)
 - In flight: none
-- Ready now (`ready-for-agent`, every blocker done), in number order: **28**, **43**
-- Waiting on the human (`needs-info`): 03, 15, 31, 33, 41, 42, 44. The open questions are in each issue file.
-- Doc follow-ups: 1 open (backend/README.md: JWT setup and demo accounts)
+- Ready now (`ready-for-agent`, every blocker done), in number order: **28**
+- Waiting on the human (`needs-info`): 03, 15, 31, 33, 41, 42, 44, 45. The open questions are in each issue file. New: 45, should a vendor-linked user be refused the System Administrator role? (The team lead recommends refusing; issue 04 shipped allowing it.)
+- Doc follow-ups: none open
 
 ## Board
 
@@ -58,8 +58,9 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 40 | "Waiting for me": Work Order items | done | 24 | #37 |
 | 41 | Cancel a PM Task | needs-info | 08, 25 | |
 | 42 | Dashboard: date range and financial sums | needs-info | 27 | |
-| 43 | Angular login screen, token handling, role-aware menu | ready-for-agent | 04 | |
+| 43 | Angular login screen, token handling, role-aware menu | done | 04 | #44 |
 | 44 | Real external-system credential checker | needs-info | 04 | |
+| 45 | Vendor-linked users and the System Administrator role | needs-info | 04 | |
 
 Other merged PRs: #1 PRD v2 docs, #2 project scaffold, #3 unblock answered issues, #15 no-duplicate-lines decision.
 
@@ -72,7 +73,7 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - [x] GLOSSARY.md: the Needs Setup list entry says it lists what stops PM Tasks, but it now also lists Work Orders with a billing chain gap (Implemented / For Billing Endorsement LVLn), and the endpoint is `GET /api/needs-setup` behind `manage-site-settings` (found in issue 32)
 - [x] GLOSSARY.md: no entry for Maintenance History (the Equipment timeline of PM Tasks, E-Calls and Work Orders, newest first; entry date = due date / filing date / creation date; `GET /api/equipment/{equipmentId}/history`) (found in issue 26)
 - [x] GLOSSARY.md: no entry for Dashboard counts (`GET /api/dashboard`: PM Tasks by open PM Status, E-Calls by status plus open, Work Orders by status plus groups; current state; filters site, equipment category, vendor; vendor staff forced to own vendor; a Work Order's E-Call counts in both) (found in issue 27)
-- [ ] backend/README.md: no setup notes for sign-in: run `php artisan jwt:secret` per deployment, set `PSS_FIRST_ADMIN_EMPLOYEE_ID` and run `php artisan pss:setup-first-admin`, `DemoAccountsSeeder` demo accounts (EMP-9001/9002/1001/8001, password `password`), shared cache store needed for the logout blacklist, `JWT_TTL`/`JWT_REFRESH_TTL` (found in issue 04)
+- [x] backend/README.md: no setup notes for sign-in: run `php artisan jwt:secret` per deployment, set `PSS_FIRST_ADMIN_EMPLOYEE_ID` and run `php artisan pss:setup-first-admin`, `DemoAccountsSeeder` demo accounts (EMP-9001/9002/1001/8001, password `password`), shared cache store needed for the logout blacklist, `JWT_TTL`/`JWT_REFRESH_TTL` (found in issue 04)
 
 ## Log
 
@@ -97,3 +98,5 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-24: issue 27 merged as PR #42; 28 is the only ready issue.
 - 2026-11-24: product-owner cleared the 27 GLOSSARY follow-up (Dashboard entry). Recorded the human's issue 04 grilling decisions (JWT via `tymon/jwt-auth`, swappable credential checker, PSS roles, manual vendor staff link, all internal employees see every Site, one approval-history rule; ADR 0004). Split 04: Angular login and menu moved to the new 43 (ready-for-agent, blocked by 04), the external credential checker to the new 44 (needs-info). 04 is now ready-for-agent. Updated 29: reports only for System Administrator and Management / Viewer. Picked 04 over 28: it replaces every placeholder gate, unblocks 29 and 43, and lets the Angular screens start.
 - 2026-11-24: issue 04 merged as PR #43; unblocks 43 (Angular login) and 29's login blocker. 44 stays needs-info.
+- 2026-11-24: product-owner cleared the 04 README follow-up (sign-in setup in `backend/README.md`), added 45 (needs-info: may a vendor-linked user hold System Administrator?), and picked 43: it is the only ready issue that isn't waiting on 03 in practice (28's "Equipment requiring attention" needs 03's operational status values), and it lets every Angular screen start.
+- 2026-11-24: issue 43 merged as PR #44; 28 is the only ready issue.
