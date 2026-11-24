@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AdminUserController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BillingThresholdController;
 use App\Http\Controllers\Api\ChecklistTemplateController;
 use App\Http\Controllers\Api\DashboardController;
@@ -25,7 +27,20 @@ use App\Http\Controllers\Api\WorkOrderController;
 use App\Http\Controllers\Api\WorkOrderEndorsementController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')->group(function () {
+Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1')->name('auth.login');
+Route::post('auth/refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+    Route::get('auth/me', [AuthController::class, 'me'])->name('auth.me');
+
+    Route::middleware('can:manage-roles')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('users/{user}/roles', [AdminUserController::class, 'grantRole'])->name('users.roles.store');
+        Route::delete('users/{user}/roles/{role}', [AdminUserController::class, 'revokeRole'])->name('users.roles.destroy');
+        Route::put('users/{user}/vendor', [AdminUserController::class, 'linkVendor'])->name('users.vendor.update');
+    });
+
     Route::get('me/waiting', WaitingListController::class)->name('me.waiting.index');
     Route::get('needs-setup', NeedsSetupController::class)->name('needs-setup.index');
     Route::get('dashboard', DashboardController::class)->name('dashboard.index');
