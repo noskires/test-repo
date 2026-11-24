@@ -7,10 +7,10 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **45 — Vendor-linked users and the System Administrator role** (PR #46, 2026-11-24)
-- In flight: none
+- In flight: **48 — Restyle the Angular app to the PSS design (lucide-angular)** (handed off 2026-11-24)
 - Ready now (`ready-for-agent`, every blocker done), in number order: **28**, **48**.
 - Waiting on the human (`needs-info`): 03, 15, 31, 33, 41, 42, 44, 47. The open questions are in each issue file. New: 47 (remove or deactivate users).
-- Doc follow-ups: 1 open (backend/README.md: pss:check-vendor-admins)
+- Doc follow-ups: none open
 
 ## Board
 
@@ -77,7 +77,7 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - [x] GLOSSARY.md: no entry for Maintenance History (the Equipment timeline of PM Tasks, E-Calls and Work Orders, newest first; entry date = due date / filing date / creation date; `GET /api/equipment/{equipmentId}/history`) (found in issue 26)
 - [x] GLOSSARY.md: no entry for Dashboard counts (`GET /api/dashboard`: PM Tasks by open PM Status, E-Calls by status plus open, Work Orders by status plus groups; current state; filters site, equipment category, vendor; vendor staff forced to own vendor; a Work Order's E-Call counts in both) (found in issue 27)
 - [x] backend/README.md: no setup notes for sign-in: run `php artisan jwt:secret` per deployment, set `PSS_FIRST_ADMIN_EMPLOYEE_ID` and run `php artisan pss:setup-first-admin`, `DemoAccountsSeeder` demo accounts (EMP-9001/9002/1001/8001, password `password`), shared cache store needed for the logout blacklist, `JWT_TTL`/`JWT_REFRESH_TTL` (found in issue 04)
-- [ ] backend/README.md: no mention of `php artisan pss:check-vendor-admins` (read-only list of vendor-linked System Administrators; run after deploying issue 45) (found in issue 45)
+- [x] backend/README.md: no mention of `php artisan pss:check-vendor-admins` (read-only list of vendor-linked System Administrators; run after deploying issue 45) (found in issue 45)
 
 ## Log
 
@@ -109,3 +109,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-24: issue 46 merged as PR #45; unblocks 45 and 48 (44 and 47 stay needs-info).
 - 2026-11-24: product-owner picked 45 over 48 and 28: it stops vendor staff holding System Administrator (who could manage their own Vendor's Price List and assignments) and closes the "unlinked admin becomes pending" gap from 46. Small backend change. Added the post-46 clarifications.
 - 2026-11-24: issue 45 merged as PR #46; 28 and 48 are ready.
+- 2026-11-24: product-owner cleared the 45 README follow-up (`pss:check-vendor-admins` in `backend/README.md`) and picked 48 over 28: the human asked for it right after 46, and every later Angular screen builds on its shell and tokens. 28 still waits in practice on 03 ("Equipment requiring attention" needs the operational status values).

@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PSS Check-ups (mobile)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/4c9866e5ac71aed9d9092b6082c0da2a">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2563EB}a:hover{color:#1D4ED8}
+</style>
+</helmet>
+<div class="m" data-theme="{{theme}}">
+  <div class="scroll">
+    <header class="head">
+      <div class="head-l">
+        <span class="sub">Makati Office · EIC Juan Dela Cruz</span>
+        <h1>Check-ups</h1>
+      </div>
+      <button class="iconbtn" aria-label="Calendar view">
+        <svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>
+      </button>
+    </header>
+
+    <section class="card pad" aria-label="Waiting for your review">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+        <span class="eyebrow">For your review</span>
+        <span class="pill p-warn">Due 25 Nov</span>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: flex-start">
+        <span class="tile"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="m9 15 2 2 4-4"></path></svg></span>
+        <div class="row-main">
+          <span style="font-size: 16px; font-weight: 600">Aircon #3 · November</span>
+          <span class="row-meta"><span class="mono">ACU-MKT-003</span> · PowerPro Services</span>
+        </div>
+        <span class="{{d.stepCls}}">{{d.step}}</span>
+      </div>
+      <sc-if value="{{d.pending}}" hint-placeholder-val="{{ true }}">
+        <button class="btn btn-cta block" onClick="{{open}}">Review report</button>
+      </sc-if>
+      <sc-if value="{{d.approved}}" hint-placeholder-val="{{ false }}">
+        <div class="bn bn-success" style="flex-direction: column; gap: 2px">
+          <span style="font-weight: 600">Approved · next check-up 21 Dec 2026</span>
+          <span style="font-size: 12px">21 Nov + 1 month. Late or early work moves the next date.</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{d.returned}}" hint-placeholder-val="{{ false }}">
+        <div class="bn bn-tip" style="flex-direction: column; gap: 2px">
+          <span style="font-weight: 600">Returned to PowerPro Services</span>
+          <span class="sub" style="font-size: 12px">“{{remarks}}”</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{d.done}}" hint-placeholder-val="{{ false }}"><button class="link" onClick="{{reset}}">Reset demo</button></sc-if>
+    </section>
+
+    <section aria-labelledby="sched-h" style="display: flex; flex-direction: column; gap: 8px">
+      <div class="sec-h"><h2 id="sched-h">Scheduled</h2><span class="sub num">{{count}} shown</span></div>
+      <div role="group" aria-label="Filter by timing" style="display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 4px; margin: 0 -2px">
+        <sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+          <button class="{{f.cls}}" onClick="{{f.pick}}" aria-pressed="{{f.pressed}}" style="flex: none">{{f.label}}</button>
+        </sc-for>
+      </div>
+      <div class="card" style="overflow: hidden">
+        <sc-if value="{{none}}" hint-placeholder-val="{{ false }}"><div class="sub" style="padding: 20px 16px">Nothing in this group.</div></sc-if>
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+          <a class="row" href="MobileEquipment.dc.html" style="align-items: flex-start">
+            <span class="row-main" style="gap: 6px">
+              <span style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline">
+                <span class="row-title">{{r.equip}}</span>
+                <span class="sub num" style="font-size: 12px; white-space: nowrap">{{r.due}}</span>
+              </span>
+              <span class="row-meta"><span class="mono">{{r.id}}</span> · {{r.cycle}}</span>
+              <span style="display: flex; gap: 6px; flex-wrap: wrap">
+                <span class="{{r.stepCls}}">{{r.step}}</span>
+                <span class="{{r.timeCls}}">{{r.time}}</span>
+              </span>
+            </span>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+
+  <nav class="dock" aria-label="Tabs">
+    <a class="tab" href="MobileOverviewDS.dc.html"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>Overview</a>
+    <a class="tab" href="MobileEquipment.dc.html"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>Equipment</a>
+    <a class="tab on" href="MobileCheckups.dc.html" aria-current="page"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>Check-ups</a>
+    <a class="tab" href="MobileWorkOrder.dc.html"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>Approvals</a>
+  </nav>
+
+  <sc-if value="{{drawer}}" hint-placeholder-val="{{ false }}">
+    <div class="scrim" aria-hidden="true"></div>
+    <section class="drawer" role="dialog" aria-modal="true" aria-labelledby="rv-h">
+      <span class="grab" aria-hidden="true"></span>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <h2 id="rv-h">Aircon #3 · November</h2>
+          <span class="row-meta">ACU checklist v3 · submitted by PowerPro</span>
+        </div>
+        <button class="iconbtn" onClick="{{close}}" aria-label="Close" style="box-shadow: none; background: var(--m-soft)">
+          <svg class="ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <div class="soft"><div class="eyebrow">Work done</div><div class="num" style="font-weight: 600">21 Nov 2026</div></div>
+        <div class="soft"><div class="eyebrow">Report</div><a href="#report" style="font-weight: 600">View PDF</a></div>
+      </div>
+      <div style="display: flex; flex-direction: column">
+        <span class="eyebrow" style="padding-bottom: 4px">Checklist · 8 of 8 passed</span>
+        <sc-for list="{{checklist}}" as="c" hint-placeholder-count="8">
+          <div style="display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--m-line); font-size: 14px">
+            <span>{{c.item}}<span class="sub" style="font-size: 12px; display: block">{{c.range}}</span></span>
+            <span class="pill p-success">{{c.result}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div class="soft" style="font-size: 14px"><strong style="font-weight: 600">Vendor findings:</strong> Drain pan cleaned of light algae. Thermostat reads 1.5 °C high; recalibrate next visit.</div>
+      <div class="field">
+        <label for="remarks">Remarks <span class="sub" style="font-weight: 400">(required to return)</span></label>
+        <textarea id="remarks" value="{{remarks}}" onChange="{{onRemarks}}" placeholder="What should the vendor fix?"></textarea>
+        <sc-if value="{{showErr}}" hint-placeholder-val="{{ false }}"><div class="err">Add a remark so the vendor knows what to fix.</div></sc-if>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <button class="btn btn-cta block" onClick="{{approve}}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Approve report</button>
+        <button class="btn btn-soft block" onClick="{{ret}}">Return to vendor</button>
+      </div>
+      <p class="sub" style="margin: 0; font-size: 12px">Check-up reports can't be rejected. Send it back with remarks instead.</p>
+    </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { filter: 'All', decision: null, remarks: '', err: false, drawer: false }; }
+  renderVals() {
+    const S = { Scheduled: 'pill p-neutral', 'For validation': 'pill p-brand', Returned: 'pill p-brand', Completed: 'pill p-success' };
+    const T = { Later: 'pill p-neutral', Upcoming: 'pill p-warn', Due: 'pill p-warn', Overdue: 'pill p-danger', 'On time': 'pill p-success', Late: 'pill p-warn' };
+    const st = this.state;
+    const dec = st.decision;
+    const ac3Step = dec === 'approved' ? 'Completed' : dec === 'returned' ? 'Returned' : 'For validation';
+    const ac3Time = dec === 'approved' ? 'On time' : 'Upcoming';
+    const ac3Label = dec === 'approved' ? 'On time' : 'Upcoming · 3 days';
+    const all = [
+      { equip: 'Main electrical panel', id: 'PNL-MKT-004', cycle: 'Monthly, Sep', due: '3 Sep', step: 'Scheduled', time: 'Overdue', label: 'Overdue 80 days' },
+      { equip: 'Aircon #5, server room', id: 'ACU-MKT-005', cycle: 'Monthly, Oct', due: '28 Oct', step: 'Returned', time: 'Overdue', label: 'Overdue 25 days' },
+      { equip: 'Aircon #3', id: 'ACU-MKT-003', cycle: 'Monthly, Nov', due: '25 Nov', step: ac3Step, time: ac3Time, label: ac3Label },
+      { equip: 'Genset #1', id: 'GEN-MKT-001', cycle: 'Monthly, Dec', due: '4 Dec', step: 'Scheduled', time: 'Later', label: 'In 12 days' },
+      { equip: 'ATS #2', id: 'ATS-MKT-002', cycle: 'Monthly, Dec', due: '15 Dec', step: 'Scheduled', time: 'Later', label: 'In 23 days' },
+      { equip: 'Aircon #1', id: 'ACU-MKT-001', cycle: 'Monthly, Nov', due: '12 Nov', step: 'Completed', time: 'On time', label: 'On time' },
+      { equip: 'Genset #3', id: 'GEN-MKT-003', cycle: 'Monthly, Nov', due: '2 Nov', step: 'Completed', time: 'Late', label: 'Late by 6 days' }
+    ];
+    const f = st.filter;
+    const match = r => f === 'All' || (f === 'Done' ? r.step === 'Completed' : r.time === f);
+    const rows = all.filter(match).map(r => ({ equip: r.equip, id: r.id, cycle: r.cycle, due: r.due, step: r.step, stepCls: S[r.step], time: r.label, timeCls: T[r.time] }));
+    const filters = ['All', 'Overdue', 'Upcoming', 'Later', 'Done'].map(x => ({ label: x, cls: x === f ? 'choice sel' : 'choice', pressed: x === f ? 'true' : 'false', pick: () => this.setState({ filter: x }) }));
+    const checklist = [
+      ['Air filter cleaning', 'Pass', ''], ['Evaporator coil', 'Good', ''], ['Condenser coil', 'Good', ''],
+      ['Refrigerant pressure', '118 psi', 'Accepted 110–130 psi'], ['Drainage system', 'Pass', ''], ['Electrical connections', 'Pass', ''],
+      ['Thermostat working', 'Yes', ''], ['Supply air temperature', '13.5 °C', 'Accepted 12–15 °C']
+    ].map(c => ({ item: c[0], result: c[1], range: c[2] }));
+    return {
+      theme: this.props.theme ?? 'system', rows, count: rows.length, none: rows.length === 0, filters, checklist,
+      d: { step: ac3Step, stepCls: S[ac3Step], pending: !dec, approved: dec === 'approved', returned: dec === 'returned', done: !!dec },
+      drawer: st.drawer, remarks: st.remarks, showErr: st.err,
+      open: () => this.setState({ drawer: true }),
+      close: () => this.setState({ drawer: false, err: false }),
+      onRemarks: (e) => this.setState({ remarks: e.target.value, err: false }),
+      approve: () => this.setState({ decision: 'approved', drawer: false, err: false }),
+      ret: () => st.remarks.trim() ? this.setState({ decision: 'returned', drawer: false, err: false }) : this.setState({ err: true }),
+      reset: () => this.setState({ decision: null, remarks: '', err: false })
+    };
+  }
+}
+</script>
+</body>
+</html>
