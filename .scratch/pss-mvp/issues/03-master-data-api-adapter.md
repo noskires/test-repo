@@ -21,21 +21,21 @@ Type: task
 
 ## Acceptance criteria
 
-- [ ] Config: a `master_source` DB connection, read from env vars (the names are the dev-lead's choice; document them in `backend/README.md` and `.env.example`). PSS only reads from it.
-- [ ] Migrations add PSS tables for sites, equipment categories, equipment (with `details` JSON and `is_active`) and employees (with `immediate_head_id`, position title and `is_active`). Each is unique on the source ID. Equipment Categories get stable codes `ACU`, `GENSET` and `ATS`, so issue 31 can bind its checklists to them.
-- [ ] One mapping class (e.g. `App\MasterData\Import\SourceSchema`) holds every source table and column name and turns a source row into a PSS row. Unit tests cover each mapping: one row from each equipment table, plus a site and an employee.
-- [ ] `php artisan pss:import-master-data`:
+- [x] Config: a `master_source` DB connection, read from env vars (the names are the dev-lead's choice; document them in `backend/README.md` and `.env.example`). PSS only reads from it.
+- [x] Migrations add PSS tables for sites, equipment categories, equipment (with `details` JSON and `is_active`) and employees (with `immediate_head_id`, position title and `is_active`). Each is unique on the source ID. Equipment Categories get stable codes `ACU`, `GENSET` and `ATS`, so issue 31 can bind its checklists to them.
+- [x] One mapping class (e.g. `App\MasterData\Import\SourceSchema`) holds every source table and column name and turns a source row into a PSS row. Unit tests cover each mapping: one row from each equipment table, plus a site and an employee.
+- [x] `php artisan pss:import-master-data`:
   - without the connection configured, it exits non-zero with a clear message and writes nothing;
   - it inserts new rows and updates changed ones (keyed by source ID) and is idempotent, so a second run with the same data changes nothing;
   - it marks rows missing from the source as inactive, and reactivates them if they come back;
   - it prints a summary (inserted / updated / deactivated per table).
 
   Feature tests run it against a second SQLite connection seeded with guessed source rows.
-- [ ] The command is scheduled nightly (in `routes/console.php` or the scheduler the app uses). A test asserts the schedule entry.
-- [ ] A database-backed `MasterDataDirectory` reads the PSS tables and implements every port method. Its `findEmployee` returns the Immediate Head and position title. It's bound in every environment except `testing`, which keeps the in-memory fake. Existing tests stay green.
-- [ ] Inactive Equipment: the PM Task generation job (issue 08) creates no new PM Tasks for it, and filing an E-Call for it returns 422. Its existing records still read correctly (Snapshots). Tests for both.
-- [ ] A sample seeder fills the master data tables with the same sample Sites, Equipment, Categories and Employees as `SampleMasterData` (issue 30), so local dev looks the same as before. It's called from `DatabaseSeeder`.
-- [ ] No Building category and no Building equipment are imported.
+- [x] The command is scheduled nightly (in `routes/console.php` or the scheduler the app uses). A test asserts the schedule entry.
+- [x] A database-backed `MasterDataDirectory` reads the PSS tables and implements every port method. Its `findEmployee` returns the Immediate Head and position title. It's bound in every environment except `testing`, which keeps the in-memory fake. Existing tests stay green.
+- [x] Inactive Equipment: the PM Task generation job (issue 08) creates no new PM Tasks for it, and filing an E-Call for it returns 422. Its existing records still read correctly (Snapshots). Tests for both.
+- [x] A sample seeder fills the master data tables with the same sample Sites, Equipment, Categories and Employees as `SampleMasterData` (issue 30), so local dev looks the same as before. It's called from `DatabaseSeeder`.
+- [x] No Building category and no Building equipment are imported.
 
 ## Comments
 
@@ -56,6 +56,8 @@ Type: task
   - `employees(id, name, position_title, immediate_head_id)`, where `immediate_head_id` is another `employees.id`
   - `aircondition_units`, `gensets`, `ats`: shared `id, site_id, name, location, installed_on, status`; details `brand, model, capacity_tons, refrigerant` (ACU), `brand, model, capacity_kva, fuel_type` (Genset), `brand, model, rating_amperes` (ATS)
 - **Category mapping:** `aircondition_units` → `ACU` "ACU", `gensets` → `GENSET` "Genset", `ats` → `ATS` "ATS". No Building table is read.
+
+- 2026-11-24 (qa-03): QA PASS. `php artisan test --compact` = 1307 passed (6094 assertions); `vendor/bin/pint --test` passed. Frontend untouched.
 
 ## Implementation decisions
 
