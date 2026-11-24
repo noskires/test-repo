@@ -10,14 +10,14 @@ The frontend half of issue 04 (split, human, 2026-11-24, Q12). A login screen th
 
 ## Acceptance criteria
 
-- [ ] A login screen posts `employee_id` and `password` to `POST /api/auth/login`. On success it stores the token and goes to the home page. On 401 it shows an error and stores nothing.
-- [ ] The token is kept in `localStorage` (Q10). An HTTP interceptor adds `Authorization: Bearer <token>` to every request to the API.
-- [ ] A 401 from the API clears the token and redirects to the login screen. The interceptor first tries `POST /api/auth/refresh` once when the token has expired, and redirects only if that fails.
-- [ ] After sign-in the app loads `GET /api/auth/me` and keeps `employee_id`, `name`, `roles` and `vendor_id`.
-- [ ] Logout calls `POST /api/auth/logout`, clears the token and goes to the login screen.
-- [ ] Route guards: unauthenticated users are sent to login. Admin pages require `system-administrator`. Reports (issue 29) require `system-administrator` or `management-viewer`.
-- [ ] The menu shows admin entries only to `system-administrator`, the Reports entry only to `system-administrator` and `management-viewer`, and the dashboard to every signed-in user.
-- [ ] Unit tests (the Angular project's existing test runner) cover the interceptor (header added, refresh-then-redirect on 401), the guards and the menu for each role. No new npm package without approval.
+- [x] A login screen posts `employee_id` and `password` to `POST /api/auth/login`. On success it stores the token and goes to the home page. On 401 it shows an error and stores nothing.
+- [x] The token is kept in `localStorage` (Q10). An HTTP interceptor adds `Authorization: Bearer <token>` to every request to the API.
+- [x] A 401 from the API clears the token and redirects to the login screen. The interceptor first tries `POST /api/auth/refresh` once when the token has expired, and redirects only if that fails.
+- [x] After sign-in the app loads `GET /api/auth/me` and keeps `employee_id`, `name`, `roles` and `vendor_id`.
+- [x] Logout calls `POST /api/auth/logout`, clears the token and goes to the login screen.
+- [x] Route guards: unauthenticated users are sent to login. Admin pages require `system-administrator`. Reports (issue 29) require `system-administrator` or `management-viewer`.
+- [x] The menu shows admin entries only to `system-administrator`, the Reports entry only to `system-administrator` and `management-viewer`, and the dashboard to every signed-in user.
+- [x] Unit tests (the Angular project's existing test runner) cover the interceptor (header added, refresh-then-redirect on 401), the guards and the menu for each role. No new npm package without approval.
 
 ## Decisions (human, 2026-11-24)
 
@@ -33,6 +33,7 @@ From the issue 04 grilling: Q2 (JWT, no Sanctum), Q10 (localStorage, interceptor
   - **Tests:** the project runs `ng test` with Vitest (already installed). No new npm package.
   - **Demo accounts** for a manual check are in `backend/README.md` ("PSS: sign-in setup").
   - The open question on vendor-linked System Administrators (issue 45) doesn't affect this issue: the menu just follows `roles`.
+- 2026-11-24 (qa-43): QA PASS (frontend only; backend untouched, so the backend suite was not run). `cd frontend && npx ng test --watch=false`: 6 files, 47 tests passed. `npx ng build` succeeded (prerendered /login; the CLI process hangs after "Output location" on this Windows machine, see decision 11). No new npm package. Every criterion maps to a real assertion.
 
 ## Implementation decisions
 
