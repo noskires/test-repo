@@ -201,7 +201,7 @@ class User extends Authenticatable implements JWTSubject
      * way a user gets a vendor_id (Q3). A current Site EIC can't be linked: vendor staff never act as EIC (issue 37).
      * Unlinking a user who has no Vendor changes nothing. Each change records who made it ($by) and when.
      *
-     * @throws ValidationException when linking a current Site EIC
+     * @throws ValidationException when linking a current Site EIC or a System Administrator (issue 45)
      */
     public function linkToVendor(?Vendor $vendor, ?User $by = null): void
     {
@@ -210,6 +210,12 @@ class User extends Authenticatable implements JWTSubject
         }
 
         DB::transaction(function () use ($vendor, $by): void {
+            if ($vendor !== null && $this->roles()->where('role', PssRole::SystemAdministrator->value)->exists()) {
+                throw ValidationException::withMessages([
+                    'vendor_id' => 'Revoke the System Administrator role first.',
+                ]);
+            }
+
             if ($vendor !== null && $this->employee_id !== null) {
                 $eicSiteIds = SiteSetting::query()
                     ->where('eic_employee_id', $this->employee_id)
