@@ -21,36 +21,36 @@ The PRD asks for several indicators without saying how to calculate them (§3.1,
 Scope: three KPIs, each a pure calculation in `app/Dashboard/` with PHPUnit unit tests, added to `GET /api/dashboard` as new keys next to the issue 27 keys. **Do not rename or remove any existing key.** Reports are issue 29 and the date range is issue 42, so neither is part of this issue.
 
 **PM Compliance**
-- [ ] Unit: given PM Tasks, a period (`from`, `to`) and today (Manila), it returns `due`, `on_time` and `percent`.
+- [x] Unit: given PM Tasks, a period (`from`, `to`) and today (Manila), it returns `due`, `on_time` and `percent`.
   - `due` counts the PM Tasks whose due date is in `[from, min(to, today)]`, leaving out Cancelled ones. PM Tasks due later in the period don't count yet.
   - `on_time` counts the tasks in `due` that are **Completed** and have Work Done Date ≤ due date.
   - `percent` = on_time ÷ due × 100, rounded half-up to 1 decimal place. It is `null` when `due` is 0. Never divide by zero.
-- [ ] Unit cases: done on the due date (compliant); done a day late (not compliant); For Validation, Returned, In Progress or Scheduled past the due date (not compliant); Cancelled (left out); due date after today (left out); due date outside the period (left out); no due tasks (`percent` null).
-- [ ] API: `pm.compliance` = `{period_from, period_to, due, on_time, percent}`. Until issue 42 adds a date range, the period is the **current calendar month in Asia/Manila**. Feature test with the clock frozen (`Carbon::setTestNow` / `travelTo`).
+- [x] Unit cases: done on the due date (compliant); done a day late (not compliant); For Validation, Returned, In Progress or Scheduled past the due date (not compliant); Cancelled (left out); due date after today (left out); due date outside the period (left out); no due tasks (`percent` null).
+- [x] API: `pm.compliance` = `{period_from, period_to, due, on_time, percent}`. Until issue 42 adds a date range, the period is the **current calendar month in Asia/Manila**. Feature test with the clock frozen (`Carbon::setTestNow` / `travelTo`).
 
 **Operational status**
-- [ ] Unit: classify the `operating_status` from the master data directory (case-insensitive, trimmed): `operational` → operational; `null` or empty → unknown; any other value → non-operational.
-- [ ] API: `equipment.operating` = `{operational, non_operational, unknown}`, counted over the Equipment the dashboard covers.
+- [x] Unit: classify the `operating_status` from the master data directory (case-insensitive, trimmed): `operational` → operational; `null` or empty → unknown; any other value → non-operational.
+- [x] API: `equipment.operating` = `{operational, non_operational, unknown}`, counted over the Equipment the dashboard covers.
 
 **Equipment Requiring Attention**
-- [ ] Unit: for one Equipment, it returns the list of reasons that apply, in this order:
+- [x] Unit: for one Equipment, it returns the list of reasons that apply, in this order:
   - `overdue_pm`: an open PM Task whose PM Timeliness is Overdue. Reuse `App\Scheduling\PmTimelinessRule`; don't copy it.
   - `failed_items`: the latest PM Report of its most recent **Completed** PM Task has at least one response with `is_failed = true`. "Latest" means the highest revision.
   - `emergency_e_call`: an open E-Call with priority `emergency`. Open means not Closed, Rejected or Cancelled, the same as in `DashboardCounts`.
   - `not_operating`: the operational status above is non-operational. Unknown doesn't count.
 
   An empty list means the Equipment doesn't need attention. Each reason gets a test on its own, plus one test with several reasons together.
-- [ ] API: `equipment.requiring_attention` = `{count, items: [{equipment_id, equipment_name, site_id, reasons: [...]}]}`, sorted by site_id, then equipment_id.
+- [x] API: `equipment.requiring_attention` = `{count, items: [{equipment_id, equipment_name, site_id, reasons: [...]}]}`, sorted by site_id, then equipment_id.
 
 **Filters and visibility (same rules as issue 27)**
-- [ ] `site_id` and `equipment_category_id` narrow every new figure.
-- [ ] `vendor_id` narrows the Equipment figures to Equipment at Sites whose `site_settings.vendor_id` is that Vendor, and narrows PM Compliance through `pm_tasks.vendor_id`.
-- [ ] Vendor staff are forced to their own Vendor whatever they pass. Feature test: vendor staff can't see another Vendor's Equipment in `requiring_attention`.
-- [ ] Feature test: the existing issue 27 keys still come back unchanged (regression).
-- [ ] Performance: no query per PM Task. Load the PM Tasks, E-Calls and failed responses for the covered Equipment in a fixed number of queries. A test asserts the query count doesn't grow with the number of Equipment.
+- [x] `site_id` and `equipment_category_id` narrow every new figure.
+- [x] `vendor_id` narrows the Equipment figures to Equipment at Sites whose `site_settings.vendor_id` is that Vendor, and narrows PM Compliance through `pm_tasks.vendor_id`.
+- [x] Vendor staff are forced to their own Vendor whatever they pass. Feature test: vendor staff can't see another Vendor's Equipment in `requiring_attention`.
+- [x] Feature test: the existing issue 27 keys still come back unchanged (regression).
+- [x] Performance: no query per PM Task. Load the PM Tasks, E-Calls and failed responses for the covered Equipment in a fixed number of queries. A test asserts the query count doesn't grow with the number of Equipment.
 
 **Docs**
-- [ ] `backend/README.md` dashboard section (if it has one) lists the new keys.
+- [x] `backend/README.md` dashboard section (if it has one) lists the new keys.
 
 ## Comments
 
@@ -65,6 +65,7 @@ Scope: three KPIs, each a pure calculation in `app/Dashboard/` with PHPUnit unit
   3. The default period is the current Manila calendar month (until issue 42).
   4. The external API's operating status values are still open (issue 03 Q4): only `operational` counts as operating, `null` is unknown, and anything else is non-operational.
 - Record your own implementation decisions under a dated "Decisions (dev-lead, ...)" heading in this file.
+- 2026-11-24 (qa-28): QA PASS. `php artisan test --compact` = 1265 passed (5771 assertions); `vendor/bin/pint --test` passed. Frontend untouched.
 
 ## Decisions (grilling, 2026-11-22)
 - Q1 answered: **PM compliance % = PM Tasks done on time ÷ PM Tasks due in the period**. "On time" means Work Done Date ≤ due date (issue 09). Late and not-done tasks don't count as compliant.
