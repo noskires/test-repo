@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\DB;
 class SetupFirstAdmin extends Command
 {
     /**
-     * Execute the console command. Safe to run again: an existing admin is left as it is.
+     * Execute the console command. Safe to run again: an existing admin is left as it is. A new user is created
+     * internal; an existing user keeps their access state (issue 46, Q17), with a warning when they are pending.
      */
     public function handle(MasterDataDirectory $directory): int
     {
@@ -34,13 +35,21 @@ class SetupFirstAdmin extends Command
             return self::FAILURE;
         }
 
-        DB::transaction(function () use ($employeeId, $employee): void {
-            User::query()
-                ->firstOrCreate(['employee_id' => $employeeId], ['name' => $employee->name])
-                ->grantRole(PssRole::SystemAdministrator);
+        $user = DB::transaction(function () use ($employeeId, $employee): User {
+            $user = User::query()->firstOrNew(['employee_id' => $employeeId], ['name' => $employee->name]);
+            if (! $user->exists) {
+                $user->markInternal();
+            }
+            $user->grantRole(PssRole::SystemAdministrator);
+
+            return $user;
         });
 
         $this->info("{$employee->name} [{$employeeId}] is a System Administrator.");
+
+        if ($user->isPending()) {
+            $this->warn('This user is pending: they can sign in but can\'t use PSS until they are classified (internal or a Vendor) in the database or by another System Administrator.');
+        }
 
         return self::SUCCESS;
     }

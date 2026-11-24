@@ -21,7 +21,7 @@ class CurrentUserResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @return array{employee_id: string|null, name: string, roles: list<string>, vendor_id: int|null}
+     * @return array{employee_id: string|null, name: string, roles: list<string>, vendor_id: int|null, access: string}
      */
     public function toArray(Request $request): array
     {
@@ -30,6 +30,7 @@ class CurrentUserResource extends JsonResource
             'name' => $this->name,
             'roles' => $this->roleKeys(),
             'vendor_id' => $this->vendor_id,
+            'access' => $this->access->value,
         ];
     }
 }

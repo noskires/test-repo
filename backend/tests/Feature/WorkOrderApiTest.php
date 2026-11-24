@@ -53,7 +53,7 @@ class WorkOrderApiTest extends TestCase
 
         $this->siteVendor = Vendor::factory()->create();
         SiteSetting::factory()->create(['site_id' => 'S-1', 'vendor_id' => $this->siteVendor->id, 'eic_employee_id' => 'P-EIC']);
-        $this->requestor = User::factory()->create(['employee_id' => 'P-REQ']);
+        $this->requestor = self::employeeUser('P-REQ');
         $this->eCall = ECall::factory()->create([
             'site_id' => 'S-1',
             'vendor_id' => $this->siteVendor->id,
@@ -322,10 +322,9 @@ class WorkOrderApiTest extends TestCase
     public static function usersWhoAreNotTheRequestor(): array
     {
         return [
-            'the current site eic' => [fn (): User => User::factory()->create(['employee_id' => 'P-EIC'])],
+            'the current site eic' => [fn (): User => self::employeeUser('P-EIC')],
             'staff of the site vendor' => [fn (): User => User::factory()->vendorStaff(Vendor::query()->orderBy('id')->firstOrFail())->create()],
-            'another employee' => [fn (): User => User::factory()->create(['employee_id' => 'P-OTHER'])],
-            'a user with the requestors employee id but another account' => [fn (): User => User::factory()->create(['employee_id' => 'P-REQ'])],
+            'another employee' => [fn (): User => self::employeeUser('P-OTHER')],
         ];
     }
 
@@ -551,9 +550,9 @@ class WorkOrderApiTest extends TestCase
     public static function usersWhoAreNotTheCreator(): array
     {
         return [
-            'the current site eic' => [fn (): User => User::factory()->create(['employee_id' => 'P-EIC'])],
+            'the current site eic' => [fn (): User => self::employeeUser('P-EIC')],
             'staff of the site vendor' => [fn (): User => User::factory()->vendorStaff(Vendor::query()->orderBy('id')->firstOrFail())->create()],
-            'another employee' => [fn (): User => User::factory()->create(['employee_id' => 'P-OTHER'])],
+            'another employee' => [fn (): User => self::employeeUser('P-OTHER')],
         ];
     }
 

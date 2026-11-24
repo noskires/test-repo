@@ -59,7 +59,7 @@ class WorkOrderBillingEndorsementApiTest extends TestCase
 
         $this->siteVendor = Vendor::factory()->create();
         SiteSetting::factory()->create(['site_id' => 'S-1', 'vendor_id' => $this->siteVendor->id, 'eic_employee_id' => 'P-EIC']);
-        $this->requestor = User::factory()->create(['employee_id' => 'P-REQ']);
+        $this->requestor = self::employeeUser('P-REQ');
 
         $eCall = ECall::factory()->create([
             'site_id' => 'S-1',
@@ -108,7 +108,7 @@ class WorkOrderBillingEndorsementApiTest extends TestCase
 
     private function employee(string $employeeId): User
     {
-        return User::factory()->create(['employee_id' => $employeeId]);
+        return self::employeeUser($employeeId);
     }
 
     /**
@@ -245,9 +245,9 @@ class WorkOrderBillingEndorsementApiTest extends TestCase
     {
         return [
             'the requestor' => [fn (): User => User::query()->where('employee_id', 'P-REQ')->firstOrFail()],
-            'the site eic' => [fn (): User => User::factory()->create(['employee_id' => 'P-EIC'])],
-            'the level 2 head' => [fn (): User => User::factory()->create(['employee_id' => 'P-L2'])],
-            'site vendor staff with the level 1 employee id' => [fn (): User => User::factory()->vendorStaff(Vendor::query()->orderBy('id')->firstOrFail())->create(['employee_id' => 'P-L1'])],
+            'the site eic' => [fn (): User => self::employeeUser('P-EIC')],
+            'the level 2 head' => [fn (): User => self::employeeUser('P-L2')],
+            'site vendor staff with the level 1 employee id' => [fn (): User => self::vendorStaffWithEmployeeId('P-L1', Vendor::query()->orderBy('id')->firstOrFail())],
         ];
     }
 
@@ -284,7 +284,7 @@ class WorkOrderBillingEndorsementApiTest extends TestCase
     {
         $this->enterBillingWith(150);
         $this->setHead('P-REQ', null);
-        $this->actingAs(User::factory()->vendorStaff(Vendor::factory()->create())->create(['employee_id' => 'P-L1']));
+        $this->actingAs(self::vendorStaffWithEmployeeId('P-L1', Vendor::factory()->create()));
 
         $this->act('approve')->assertForbidden();
         $this->act('return', ['remarks' => 'x'])->assertForbidden();

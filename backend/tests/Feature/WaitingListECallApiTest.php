@@ -35,7 +35,7 @@ class WaitingListECallApiTest extends TestCase
 
         Carbon::setTestNow('2026-11-22 10:00:00');
         $this->vendor = Vendor::factory()->create();
-        $this->requestor = User::factory()->create(['employee_id' => 'P-REQ']);
+        $this->requestor = self::employeeUser('P-REQ');
         SiteSetting::factory()->create(['site_id' => 'S-1', 'vendor_id' => $this->vendor->id, 'eic_employee_id' => 'P-EIC']);
         SiteSetting::factory()->create(['site_id' => 'S-2', 'vendor_id' => $this->vendor->id, 'eic_employee_id' => 'P-OTHER']);
     }
@@ -103,7 +103,7 @@ class WaitingListECallApiTest extends TestCase
 
     private function eic(string $employeeId = 'P-EIC'): User
     {
-        return User::factory()->create(['employee_id' => $employeeId]);
+        return self::employeeUser($employeeId);
     }
 
     /**
@@ -129,7 +129,7 @@ class WaitingListECallApiTest extends TestCase
             'other vendor staff' => $this->vendorStaff(Vendor::factory()->create()),
             'eic' => $this->eic(),
             'non-eic employee' => $this->eic('P-NOBODY'),
-            'vendor staff with eic employee id' => User::factory()->vendorStaff($this->vendor)->create(['employee_id' => 'P-EIC']),
+            'vendor staff with eic employee id' => self::vendorStaffWithEmployeeId('P-EIC', $this->vendor),
             'requestor' => $this->requestor,
         ];
     }

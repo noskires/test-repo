@@ -10,12 +10,19 @@ export const TOKEN_STORAGE_KEY = 'pss.access_token';
 export const ROLE_SYSTEM_ADMINISTRATOR = 'system-administrator';
 export const ROLE_MANAGEMENT_VIEWER = 'management-viewer';
 
+/**
+ * What a user may use (issue 46). A pending user can sign in but sees only the
+ * "waiting for an administrator" page until a System Administrator classifies them.
+ */
+export type UserAccess = 'internal' | 'vendor' | 'pending';
+
 /** Shape of `GET /api/auth/me`. */
 export interface CurrentUser {
   employee_id: string;
   name: string;
   roles: string[];
   vendor_id: number | null;
+  access: UserAccess;
 }
 
 /** Shape of `POST /api/auth/login` and `POST /api/auth/refresh`. */
@@ -51,6 +58,7 @@ export class AuthService {
   readonly token = this.tokenSignal.asReadonly();
   readonly user = this.userSignal.asReadonly();
   readonly isSignedIn = computed(() => this.tokenSignal() !== null && this.userSignal() !== null);
+  readonly isPending = computed(() => this.userSignal()?.access === 'pending');
 
   hasToken(): boolean {
     return this.tokenSignal() !== null;

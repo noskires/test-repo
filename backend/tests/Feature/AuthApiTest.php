@@ -13,7 +13,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * JWT sign-in (issue 04, ADR 0004): login, refresh, logout and me, with users created on first sign-in.
+ * JWT sign-in (issue 04, ADR 0004/0005): login, refresh, logout and me. Sign-in only signs in users an administrator
+ * added (issue 46); it never creates one.
  */
 class AuthApiTest extends TestCase
 {
@@ -27,6 +28,7 @@ class AuthApiTest extends TestCase
 
         $this->directory = $this->app->make(MasterDataDirectory::class);
         $this->directory->addEmployee(new Employee(id: 'EMP-1', name: 'Rina Requestor'));
+        User::factory()->create(['employee_id' => 'EMP-1', 'name' => 'Rina Requestor']);
     }
 
     /**
@@ -78,15 +80,57 @@ class AuthApiTest extends TestCase
             ->assertJsonPath('expires_in', 3600);
     }
 
-    public function test_wrong_credentials_give_401_and_no_token(): void
+    /**
+     * The password is checked first (Q16): a wrong one gives the same 401 whether or not the employee is a PSS user.
+     */
+    public function test_wrong_credentials_give_the_same_401_for_registered_and_unregistered_employees(): void
+    {
+        $this->acceptCredentials(['EMP-1' => 'secret', 'EMP-2' => 'secret']);
+        $this->directory->addEmployee(new Employee(id: 'EMP-2', name: 'Uma Unregistered'));
+
+        $registered = $this->postJson('/api/auth/login', ['employee_id' => 'EMP-1', 'password' => 'wrong'])
+            ->assertUnauthorized()
+            ->assertExactJson(['message' => 'Invalid employee ID or password.']);
+        $unregistered = $this->postJson('/api/auth/login', ['employee_id' => 'EMP-2', 'password' => 'wrong'])
+            ->assertUnauthorized()
+            ->assertExactJson(['message' => 'Invalid employee ID or password.']);
+
+        $this->assertSame($registered->getContent(), $unregistered->getContent());
+        $this->assertSame(1, User::query()->count());
+    }
+
+    public function test_correct_credentials_without_a_pss_user_give_403_no_token_and_create_no_user(): void
+    {
+        $this->acceptCredentials(['EMP-2' => 'secret', 'EMP-GHOST' => 'secret']);
+        $this->directory->addEmployee(new Employee(id: 'EMP-2', name: 'Uma Unregistered'));
+
+        foreach (['EMP-2', 'EMP-GHOST'] as $employeeId) {
+            $this->postJson('/api/auth/login', ['employee_id' => $employeeId, 'password' => 'secret'])
+                ->assertForbidden()
+                ->assertExactJson(['message' => "Your account isn't set up in PSS yet. Ask an administrator."]);
+        }
+
+        $this->assertSame(1, User::query()->count());
+    }
+
+    public function test_login_never_calls_the_master_data_directory(): void
     {
         $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->app->instance(MasterDataDirectory::class, $this->createMock(MasterDataDirectory::class));
+        $this->app->make(MasterDataDirectory::class)->expects($this->never())->method($this->anything());
 
-        $this->postJson('/api/auth/login', ['employee_id' => 'EMP-1', 'password' => 'wrong'])
-            ->assertUnauthorized()
-            ->assertJsonMissingPath('access_token');
+        $this->login();
+    }
 
-        $this->assertSame(0, User::query()->count());
+    public function test_a_pending_user_with_a_correct_password_gets_a_token(): void
+    {
+        User::factory()->pending()->create(['employee_id' => 'EMP-P']);
+        $this->acceptCredentials(['EMP-P' => 'secret']);
+
+        $token = $this->login('EMP-P');
+        $this->forgetSignedInUser();
+
+        $this->withToken($token)->getJson('/api/auth/me')->assertOk()->assertJsonPath('access', 'pending');
     }
 
     public function test_missing_fields_give_422(): void
@@ -186,6 +230,7 @@ class AuthApiTest extends TestCase
                 'name' => 'Rina Requestor',
                 'roles' => ['management-viewer'],
                 'vendor_id' => null,
+                'access' => 'internal',
             ]);
     }
 
@@ -197,7 +242,10 @@ class AuthApiTest extends TestCase
         User::query()->where('employee_id', 'EMP-1')->sole()->forceFill(['vendor_id' => $vendor->id])->save();
         $this->forgetSignedInUser();
 
-        $this->withToken($token)->getJson('/api/auth/me')->assertOk()->assertJsonPath('vendor_id', $vendor->id);
+        $this->withToken($token)->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('vendor_id', $vendor->id)
+            ->assertJsonPath('access', 'vendor');
     }
 
     public function test_me_without_a_token_gives_401(): void
@@ -219,47 +267,18 @@ class AuthApiTest extends TestCase
         $this->withToken($token)->getJson('/api/dashboard')->assertOk();
     }
 
-    public function test_first_sign_in_creates_a_user_with_the_master_data_name_no_roles_and_no_vendor(): void
+    public function test_sign_in_never_changes_the_user(): void
     {
+        $vendor = Vendor::factory()->create();
+        User::query()->where('employee_id', 'EMP-1')->sole()->forceFill(['vendor_id' => $vendor->id, 'name' => 'Old Name'])->save();
         $this->acceptCredentials(['EMP-1' => 'secret']);
 
+        $this->login();
         $this->login();
 
         $user = User::query()->where('employee_id', 'EMP-1')->sole();
-        $this->assertSame('Rina Requestor', $user->name);
-        $this->assertNull($user->vendor_id);
-        $this->assertSame([], $user->roleKeys());
-    }
-
-    public function test_a_second_sign_in_reuses_the_same_user(): void
-    {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
-
-        $this->login();
-        $this->login();
-
-        $this->assertSame(1, User::query()->where('employee_id', 'EMP-1')->count());
-    }
-
-    public function test_sign_in_keeps_an_existing_vendor_link_and_never_sets_one(): void
-    {
-        $vendor = Vendor::factory()->create();
-        User::factory()->vendorStaff($vendor)->create(['employee_id' => 'EMP-1', 'name' => 'Old Name']);
-        $this->acceptCredentials(['EMP-1' => 'secret']);
-
-        $this->login();
-
-        $this->assertSame($vendor->id, User::query()->where('employee_id', 'EMP-1')->sole()->vendor_id);
-    }
-
-    public function test_accepted_credentials_for_an_employee_unknown_to_master_data_give_401_and_create_no_user(): void
-    {
-        $this->acceptCredentials(['EMP-GHOST' => 'secret']);
-
-        $this->postJson('/api/auth/login', ['employee_id' => 'EMP-GHOST', 'password' => 'secret'])
-            ->assertUnauthorized()
-            ->assertJsonMissingPath('access_token');
-
-        $this->assertSame(0, User::query()->count());
+        $this->assertSame($vendor->id, $user->vendor_id);
+        $this->assertSame('Old Name', $user->name);
+        $this->assertSame(1, User::query()->count());
     }
 }

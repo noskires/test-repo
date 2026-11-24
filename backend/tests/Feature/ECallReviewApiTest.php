@@ -45,7 +45,7 @@ class ECallReviewApiTest extends TestCase
 
         $this->siteVendor = Vendor::factory()->create();
         SiteSetting::factory()->create(['site_id' => 'S-1', 'vendor_id' => $this->siteVendor->id, 'eic_employee_id' => 'P-EIC']);
-        $this->requestor = User::factory()->create(['employee_id' => 'P-REQ']);
+        $this->requestor = self::employeeUser('P-REQ');
         $this->eCall = ECall::factory()->create([
             'site_id' => 'S-1',
             'vendor_id' => $this->siteVendor->id,
@@ -84,7 +84,7 @@ class ECallReviewApiTest extends TestCase
 
     private function actingAsEic(string $employeeId = 'P-EIC'): User
     {
-        $eic = User::factory()->create(['employee_id' => $employeeId]);
+        $eic = self::employeeUser($employeeId);
         $this->actingAs($eic);
 
         return $eic;
@@ -221,9 +221,9 @@ class ECallReviewApiTest extends TestCase
     public static function usersWhoAreNotTheCurrentEic(): array
     {
         return [
-            'another employee' => [fn (): User => User::factory()->create(['employee_id' => 'P-OTHER'])],
+            'another employee' => [fn (): User => self::employeeUser('P-OTHER')],
             'a user with no employee id' => [fn (): User => User::factory()->create()],
-            'staff of the site vendor' => [fn (): User => User::factory()->vendorStaff(Vendor::query()->orderBy('id')->firstOrFail())->create(['employee_id' => 'P-EIC'])],
+            'staff of the site vendor' => [fn (): User => self::vendorStaffWithEmployeeId('P-EIC', Vendor::query()->orderBy('id')->firstOrFail())],
             'the requestor' => [fn (): User => User::query()->where('employee_id', 'P-REQ')->firstOrFail()],
         ];
     }
@@ -246,7 +246,7 @@ class ECallReviewApiTest extends TestCase
 
     public function test_a_non_eic_gets_403_before_remarks_are_validated(): void
     {
-        $this->actingAs(User::factory()->create(['employee_id' => 'P-OTHER']));
+        $this->actingAs(self::employeeUser('P-OTHER'));
 
         $this->postJson("/api/e-calls/{$this->eCall->id}/reject")->assertForbidden();
     }
@@ -445,7 +445,7 @@ class ECallReviewApiTest extends TestCase
     public function test_the_model_rechecks_the_current_eic_without_the_policy(): void
     {
         $this->replaceSiteEic('P-NEW');
-        $replacedEic = User::factory()->create(['employee_id' => 'P-EIC']);
+        $replacedEic = self::employeeUser('P-EIC');
 
         try {
             ECall::approveProposal($this->eCall, $replacedEic, null);

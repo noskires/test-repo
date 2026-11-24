@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserAccess;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -33,7 +34,19 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'employee_id' => null,
             'vendor_id' => null,
+            'access' => UserAccess::Internal,
         ];
+    }
+
+    /**
+     * Indicate that the user is waiting for an administrator to classify them (issue 46).
+     */
+    public function pending(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'vendor_id' => null,
+            'access' => UserAccess::Pending,
+        ]);
     }
 
     /**

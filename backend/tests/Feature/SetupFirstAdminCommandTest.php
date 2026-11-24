@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\PssRole;
+use App\Enums\UserAccess;
 use App\MasterData\Data\Employee;
 use App\MasterData\InMemoryMasterDataDirectory;
 use App\MasterData\MasterDataDirectory;
@@ -36,6 +37,28 @@ class SetupFirstAdminCommandTest extends TestCase
         $this->assertSame('Ada Admin', $user->name);
         $this->assertNull($user->vendor_id);
         $this->assertSame(['system-administrator'], $user->roleKeys());
+    }
+
+    public function test_the_user_it_creates_is_internal(): void
+    {
+        config(['pss.first_admin_employee_id' => 'EMP-ADMIN']);
+
+        $this->artisan('pss:setup-first-admin')->assertSuccessful();
+
+        $this->assertSame(UserAccess::Internal, User::query()->where('employee_id', 'EMP-ADMIN')->sole()->access);
+    }
+
+    public function test_an_existing_pending_user_keeps_their_access_and_the_command_warns(): void
+    {
+        config(['pss.first_admin_employee_id' => 'EMP-ADMIN']);
+        $existing = User::factory()->pending()->create(['employee_id' => 'EMP-ADMIN']);
+
+        $this->artisan('pss:setup-first-admin')
+            ->expectsOutputToContain('This user is pending')
+            ->assertSuccessful();
+
+        $this->assertSame(UserAccess::Pending, $existing->refresh()->access);
+        $this->assertSame(['system-administrator'], $existing->roleKeys());
     }
 
     public function test_it_grants_the_role_to_an_existing_user(): void

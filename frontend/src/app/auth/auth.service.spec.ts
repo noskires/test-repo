@@ -12,6 +12,7 @@ const ME = {
   name: 'Ada Administrator',
   roles: ['system-administrator'],
   vendor_id: null,
+  access: 'internal',
 };
 
 function setup(platform: 'browser' | 'server' = 'browser') {

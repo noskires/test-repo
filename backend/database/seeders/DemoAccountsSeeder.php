@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\PssRole;
+use App\Enums\UserAccess;
 use App\MasterData\MasterDataDirectory;
 use App\MasterData\SampleMasterData;
 use App\Models\User;
@@ -42,9 +43,15 @@ class DemoAccountsSeeder extends Seeder
         $employee = $directory->findEmployee($employeeId)
             ?? throw new RuntimeException("Demo employee [{$employeeId}] is missing from the master data.");
 
-        return User::query()->updateOrCreate(
+        $user = User::query()->updateOrCreate(
             ['employee_id' => $employeeId],
             ['name' => $employee->name, 'password' => self::PASSWORD],
         );
+
+        if ($user->access === UserAccess::Pending) {
+            $user->markInternal();
+        }
+
+        return $user;
     }
 }
