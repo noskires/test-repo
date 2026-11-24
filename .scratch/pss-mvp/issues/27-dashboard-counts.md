@@ -1,6 +1,7 @@
 # 27 — Dashboard: operational counts
 
-Status: ready-for-agent
+Status: done
+Merged: PR #42 (3a5378e), 2026-11-24
 Blocked by: 11, 17, 21
 Type: task
 
