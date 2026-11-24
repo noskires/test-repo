@@ -22,3 +22,13 @@ The human decided (issue 04 grilling, 2026-11-24) how users sign in and how PSS 
 - PM Task approval history is widened from "current EIC and the task's Vendor" to "anyone who can view the task", matching E-Calls and Work Orders.
 - Production sign-in needs issue 44. Until then, only local and testing environments can sign in.
 - Changing a user's roles or Vendor link takes effect on their next request, because the token carries only the user's id.
+
+## Amendment (2026-11-24): email and password sign-in everywhere
+
+The human decided (issue 44 rewrite) that there is **no external login**. Users sign in to the PSS backend with **email + password**, checked against the local `users` table, in **every** environment for now. The production block on `LocalCredentialChecker` is lifted. The `CredentialChecker` port stays, so a different checker can be plugged in later.
+
+- Email is required and unique. `employee_id` stays on the user to link them to their imported employee record (Immediate Head chain, ADR 0001 amendment 2026-11-24).
+- An admin adding a user enters the email and a **temporary password**, and the user must change it on first sign-in. Users can change their own password. An admin resets a forgotten one. There is no email reset flow and no mail server.
+- The issue 46 sign-in order is kept (ADR 0005).
+
+This replaces the Credentials bullet above and the Consequence "Production sign-in needs issue 44". Issue 44 now delivers this email sign-in.

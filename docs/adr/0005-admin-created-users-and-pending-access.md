@@ -21,3 +21,8 @@ This supersedes ADR 0004's "a PSS `User` is created on first sign-in".
 - Issue 04's merged behaviour changes (issue 46, then 45). Test fixtures that shared an `employee_id` between two users must use distinct ids.
 - Issue 44 (external credential checker) no longer has to tell vendor staff from internal employees.
 - Removing or deactivating users is not decided yet (issue 47). Until then, revoking roles and unlinking a Vendor are the ways to limit a user.
+
+## Amendment (2026-11-24): temporary passwords and deactivation
+
+- **Temporary passwords** (issue 44): when adding a user, the System Administrator also enters their email and a temporary password, which the user must change on first sign-in (ADR 0004 amendment, 2026-11-24).
+- **Deactivation** (issue 47): users are **deactivated, never deleted**, and only by a System Administrator. There's no automatic deactivation from the master data. It's allowed even with open work: a Site whose EIC is deactivated shows on Needs Setup, pending approvals stay open for other holders of that role, and filed E-Calls are unchanged. Deactivating revokes all tokens at once. A deactivated user can't be granted roles, assigned as Site EIC or linked to a Vendor (422 "Reactivate the user first.") and is hidden from pick lists. Reactivating restores their previous access and roles. Both actions write a history entry.
