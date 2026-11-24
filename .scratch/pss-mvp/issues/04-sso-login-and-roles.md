@@ -22,43 +22,43 @@ PRD roles (Module 9): System Administrator, Requestor, Engineer-in-Charge, Vendo
 ## Acceptance criteria
 
 Auth endpoints (JWT)
-- [ ] `tymon/jwt-auth` is the only package added. The `api` guard uses the `jwt` driver and the routes in `routes/api.php` authenticate with it. Existing feature tests that use `actingAs` keep passing.
-- [ ] `POST /api/auth/login` with `employee_id` and `password` returns `access_token`, `token_type: "bearer"` and `expires_in` (seconds) when the credential checker accepts them. Wrong credentials give 401 and no token. Missing fields give 422.
-- [ ] The access token lives **60 minutes** (`JWT_TTL=60`): a request with an expired token gets 401 (test with time travel).
-- [ ] `POST /api/auth/refresh` with a valid or expired token inside the **14-day** refresh window (`JWT_REFRESH_TTL=20160`) returns a new token. After the window it returns 401.
-- [ ] `POST /api/auth/logout` blacklists the token: using the same token afterwards gives 401.
-- [ ] `GET /api/auth/me` returns `employee_id`, `name`, `roles` (array of role keys) and `vendor_id` (null for internal employees). Without a token it returns 401.
+- [x] `tymon/jwt-auth` is the only package added. The `api` guard uses the `jwt` driver and the routes in `routes/api.php` authenticate with it. Existing feature tests that use `actingAs` keep passing.
+- [x] `POST /api/auth/login` with `employee_id` and `password` returns `access_token`, `token_type: "bearer"` and `expires_in` (seconds) when the credential checker accepts them. Wrong credentials give 401 and no token. Missing fields give 422.
+- [x] The access token lives **60 minutes** (`JWT_TTL=60`): a request with an expired token gets 401 (test with time travel).
+- [x] `POST /api/auth/refresh` with a valid or expired token inside the **14-day** refresh window (`JWT_REFRESH_TTL=20160`) returns a new token. After the window it returns 401.
+- [x] `POST /api/auth/logout` blacklists the token: using the same token afterwards gives 401.
+- [x] `GET /api/auth/me` returns `employee_id`, `name`, `roles` (array of role keys) and `vendor_id` (null for internal employees). Without a token it returns 401.
 
 Credential checker
-- [ ] A `CredentialChecker` interface takes `employee_id` and `password` and says whether they are valid. Login uses only this interface, and tests can bind a fake.
-- [ ] `LocalCredentialChecker` checks the password against the hashed `users.password`. It can be resolved only when the app environment is `local` or `testing`. In any other environment resolving it throws a clear exception (test: set the environment to `production` and assert the exception).
-- [ ] A local seeder creates demo accounts with known passwords: one System Administrator, one Management/Viewer, one ordinary internal employee and one vendor staff user linked to a seeded Vendor. Their `employee_id`s exist in the local dev master data fake (issue 30).
+- [x] A `CredentialChecker` interface takes `employee_id` and `password` and says whether they are valid. Login uses only this interface, and tests can bind a fake.
+- [x] `LocalCredentialChecker` checks the password against the hashed `users.password`. It can be resolved only when the app environment is `local` or `testing`. In any other environment resolving it throws a clear exception (test: set the environment to `production` and assert the exception).
+- [x] A local seeder creates demo accounts with known passwords: one System Administrator, one Management/Viewer, one ordinary internal employee and one vendor staff user linked to a seeded Vendor. Their `employee_id`s exist in the local dev master data fake (issue 30).
 
 Users created on first sign-in
-- [ ] When the checker accepts an `employee_id` that has no PSS `User` yet, login creates one with that `employee_id`, the name from `MasterDataDirectory::findEmployee`, no roles and `vendor_id = null`. A second login reuses the same record (no duplicate).
-- [ ] If the checker accepts the credentials but `MasterDataDirectory` doesn't know the employee, login gives 401 and creates no user (see "Decisions to confirm").
-- [ ] Sign-in never sets `vendor_id`. Only the admin link action below does (alignment item 4). Test: a first sign-in user has `vendor_id = null`.
+- [x] When the checker accepts an `employee_id` that has no PSS `User` yet, login creates one with that `employee_id`, the name from `MasterDataDirectory::findEmployee`, no roles and `vendor_id = null`. A second login reuses the same record (no duplicate).
+- [x] If the checker accepts the credentials but `MasterDataDirectory` doesn't know the employee, login gives 401 and creates no user (see "Decisions to confirm").
+- [x] Sign-in never sets `vendor_id`. Only the admin link action below does (alignment item 4). Test: a first sign-in user has `vendor_id = null`.
 
 First admin
-- [ ] `php artisan pss:setup-first-admin` reads `PSS_FIRST_ADMIN_EMPLOYEE_ID` (added to `.env.example`), creates that `User` if missing (name from `MasterDataDirectory`) and grants it `system-administrator`. Running it twice changes nothing and still succeeds. If the variable is empty, or the employee isn't in `MasterDataDirectory`, it fails with a clear message and a non-zero exit code.
+- [x] `php artisan pss:setup-first-admin` reads `PSS_FIRST_ADMIN_EMPLOYEE_ID` (added to `.env.example`), creates that `User` if missing (name from `MasterDataDirectory`) and grants it `system-administrator`. Running it twice changes nothing and still succeeds. If the variable is empty, or the employee isn't in `MasterDataDirectory`, it fails with a clear message and a non-zero exit code.
 
 Roles and gates
-- [ ] Roles are stored in PSS (e.g. a `user_roles` table) with the two keys `system-administrator` and `management-viewer`. Any other key is refused with 422.
-- [ ] The gates `manage-vendors`, `manage-site-settings`, `manage-checklists`, `manage-price-lists`, `manage-billing-thresholds` and the new `manage-roles` are defined from real roles: allowed for a `system-administrator`, denied for everyone else (including `management-viewer` and vendor staff). One test per gate for each outcome.
+- [x] Roles are stored in PSS (e.g. a `user_roles` table) with the two keys `system-administrator` and `management-viewer`. Any other key is refused with 422.
+- [x] The gates `manage-vendors`, `manage-site-settings`, `manage-checklists`, `manage-price-lists`, `manage-billing-thresholds` and the new `manage-roles` are defined from real roles: allowed for a `system-administrator`, denied for everyone else (including `management-viewer` and vendor staff). One test per gate for each outcome.
 
 Admin API (behind `manage-roles`; anyone else gets 403)
-- [ ] `GET /api/admin/users` lists PSS users with `employee_id`, `name`, `roles` and `vendor_id`.
-- [ ] `POST /api/admin/users/{user}/roles` with `role` grants it (granting a role the user already has is a no-op 200). `DELETE /api/admin/users/{user}/roles/{role}` revokes it.
-- [ ] Revoking `system-administrator` from its **last holder** is refused with 422 and a clear message, including when an admin removes it from themselves. With two admins, either can remove the other's or their own.
-- [ ] `PUT /api/admin/users/{user}/vendor` with `vendor_id` links the user to an existing Vendor (unknown id gives 422). `vendor_id: null` unlinks them, and they are an ordinary employee again.
-- [ ] Linking a user who is the **current EIC of any Site** is refused with 422 and a message saying to replace them as EIC first. Nothing changes (alignment item 4, issue 37).
+- [x] `GET /api/admin/users` lists PSS users with `employee_id`, `name`, `roles` and `vendor_id`.
+- [x] `POST /api/admin/users/{user}/roles` with `role` grants it (granting a role the user already has is a no-op 200). `DELETE /api/admin/users/{user}/roles/{role}` revokes it.
+- [x] Revoking `system-administrator` from its **last holder** is refused with 422 and a clear message, including when an admin removes it from themselves. With two admins, either can remove the other's or their own.
+- [x] `PUT /api/admin/users/{user}/vendor` with `vendor_id` links the user to an existing Vendor (unknown id gives 422). `vendor_id: null` unlinks them, and they are an ordinary employee again.
+- [x] Linking a user who is the **current EIC of any Site** is refused with 422 and a message saying to replace them as EIC first. Nothing changes (alignment item 4, issue 37).
 
 Visibility and approval history
-- [ ] Internal employees (`vendor_id = null`) can view PM Tasks, E-Calls and Work Orders at every Site. Vendor staff can view only their own Vendor's records, and get 403 on another Vendor's. (Today's policies already do this; keep a test per record type.)
-- [ ] One rule for approval history (alignment item 2): anyone who can `view` the record can read its approvals. `GET /api/pm-tasks/{pmTask}/approvals` changes to authorize `view` (today `viewApprovals` limits it to the current EIC and the task's Vendor). E-Call and Work Order history already use `view`. Test: an internal employee who isn't the EIC can read a PM Task's history; another Vendor's staff get 403.
+- [x] Internal employees (`vendor_id = null`) can view PM Tasks, E-Calls and Work Orders at every Site. Vendor staff can view only their own Vendor's records, and get 403 on another Vendor's. (Today's policies already do this; keep a test per record type.)
+- [x] One rule for approval history (alignment item 2): anyone who can `view` the record can read its approvals. `GET /api/pm-tasks/{pmTask}/approvals` changes to authorize `view` (today `viewApprovals` limits it to the current EIC and the task's Vendor). E-Call and Work Order history already use `view`. Test: an internal employee who isn't the EIC can read a PM Task's history; another Vendor's staff get 403.
 
 Morph map
-- [ ] The enforced morph map in `AppServiceProvider` has a `user` alias for `App\Models\User`, with a test that `(new User)->getMorphClass()` is `user` (alignment item 3).
+- [x] The enforced morph map in `AppServiceProvider` has a `user` alias for `App\Models\User`, with a test that `(new User)->getMorphClass()` is `user` (alignment item 3).
 
 ## Decisions (human, 2026-11-24)
 
@@ -95,6 +95,7 @@ Earlier decisions (grilling, 2026-11-22), still valid: vendor staff are in the e
     2. A sign-in whose employee isn't in `MasterDataDirectory` is refused (401), so every PSS user has a real employee name.
     3. An admin can unlink a vendor staff user (`vendor_id: null`).
     4. Roles can be granted only to users who already exist in PSS (signed in once, or created by the setup command).
+- 2026-11-24 (qa-04): QA PASS. `php artisan test --compact` (backend/): 1165 passed (5436 assertions). `vendor/bin/pint --test` passed. Issue-04 test files: 127 passed. Every criterion maps to a real test; only tymon/jwt-auth (and its transitive deps) added.
 
 ## Alignment items (history)
 
