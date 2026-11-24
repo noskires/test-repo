@@ -1,6 +1,7 @@
 # 04 — Login (JWT) and PSS roles (backend)
 
-Status: ready-for-agent
+Status: done
+Merged: PR #43 (ac25f69), 2026-11-24
 Blocked by: none
 Type: task
 
