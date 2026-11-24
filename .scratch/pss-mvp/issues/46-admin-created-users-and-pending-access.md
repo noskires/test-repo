@@ -17,41 +17,41 @@ Out of scope: an admin screen for users (later issue), removing or deactivating 
 ## Acceptance criteria
 
 Sign-in (Q13, Q16)
-- [ ] `POST /api/auth/login` no longer creates a `User` (the `firstOrCreate` in `AuthController::login` is removed). Login no longer calls `MasterDataDirectory`.
-- [ ] The password is checked first. If the `CredentialChecker` refuses the credentials, the response is **401** with the existing message ("Invalid employee ID or password."), whether or not the `employee_id` belongs to a PSS user. Test both cases (registered and unregistered) and assert the same status and body.
-- [ ] If the checker accepts the credentials but no PSS user has that `employee_id`, the response is **403** with the message "Your account isn't set up in PSS yet. Ask an administrator." No token, no user created. (Test by binding a fake `CredentialChecker` that accepts.)
-- [ ] A registered user with a correct password gets a token, whatever their access state (pending included).
+- [x] `POST /api/auth/login` no longer creates a `User` (the `firstOrCreate` in `AuthController::login` is removed). Login no longer calls `MasterDataDirectory`.
+- [x] The password is checked first. If the `CredentialChecker` refuses the credentials, the response is **401** with the existing message ("Invalid employee ID or password."), whether or not the `employee_id` belongs to a PSS user. Test both cases (registered and unregistered) and assert the same status and body.
+- [x] If the checker accepts the credentials but no PSS user has that `employee_id`, the response is **403** with the message "Your account isn't set up in PSS yet. Ask an administrator." No token, no user created. (Test by binding a fake `CredentialChecker` that accepts.)
+- [x] A registered user with a correct password gets a token, whatever their access state (pending included).
 
 Access state (Q9, Q8, Q6)
-- [ ] Every user has an `access` value: `internal`, `vendor` or `pending`. A user is `vendor` exactly when `vendor_id` is set.
-- [ ] A migration backfills existing users: those with a `vendor_id` become `vendor`, all others `internal`. Test the backfill (a user with and one without a `vendor_id` before the migration's data step).
-- [ ] `PUT /api/admin/users/{user}/vendor` with a `vendor_id` sets `vendor` (the existing rules still apply: unknown Vendor 422, current Site EIC 422). With `null` on a vendor-linked user it clears `vendor_id` and sets **`pending`** (no longer "ordinary employee again").
-- [ ] New `PUT /api/admin/users/{user}/access` with `{access: "internal"}` sets `internal`. Behind `can:manage-roles` (others 403). Any other `access` value, or a missing one, gives 422.
-- [ ] Leaving `pending` (by linking a Vendor or by setting `internal`) records **who made the change and when** (the acting admin's user id and a timestamp, stored on the user). Test both ways out.
+- [x] Every user has an `access` value: `internal`, `vendor` or `pending`. A user is `vendor` exactly when `vendor_id` is set.
+- [x] A migration backfills existing users: those with a `vendor_id` become `vendor`, all others `internal`. Test the backfill (a user with and one without a `vendor_id` before the migration's data step).
+- [x] `PUT /api/admin/users/{user}/vendor` with a `vendor_id` sets `vendor` (the existing rules still apply: unknown Vendor 422, current Site EIC 422). With `null` on a vendor-linked user it clears `vendor_id` and sets **`pending`** (no longer "ordinary employee again").
+- [x] New `PUT /api/admin/users/{user}/access` with `{access: "internal"}` sets `internal`. Behind `can:manage-roles` (others 403). Any other `access` value, or a missing one, gives 422.
+- [x] Leaving `pending` (by linking a Vendor or by setting `internal`) records **who made the change and when** (the acting admin's user id and a timestamp, stored on the user). Test both ways out.
 
 Pending users (Q5)
-- [ ] A pending user can call `GET /api/auth/me`, `POST /api/auth/refresh` and `POST /api/auth/logout`. **Every other `auth:api` route returns 403** for them, including the admin API. Test at least one route of each kind: a record list (e.g. PM Tasks or E-Calls), a write (e.g. filing an E-Call), the dashboard and an admin route.
-- [ ] `GET /api/auth/me` (`CurrentUserResource`) also returns `access` (`internal`, `vendor` or `pending`).
+- [x] A pending user can call `GET /api/auth/me`, `POST /api/auth/refresh` and `POST /api/auth/logout`. **Every other `auth:api` route returns 403** for them, including the admin API. Test at least one route of each kind: a record list (e.g. PM Tasks or E-Calls), a write (e.g. filing an E-Call), the dashboard and an admin route.
+- [x] `GET /api/auth/me` (`CurrentUserResource`) also returns `access` (`internal`, `vendor` or `pending`).
 
 Adding a user (Q14, Q15)
-- [ ] `POST /api/admin/users` behind `can:manage-roles` (others 403). Body: `employee_id` plus **exactly one** of `access: "internal"` or `vendor_id`. Returns **201** with the user (`id`, `employee_id`, `name`, `roles`, `vendor_id`, `access`).
-- [ ] 422 when: `employee_id` is missing; `MasterDataDirectory::findEmployee` doesn't know it; a PSS user already has it; both or neither of `access` / `vendor_id` are given; `access` is anything but `internal`; `vendor_id` isn't an existing Vendor. Nothing is stored on any 422.
-- [ ] The name is copied from the master data. The new user has no roles (roles are granted separately).
-- [ ] A migration adds a **unique** constraint on `users.employee_id`. A test asserts inserting a second user with the same `employee_id` fails.
+- [x] `POST /api/admin/users` behind `can:manage-roles` (others 403). Body: `employee_id` plus **exactly one** of `access: "internal"` or `vendor_id`. Returns **201** with the user (`id`, `employee_id`, `name`, `roles`, `vendor_id`, `access`).
+- [x] 422 when: `employee_id` is missing; `MasterDataDirectory::findEmployee` doesn't know it; a PSS user already has it; both or neither of `access` / `vendor_id` are given; `access` is anything but `internal`; `vendor_id` isn't an existing Vendor. Nothing is stored on any 422.
+- [x] The name is copied from the master data. The new user has no roles (roles are granted separately).
+- [x] A migration adds a **unique** constraint on `users.employee_id`. A test asserts inserting a second user with the same `employee_id` fails.
 
 Roles (Q7)
-- [ ] `POST /api/admin/users/{user}/roles` for a pending user returns 422 with the message "Classify this user first (internal or a Vendor) before granting roles." and stores no role.
+- [x] `POST /api/admin/users/{user}/roles` for a pending user returns 422 with the message "Classify this user first (internal or a Vendor) before granting roles." and stores no role.
 
 Admin list (Q10)
-- [ ] `GET /api/admin/users` returns each user's `access`. `?access=pending` returns only pending users (also accept `internal` and `vendor`). Any other value gives 422.
+- [x] `GET /api/admin/users` returns each user's `access`. `?access=pending` returns only pending users (also accept `internal` and `vendor`). Any other value gives 422.
 
 Unchanged (Q17)
-- [ ] `php artisan pss:setup-first-admin` keeps working as before (existing tests stay green).
+- [x] `php artisan pss:setup-first-admin` keeps working as before (existing tests stay green).
 
 Angular (Q5, Q16)
-- [ ] When `GET /api/auth/me` returns `access: "pending"`, the app shows a "waiting for an administrator" page (with the user's name and the Log out button) instead of the dashboard, for every route. No menu entries.
-- [ ] On a 403 from login, the login screen shows the backend's `message`. Nothing is stored.
-- [ ] Unit tests (existing Angular runner) cover the pending page guard/redirect and the 403 login message. No new npm package.
+- [x] When `GET /api/auth/me` returns `access: "pending"`, the app shows a "waiting for an administrator" page (with the user's name and the Log out button) instead of the dashboard, for every route. No menu entries.
+- [x] On a 403 from login, the login screen shows the backend's `message`. Nothing is stored.
+- [x] Unit tests (existing Angular runner) cover the pending page guard/redirect and the 403 login message. No new npm package.
 
 ## Decisions (human, 2026-11-24)
 
@@ -84,6 +84,7 @@ Grilling on issue 04's open gap (Q16 and issue 45). The human confirmed each poi
     2. `PUT .../access {access: internal}` on a vendor-linked user returns 422 ("unlink the Vendor first"), so the vendor/vendor_id invariant can't break. On an internal user it's a no-op 200.
     3. A pending user who still holds roles (e.g. vendor staff with Management / Viewer, then unlinked) keeps them; they're blocked anyway until classified.
     4. Until issue 45 ships, a vendor-linked System Administrator who is unlinked becomes pending and loses admin access. If that is the last admin, recovery is a database fix. Issue 45 (refuse linking a System Administrator) closes this.
+- 2026-11-24 (qa-46): QA PASS. Backend `php artisan test --compact`: 1212 passed (5621 assertions); `vendor/bin/pint --test` passed. Frontend `npx ng test --watch=false`: 58 passed (7 files). Every criterion maps to a real assertion (401 vs 403 split with exact bodies, pending 403 on every route kind, who/when for both ways out of pending, unique constraint). Concerns: three tests removed because the state cannot exist once employee_id is unique; migration 150001 fails on a production DB with duplicate employee_ids; simultaneous creates of one employee give a 500 (not handled).
 
 ## Implementation decisions
 
