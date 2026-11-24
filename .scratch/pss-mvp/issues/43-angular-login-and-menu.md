@@ -1,6 +1,7 @@
 # 43 — Angular login screen, token handling and role-aware menu
 
-Status: ready-for-agent
+Status: done
+Merged: PR #44 (3e50cf7), 2026-11-24
 Blocked by: 04
 Type: task
 
