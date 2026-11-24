@@ -7,10 +7,10 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **26 — Equipment maintenance history** (PR #41, 2026-11-24)
-- In flight: none
-- Ready now (`ready-for-agent`, every blocker done), in number order: **27, 28**
-- Waiting on the human (`needs-info`): 03, 04, 15, 31, 33, 41. The open questions are in each issue file.
-- Doc follow-ups: 1 open (see "Doc follow-ups")
+- In flight: **27 — Dashboard: operational counts**
+- Ready now (`ready-for-agent`, every blocker done), in number order: **27** (in flight), **28**
+- Waiting on the human (`needs-info`): 03, 04, 15, 31, 33, 41, 42. The open questions are in each issue file.
+- Doc follow-ups: none open
 
 ## Board
 
@@ -44,7 +44,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 26 | Equipment maintenance history | done | 11, 13, 18 | #41 |
 | 27 | Dashboard: operational counts | ready-for-agent | 11, 17, 21 | |
 | 28 | Define dashboard and report KPIs | ready-for-agent | 09 | |
-| 29 | Reports and export | ready-for-agent | 04, 26, 27, 28 | |
+| 29 | Reports and export | ready-for-agent | 04, 26, 27, 28, 42 | |
 | 30 | Local dev master data fake | done | 02 | #7 |
 | 31 | Seed the fixed MVP PM Checklists | needs-info | 07 | |
 | 32 | Admin "Needs Setup" list | done | 08, 19 | #38 |
@@ -57,6 +57,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 39 | "Waiting for me": E-Call items | done | 24 | #36 |
 | 40 | "Waiting for me": Work Order items | done | 24 | #37 |
 | 41 | Cancel a PM Task | needs-info | 08, 25 | |
+| 42 | Dashboard: date range and financial sums | needs-info | 27 | |
 
 Other merged PRs: #1 PRD v2 docs, #2 project scaffold, #3 unblock answered issues, #15 no-duplicate-lines decision.
 
@@ -67,7 +68,7 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - [x] GLOSSARY.md: PM Timeliness entry lacks the rules (Upcoming = 7 days before due, Due = due date, Overdue = after; For Validation judged by Work Done Date; Manila today) (found in issue 09)
 - [x] GLOSSARY.md: the E-Call entry doesn't say an E-Call can be filed from a PM Task by the Site EIC (For Validation or Returned) and keeps a link to it (found in issue 13)
 - [x] GLOSSARY.md: the Needs Setup list entry says it lists what stops PM Tasks, but it now also lists Work Orders with a billing chain gap (Implemented / For Billing Endorsement LVLn), and the endpoint is `GET /api/needs-setup` behind `manage-site-settings` (found in issue 32)
-- [ ] GLOSSARY.md: no entry for Maintenance History (the Equipment timeline of PM Tasks, E-Calls and Work Orders, newest first; entry date = due date / filing date / creation date; `GET /api/equipment/{equipmentId}/history`) (found in issue 26)
+- [x] GLOSSARY.md: no entry for Maintenance History (the Equipment timeline of PM Tasks, E-Calls and Work Orders, newest first; entry date = due date / filing date / creation date; `GET /api/equipment/{equipmentId}/history`) (found in issue 26)
 
 ## Log
 
@@ -88,3 +89,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-24: issue 25 merged as PR #40; 41 (PM Task cancel) stays needs-info.
 - 2026-11-24: product-owner picked 26 (the per-Equipment timeline is a core PRD view, §5.3 / §7.1, and it is the best-defined of 26, 27 and 28; it is also one of 29's blockers). Added the hand-off clarifications (entry date, visibility, snapshots).
 - 2026-11-24: issue 26 merged as PR #41.
+- 2026-11-24: product-owner cleared the 26 GLOSSARY follow-up (Maintenance History entry). Split 27: the date range and financial sums moved to the new 42 (needs-info), and 29 is now also blocked by 42. Picked 27 (current status counts; first slice of the dashboard, PRD §4.1, which 28 and 42 then extend). 28 waits because "Equipment requiring attention" needs the operational status values from issue 03.

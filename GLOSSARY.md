@@ -122,6 +122,9 @@ The 2, 3 or 4 levels of Endorsement a Work Order goes through after completion, 
 ## Approval Record
 The permanent log entry for every Approve, Return or Reject (and cancellation): who acted, the action, remarks, the previous and resulting status, and when.
 
+## Maintenance History
+The read-only timeline of one Equipment's PM Tasks, E-Calls and Work Orders, in every status, newest first. Each entry is dated by its due date (PM Task), filing date (E-Call) or creation date (Work Order); a Work Order belongs to its E-Call's Equipment. It is built only from PSS records and their Snapshots, so it still reads after the Equipment is removed upstream. Vendor staff see only their own Vendor's records. Endpoint: `GET /api/equipment/{equipmentId}/history`.
+
 ## Snapshot
 A copy of an external Site's or Equipment's details (name, category, location) stored on a PSS record, so history still reads correctly after the item is renamed or removed in the external system.
 
