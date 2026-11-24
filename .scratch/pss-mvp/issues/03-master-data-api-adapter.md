@@ -1,6 +1,7 @@
 # 03 — Import master data from the source database into PSS tables
 
-Status: ready-for-agent
+Status: done
+Merged: PR #49 (05e9312), 2026-11-24
 Blocked by: 02
 Type: task
 

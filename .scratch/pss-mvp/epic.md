@@ -6,10 +6,10 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **28 — Define dashboard and report KPIs** (PR #48, 2026-11-24)
-- In flight: **03 — Import master data from the source database into PSS tables** (handed off 2026-11-24)
-- Build order (human hint, adjusted for dependencies): **03**, 44, 49, 42, 29 (after 42), 47 (after 44), 41, 33 (after 41), 31 (after 03), 15.
-- Ready now (`ready-for-agent`, every blocker done): 03, 44, 49, 42, 41, 33, 15. Waiting on a blocker: 29 (42), 47 (44), 31 (03).
+- Last merged: **03 — Import master data from the source database into PSS tables** (PR #49, 2026-11-24)
+- In flight: none
+- Build order (human hint, adjusted for dependencies): 44, 49, 42, 29 (after 42), 47 (after 44), 41, 33 (after 41), 31, 15.
+- Ready now (`ready-for-agent`, every blocker done): 15, 31, 33, 41, 42, 44, 49. Waiting on a blocker: 29 (42), 47 (44).
 - Waiting on the human (`needs-info`): none. Parked post-MVP (`needs-triage`): 50.
 - Doc follow-ups: none open
 
@@ -19,7 +19,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 |---|---|---|---|---|
 | 01 | Vendor registry | done | none | #4 |
 | 02 | Master data directory port (in-memory fake) | done | none | #5 |
-| 03 | Import master data from the source database into PSS tables | ready-for-agent | 02 | |
+| 03 | Import master data from the source database into PSS tables | done | 02 | #49 |
 | 04 | Login (JWT) and PSS roles (backend) | done | none | #43 |
 | 05 | Assign the Site Vendor and Site EIC | done | 01, 02 | #8 |
 | 06 | Site PM Frequency | done | 05 | #12 |
@@ -117,3 +117,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-24: issue 48 merged as PR #47; 28 is the only ready issue.
 - 2026-11-24: issue 28 merged as PR #48; nothing is ready (29 waits on 42).
 - 2026-11-24: product-owner recorded the human's 2026-11-24 grilling: 03 rewritten (import master data from a DB), 44 rewritten (email sign-in), 15, 31 (reduced), 33, 41, 42, 47 set ready-for-agent; new 49 (security chore from 28) and 50 (parked). ADRs 0001, 0004 and 0005 amended. Handed off 03.
+- 2026-11-24: issue 03 merged as PR #49; unblocks 31.
