@@ -50,7 +50,7 @@ class WorkOrderEndorsementHardeningTest extends TestCase
 
         $vendor = Vendor::factory()->create();
         SiteSetting::factory()->create(['site_id' => 'S-1', 'vendor_id' => $vendor->id, 'eic_employee_id' => 'P-EIC']);
-        $this->requestor = User::factory()->create(['employee_id' => 'P-REQ']);
+        $this->requestor = self::employeeUser('P-REQ');
         $eCall = ECall::factory()->create([
             'site_id' => 'S-1',
             'vendor_id' => $vendor->id,
@@ -95,7 +95,7 @@ class WorkOrderEndorsementHardeningTest extends TestCase
 
     private function employee(string $employeeId): User
     {
-        return User::factory()->create(['employee_id' => $employeeId]);
+        return self::employeeUser($employeeId);
     }
 
     /**
@@ -319,7 +319,7 @@ class WorkOrderEndorsementHardeningTest extends TestCase
     public function test_a_user_who_cannot_view_the_work_order_gets_a_plain_403(Closure $arrange): void
     {
         $arrange($this);
-        $this->actingAs(User::factory()->vendorStaff()->create(['employee_id' => 'P-L1']));
+        $this->actingAs(self::vendorStaffWithEmployeeId('P-L1'));
 
         $this->act('submit')->assertForbidden();
         $this->act('approve')->assertForbidden();

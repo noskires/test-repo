@@ -45,7 +45,7 @@ class ECallCancellationApiTest extends TestCase
 
         $this->siteVendor = Vendor::factory()->create();
         SiteSetting::factory()->create(['site_id' => 'S-1', 'vendor_id' => $this->siteVendor->id, 'eic_employee_id' => 'P-EIC']);
-        $this->requestor = User::factory()->create(['employee_id' => 'P-REQ']);
+        $this->requestor = self::employeeUser('P-REQ');
         $this->eCall = ECall::factory()->create([
             'site_id' => 'S-1',
             'vendor_id' => $this->siteVendor->id,
@@ -78,7 +78,7 @@ class ECallCancellationApiTest extends TestCase
 
     private function eic(): User
     {
-        return User::factory()->create(['employee_id' => 'P-EIC']);
+        return self::employeeUser('P-EIC');
     }
 
     private function assertUnchanged(ECallStatus $status): void
@@ -159,7 +159,7 @@ class ECallCancellationApiTest extends TestCase
         $this->cancel()->assertForbidden();
         $this->assertUnchanged(ECallStatus::ForVendorAssessment);
 
-        $this->actingAs(User::factory()->create(['employee_id' => 'P-EIC2']));
+        $this->actingAs(self::employeeUser('P-EIC2'));
         $this->cancel()->assertOk()->assertJsonPath('data.status', 'cancelled');
     }
 
@@ -170,10 +170,9 @@ class ECallCancellationApiTest extends TestCase
     {
         return [
             'site vendor staff' => [fn (Vendor $vendor): User => User::factory()->vendorStaff($vendor)->create()],
-            'site vendor staff with the eic employee id' => [fn (Vendor $vendor): User => User::factory()->vendorStaff($vendor)->create(['employee_id' => 'P-EIC'])],
-            'site vendor staff with the requestor employee id' => [fn (Vendor $vendor): User => User::factory()->vendorStaff($vendor)->create(['employee_id' => 'P-REQ'])],
+            'site vendor staff with the eic employee id' => [fn (Vendor $vendor): User => self::vendorStaffWithEmployeeId('P-EIC', $vendor)],
             'another vendor staff' => [fn (Vendor $vendor): User => User::factory()->vendorStaff(Vendor::factory()->create())->create()],
-            'another employee' => [fn (Vendor $vendor): User => User::factory()->create(['employee_id' => 'P-OTHER'])],
+            'another employee' => [fn (Vendor $vendor): User => self::employeeUser('P-OTHER')],
             'a user without an employee id' => [fn (Vendor $vendor): User => User::factory()->create(['employee_id' => null])],
         ];
     }
@@ -194,7 +193,7 @@ class ECallCancellationApiTest extends TestCase
     public function test_an_outsider_gets_403_regardless_of_status_or_remarks(): void
     {
         $this->setStatus(ECallStatus::Approved);
-        $this->actingAs(User::factory()->create(['employee_id' => 'P-OTHER']));
+        $this->actingAs(self::employeeUser('P-OTHER'));
 
         $this->cancel([])->assertForbidden();
 

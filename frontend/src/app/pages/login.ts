@@ -112,6 +112,9 @@ export class LoginPage {
       if (error.status === 401) {
         return error.error?.message ?? 'Invalid employee ID or password.';
       }
+      if (error.status === 403) {
+        return error.error?.message ?? "Your account isn't set up in PSS yet. Ask an administrator.";
+      }
       if (error.status === 429) {
         return 'Too many sign-in attempts. Wait a minute and try again.';
       }

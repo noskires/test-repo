@@ -53,6 +53,7 @@ describe('LoginPage', () => {
         name: 'Ada',
         roles: ['system-administrator'],
         vendor_id: null,
+        access: 'internal',
       });
     await fixture.whenStable();
 
@@ -75,6 +76,27 @@ describe('LoginPage', () => {
 
     expect(el.querySelector('[role="alert"]')?.textContent).toContain(
       'Invalid employee ID or password.',
+    );
+    expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
+    expect(navigate).not.toHaveBeenCalled();
+    http.verify();
+  });
+
+  it('shows the backend message on 403 (not set up in PSS) and stores nothing', async () => {
+    const { fill, http, navigate, fixture, el } = setup();
+    fill('EMP-2000', 'password');
+
+    http
+      .expectOne('/api/auth/login')
+      .flush(
+        { message: "Your account isn't set up in PSS yet. Ask an administrator." },
+        { status: 403, statusText: 'Forbidden' },
+      );
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(el.querySelector('[role="alert"]')?.textContent).toContain(
+      "Your account isn't set up in PSS yet. Ask an administrator.",
     );
     expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
     expect(navigate).not.toHaveBeenCalled();

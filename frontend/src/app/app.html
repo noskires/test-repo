@@ -1,7 +1,9 @@
 @if (auth.isSignedIn()) {
   <header class="topbar">
     <span class="brand">PSS</span>
-    <app-menu />
+    @if (!auth.isPending()) {
+      <app-menu />
+    }
     <span class="spacer"></span>
     <span class="who">{{ auth.user()?.name }}</span>
     <button type="button" (click)="logout()">Log out</button>

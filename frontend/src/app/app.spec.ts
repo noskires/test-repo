@@ -35,6 +35,7 @@ describe('App', () => {
       name: 'Mario Management Viewer',
       roles: ['management-viewer'],
       vendor_id: null,
+      access: 'internal',
     });
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
@@ -48,9 +49,26 @@ describe('App', () => {
     expect(el.querySelector('header button')?.textContent).toContain('Log out');
   });
 
+  it('shows no menu entries for a pending user, only the name and logout', () => {
+    TestBed.inject(AuthService).setSession('tok', {
+      employee_id: 'EMP-P',
+      name: 'Paula Pending',
+      roles: ['system-administrator'],
+      vendor_id: null,
+      access: 'pending',
+    });
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('nav')).toBeNull();
+    expect(el.querySelector('header')?.textContent).toContain('Paula Pending');
+    expect(el.querySelector('header button')?.textContent).toContain('Log out');
+  });
+
   it('the logout button calls the API, clears the token and goes to login', () => {
     const auth = TestBed.inject(AuthService);
-    auth.setSession('tok', { employee_id: 'EMP-1', name: 'X', roles: [], vendor_id: null });
+    auth.setSession('tok', { employee_id: 'EMP-1', name: 'X', roles: [], vendor_id: null, access: 'internal' });
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();

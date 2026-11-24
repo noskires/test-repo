@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\PssRole;
+use App\Enums\UserAccess;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Models\Vendor;
@@ -183,7 +184,8 @@ class AdminUserApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.vendor_id', null);
         $this->assertNull($user->refresh()->vendor_id);
-        $this->assertTrue($user->isInternalEmployee());
+        $this->assertSame(UserAccess::Pending, $user->access);
+        $this->assertFalse($user->isInternalEmployee());
     }
 
     /**

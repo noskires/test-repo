@@ -4,10 +4,14 @@ import { CanActivateFn, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { AuthService, ROLE_MANAGEMENT_VIEWER, ROLE_SYSTEM_ADMINISTRATOR } from './auth.service';
 
+/** The "waiting for an administrator" page for pending users (issue 46). */
+export const PENDING_PATH = '/pending';
+
 /**
- * Builds a guard that requires a signed-in user and, when `roles` is non-empty, at least
- * one of those roles. Unauthenticated users go to `/login`; signed-in users without the
- * role go to the dashboard (`/`).
+ * Builds a guard that requires a signed-in, classified user and, when `roles` is
+ * non-empty, at least one of those roles. Unauthenticated users go to `/login`; pending
+ * users go to `/pending` (issue 46); signed-in users without the role go to the
+ * dashboard (`/`).
  *
  * During server rendering there is no token (localStorage is browser-only), so the guard
  * lets the route render and leaves the decision to the browser.
@@ -25,6 +29,9 @@ export function requireRoles(roles: readonly string[] = []): CanActivateFn {
         if (!user) {
           return router.parseUrl('/login');
         }
+        if (user.access === 'pending') {
+          return router.parseUrl(PENDING_PATH);
+        }
         if (roles.length > 0 && !auth.hasAnyRole(roles)) {
           return router.parseUrl('/');
         }
@@ -35,6 +42,27 @@ export function requireRoles(roles: readonly string[] = []): CanActivateFn {
 }
 
 export const authGuard: CanActivateFn = requireRoles();
+
+/**
+ * The pending page: only for a signed-in pending user. Others go to `/login` or the
+ * dashboard.
+ */
+export const pendingGuard: CanActivateFn = () => {
+  if (!isPlatformBrowser(inject(PLATFORM_ID))) {
+    return true;
+  }
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  return auth.ensureUser().pipe(
+    map((user) => {
+      if (!user) {
+        return router.parseUrl('/login');
+      }
+      return user.access === 'pending' ? true : router.parseUrl('/');
+    }),
+  );
+};
 
 /** Admin pages: System Administrator only. */
 export const adminGuard: CanActivateFn = requireRoles([ROLE_SYSTEM_ADMINISTRATOR]);

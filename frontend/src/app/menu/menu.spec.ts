@@ -38,7 +38,7 @@ describe('Menu component', () => {
     });
     const auth = TestBed.inject(AuthService);
     if (roles) {
-      auth.setSession('tok', { employee_id: 'EMP-1', name: 'Someone', roles, vendor_id: null });
+      auth.setSession('tok', { employee_id: 'EMP-1', name: 'Someone', roles, vendor_id: null, access: 'internal' });
     }
     const fixture = TestBed.createComponent(Menu);
     fixture.detectChanges();

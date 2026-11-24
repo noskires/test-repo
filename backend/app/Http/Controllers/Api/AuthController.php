@@ -6,12 +6,10 @@ use App\Auth\CredentialChecker;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Resources\CurrentUserResource;
-use App\MasterData\MasterDataDirectory;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\JWTGuard;
 
@@ -21,10 +19,11 @@ use Tymon\JWTAuth\JWTGuard;
 class AuthController extends Controller
 {
     /**
-     * Check the credentials through the CredentialChecker port, create the PSS user on first sign-in, and issue a token.
-     * Refused (401) when the credentials are wrong or the employee is unknown to the master data.
+     * Check the credentials through the CredentialChecker port first, then sign in the existing PSS user, whatever
+     * their access state (ADR 0005). Wrong credentials are 401 whether or not the employee is a PSS user, so sign-in
+     * never reveals who is registered (Q16). Correct credentials without a PSS user are 403; sign-in never creates one.
      */
-    public function login(LoginRequest $request, CredentialChecker $credentials, MasterDataDirectory $directory): JsonResponse
+    public function login(LoginRequest $request, CredentialChecker $credentials): JsonResponse
     {
         $employeeId = $request->string('employee_id')->value();
 
@@ -32,15 +31,13 @@ class AuthController extends Controller
             return $this->invalidCredentials();
         }
 
-        $employee = $directory->findEmployee($employeeId);
-        if ($employee === null) {
-            return $this->invalidCredentials();
+        $user = User::query()->where('employee_id', $employeeId)->first();
+        if ($user === null) {
+            return response()->json(
+                ['message' => "Your account isn't set up in PSS yet. Ask an administrator."],
+                Response::HTTP_FORBIDDEN,
+            );
         }
-
-        $user = DB::transaction(fn (): User => User::query()->firstOrCreate(
-            ['employee_id' => $employeeId],
-            ['name' => $employee->name],
-        ));
 
         return $this->tokenResponse($this->guard()->login($user));
     }
@@ -68,7 +65,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Who is signed in: identity, granted roles and Vendor link, read fresh from the database.
+     * Who is signed in: identity, granted roles, access and Vendor link, read fresh from the database.
      */
     public function me(Request $request): CurrentUserResource
     {

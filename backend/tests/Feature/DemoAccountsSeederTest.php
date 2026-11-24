@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\PssRole;
+use App\Enums\UserAccess;
 use App\MasterData\MasterDataDirectory;
 use App\MasterData\SampleMasterData;
 use App\Models\User;
@@ -41,6 +42,10 @@ class DemoAccountsSeederTest extends TestCase
         $this->assertNull($viewer->vendor_id);
         $this->assertNull($employee->vendor_id);
         $this->assertNotNull($vendorStaff->vendor);
+        $this->assertSame(UserAccess::Internal, $admin->access);
+        $this->assertSame(UserAccess::Internal, $viewer->access);
+        $this->assertSame(UserAccess::Internal, $employee->access);
+        $this->assertSame(UserAccess::Vendor, $vendorStaff->access);
     }
 
     public function test_every_demo_account_is_in_the_master_data_and_can_sign_in_with_the_known_password(): void

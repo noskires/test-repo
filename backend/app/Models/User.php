@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PssRole;
+use App\Enums\UserAccess;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -16,8 +17,11 @@ use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
- * A PSS user, keyed by the external employee_id and created on first sign-in (ADR 0004). The token carries only the
- * primary key, so roles and the Vendor link are read from the database on every request.
+ * A PSS user, keyed by the unique external employee_id and added by a System Administrator (ADR 0004, ADR 0005). The
+ * token carries only the primary key, so roles, access and the Vendor link are read from the database on every request.
+ *
+ * Every user has an access state (UserAccess). This model is the one place that keeps "vendor exactly when vendor_id is
+ * set": see the saving hook in booted().
  */
 #[Fillable(['name', 'email', 'password', 'employee_id'])]
 #[Hidden(['password', 'remember_token'])]
@@ -25,6 +29,30 @@ class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * A user nobody has classified yet is pending (fail closed).
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'access' => 'pending',
+    ];
+
+    /**
+     * Keep the access invariant on every save: a vendor_id means `vendor`, and a `vendor` user who loses their vendor_id
+     * becomes `pending` (Q8), never silently internal.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (User $user): void {
+            if ($user->vendor_id !== null) {
+                $user->access = UserAccess::Vendor;
+            } elseif ($user->access === UserAccess::Vendor) {
+                $user->access = UserAccess::Pending;
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -37,6 +65,8 @@ class User extends Authenticatable implements JWTSubject
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'vendor_id' => 'integer',
+            'access' => UserAccess::class,
+            'access_set_at' => 'datetime',
         ];
     }
 
@@ -46,7 +76,46 @@ class User extends Authenticatable implements JWTSubject
      */
     public function isInternalEmployee(): bool
     {
-        return $this->vendor_id === null && $this->employee_id !== null;
+        return $this->access === UserAccess::Internal && $this->vendor_id === null && $this->employee_id !== null;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->access === UserAccess::Pending;
+    }
+
+    /**
+     * Classify this user as an internal employee (Q6), recording who ($by) and when. A no-op for an internal user.
+     * Refused for a vendor-linked user, who must be unlinked first, so `vendor` and vendor_id never disagree.
+     *
+     * @throws ValidationException when the user is linked to a Vendor
+     */
+    public function markInternal(?User $by = null): void
+    {
+        if ($this->access === UserAccess::Internal) {
+            return;
+        }
+
+        if ($this->vendor_id !== null) {
+            throw ValidationException::withMessages([
+                'access' => 'This user is linked to a Vendor: unlink the Vendor first, then set them internal.',
+            ]);
+        }
+
+        $this->recordAccessChange(UserAccess::Internal, $by);
+        $this->save();
+    }
+
+    /**
+     * Set the access state with who changed it ($by: an admin, or null for the system) and when. Not saved here.
+     */
+    private function recordAccessChange(UserAccess $access, ?User $by): void
+    {
+        $this->forceFill([
+            'access' => $access,
+            'access_set_by_user_id' => $by?->id,
+            'access_set_at' => now(),
+        ]);
     }
 
     /**
@@ -128,15 +197,19 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Link this user to a Vendor (they become vendor staff), or unlink them with null (an ordinary employee again).
-     * The only way a user gets a vendor_id (Q3). A current Site EIC can't be linked: vendor staff never act as EIC
-     * (issue 37).
+     * Link this user to a Vendor (they become `vendor`), or unlink them with null (they become `pending`, Q8). The only
+     * way a user gets a vendor_id (Q3). A current Site EIC can't be linked: vendor staff never act as EIC (issue 37).
+     * Unlinking a user who has no Vendor changes nothing. Each change records who made it ($by) and when.
      *
      * @throws ValidationException when linking a current Site EIC
      */
-    public function linkToVendor(?Vendor $vendor): void
+    public function linkToVendor(?Vendor $vendor, ?User $by = null): void
     {
-        DB::transaction(function () use ($vendor): void {
+        if ($vendor === null && $this->vendor_id === null) {
+            return;
+        }
+
+        DB::transaction(function () use ($vendor, $by): void {
             if ($vendor !== null && $this->employee_id !== null) {
                 $eicSiteIds = SiteSetting::query()
                     ->where('eic_employee_id', $this->employee_id)
@@ -151,6 +224,7 @@ class User extends Authenticatable implements JWTSubject
                 }
             }
 
+            $this->recordAccessChange($vendor === null ? UserAccess::Pending : UserAccess::Vendor, $by);
             $this->forceFill(['vendor_id' => $vendor?->id])->save();
         });
 

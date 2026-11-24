@@ -62,7 +62,7 @@ class WorkOrderEndorsementApiTest extends TestCase
 
         $this->siteVendor = Vendor::factory()->create();
         SiteSetting::factory()->create(['site_id' => 'S-1', 'vendor_id' => $this->siteVendor->id, 'eic_employee_id' => 'P-EIC']);
-        $this->requestor = User::factory()->create(['employee_id' => 'P-REQ']);
+        $this->requestor = self::employeeUser('P-REQ');
         $this->eCall = ECall::factory()->create([
             'site_id' => 'S-1',
             'vendor_id' => $this->siteVendor->id,
@@ -110,7 +110,7 @@ class WorkOrderEndorsementApiTest extends TestCase
 
     private function userWithEmployeeId(string $employeeId): User
     {
-        return User::factory()->create(['employee_id' => $employeeId]);
+        return self::employeeUser($employeeId);
     }
 
     private function submitAsRequestor(): void
@@ -157,10 +157,9 @@ class WorkOrderEndorsementApiTest extends TestCase
     public static function usersWhoAreNotTheCreator(): array
     {
         return [
-            'the level 1 head' => [fn (): User => User::factory()->create(['employee_id' => 'P-L1'])],
-            'the site eic' => [fn (): User => User::factory()->create(['employee_id' => 'P-EIC'])],
+            'the level 1 head' => [fn (): User => self::employeeUser('P-L1')],
+            'the site eic' => [fn (): User => self::employeeUser('P-EIC')],
             'site vendor staff' => [fn (): User => User::factory()->vendorStaff(Vendor::query()->orderBy('id')->firstOrFail())->create()],
-            'another account with the requestors employee id' => [fn (): User => User::factory()->create(['employee_id' => 'P-REQ'])],
         ];
     }
 
@@ -274,9 +273,9 @@ class WorkOrderEndorsementApiTest extends TestCase
     {
         return [
             'the creator' => [fn (): User => User::query()->where('employee_id', 'P-REQ')->firstOrFail()],
-            'the level 2 head' => [fn (): User => User::factory()->create(['employee_id' => 'P-L2'])],
-            'the site eic' => [fn (): User => User::factory()->create(['employee_id' => 'P-EIC'])],
-            'vendor staff with the level 1 heads employee id' => [fn (): User => User::factory()->vendorStaff(Vendor::query()->orderBy('id')->firstOrFail())->create(['employee_id' => 'P-L1'])],
+            'the level 2 head' => [fn (): User => self::employeeUser('P-L2')],
+            'the site eic' => [fn (): User => self::employeeUser('P-EIC')],
+            'vendor staff with the level 1 heads employee id' => [fn (): User => self::vendorStaffWithEmployeeId('P-L1', Vendor::query()->orderBy('id')->firstOrFail())],
             'a user with no employee id' => [fn (): User => User::factory()->create()],
         ];
     }
@@ -564,7 +563,7 @@ class WorkOrderEndorsementApiTest extends TestCase
         }
 
         try {
-            WorkOrder::submit($this->workOrder->refresh(), $this->userWithEmployeeId('P-REQ'));
+            WorkOrder::submit($this->workOrder->refresh(), $this->userWithEmployeeId('P-OTHER'));
             $this->fail('Only the creator may submit.');
         } catch (AuthorizationException) {
             // Expected.

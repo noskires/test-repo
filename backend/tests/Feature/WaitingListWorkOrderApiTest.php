@@ -46,7 +46,7 @@ class WaitingListWorkOrderApiTest extends TestCase
 
         $this->vendor = Vendor::factory()->create();
         SiteSetting::factory()->create(['site_id' => 'S-1', 'vendor_id' => $this->vendor->id, 'eic_employee_id' => 'P-EIC']);
-        $this->requestor = User::factory()->create(['employee_id' => 'P-REQ']);
+        $this->requestor = self::employeeUser('P-REQ');
     }
 
     protected function tearDown(): void
@@ -63,7 +63,7 @@ class WaitingListWorkOrderApiTest extends TestCase
 
     private function employee(string $employeeId): User
     {
-        return User::factory()->create(['employee_id' => $employeeId]);
+        return self::employeeUser($employeeId);
     }
 
     /**
