@@ -340,6 +340,52 @@ class PmTaskGenerationTest extends TestCase
         $this->assertFalse(PmTask::query()->sole()->equipment_removed);
     }
 
+    private function inactive(Equipment $equipment): Equipment
+    {
+        return new Equipment(
+            id: $equipment->id,
+            siteId: $equipment->siteId,
+            name: $equipment->name,
+            categoryId: $equipment->categoryId,
+            location: $equipment->location,
+            installedOn: $equipment->installedOn,
+            isActive: false,
+        );
+    }
+
+    public function test_inactive_equipment_gets_no_new_pm_task(): void
+    {
+        $this->directory->addEquipment($this->inactive($this->equipment('EQ-1', installedOn: '2026-01-15')));
+
+        $this->runJob();
+
+        $this->assertSame(0, PmTask::query()->count());
+    }
+
+    public function test_a_completed_task_of_equipment_that_went_inactive_gets_no_successor(): void
+    {
+        $this->completedTask('EQ-1', '2026-03-01');
+        $this->directory->addEquipment($this->inactive($this->equipment('EQ-1', installedOn: '2026-01-15')));
+
+        $this->runJob();
+
+        $this->assertSame(0, PmTask::query()->open()->count());
+    }
+
+    public function test_an_open_task_of_equipment_that_went_inactive_is_kept_flagged_and_still_reads_its_snapshots(): void
+    {
+        $this->runJob();
+        $this->directory->addEquipment($this->inactive($this->equipment('EQ-1', installedOn: '2026-01-15')));
+
+        $this->runJob();
+
+        $task = PmTask::query()->sole();
+        $this->assertTrue($task->equipment_removed);
+        $this->assertSame(PmStatus::Scheduled, $task->status);
+        $this->assertSame('Unit EQ-1', $task->equipment_name_snapshot);
+        $this->assertSame('Makati Office', $task->site_name_snapshot);
+    }
+
     public function test_changing_the_frequency_re_dates_only_scheduled_tasks(): void
     {
         $this->directory

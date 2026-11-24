@@ -7,7 +7,7 @@ A physical place the organisation operates (e.g. "Makati Office", "Cebu Site"). 
 A specific spot within a Site (e.g. "Basement, Genset Room").
 
 ## Equipment
-Anything registered and maintained, from machines (genset, ACU, ATS, electrical panel) to buildings themselves (e.g. "Makati Office Building"). Each one belongs to a Site and can have its own PM schedule and maintenance history.
+Anything registered and maintained, from machines (genset, ACU, ATS, electrical panel) to buildings themselves (e.g. "Makati Office Building"). Each one belongs to a Site and can have its own PM schedule and maintenance history. PSS imports it from the source database (see Master Data Import); in the MVP there are three categories: ACU, Genset and ATS. Equipment missing from the source becomes inactive: no new PM Tasks or E-Calls, but its history stays.
 _Avoid:_ Asset, Facility (as separate concepts)
 
 ## Equipment Category
@@ -63,7 +63,7 @@ The MVP has a fixed list: monthly, twice a month (every 15 days), every 2 months
 _Avoid:_ reading "twice a month" as fixed calendar days (e.g. the 1st and 15th)
 
 ## Price List
-A Vendor's contract-agreed list of priced items, covering both materials/consumables and scope-of-work (service) items, each with a unit price. A vendor's cost quote (BOQ) is built from it. Administrators maintain it by uploading a file or adding items by hand.
+A Vendor's contract-agreed list of priced items, covering both materials/consumables and scope-of-work (service) items, each with a unit price. A vendor's cost quote (BOQ) is built from it. Administrators maintain it by adding items by hand or by uploading an `.xlsx` or `.csv` file (columns `vendor_code, item_code, description, unit, unit_price, item_type`; one file can cover several Vendors, matched by the Vendor's code). An upload merges (adds new items, updates existing ones by item code) and is all or nothing.
 
 ## Billing Threshold
 An amount boundary that decides how many billing approval levels a Work Order needs (initially ₱200,000 and ₱1,000,000). Administrators can change them.
@@ -75,7 +75,7 @@ The person a given employee reports to. Approvals go up this chain: Requestor �
 The approved, priced job created from exactly one approved E-Call. The Requestor who filed that E-Call creates it, and its Endorsements and Billing Endorsements follow that Requestor's Immediate Head chain. Creating it closes that E-Call. Additional work needs a new E-Call.
 
 ## Cancel
-Withdrawing an E-Call, PM Task or Work Order before the vendor has started the work, with a mandatory reason. Its creator (the Requestor, for E-Calls and Work Orders) or the current Site EIC can do it. An E-Call can be cancelled until the EIC approves its FSR/BOQ (For Vendor Assessment, For EIC Review, Returned). A Work Order can be cancelled while Open, For Lvl1 Endorsement or For Lvl2 Endorsement, never from For Implementation on; cancelling it leaves its E-Call Closed. Each cancel writes an Approval Record. Once work has started, the only way to end it is a Reject.
+Withdrawing an E-Call, PM Task or Work Order before the vendor has started the work, with a mandatory reason. Its creator (the Requestor, for E-Calls and Work Orders) or the current Site EIC can do it. An E-Call can be cancelled until the EIC approves its FSR/BOQ (For Vendor Assessment, For EIC Review, Returned). A Work Order can be cancelled while Open, For Lvl1 Endorsement or For Lvl2 Endorsement, never from For Implementation on; cancelling it leaves its E-Call Closed. A PM Task can be cancelled only while Scheduled, by the current Site EIC; cancelling doesn't create the next task: the EIC sets the next PM due date (when cancelling or later), and until then the Equipment waits on the Needs Setup list. Each cancel writes an Approval Record. Once work has started, the only way to end it is a Reject.
 
 ## Return
 An approver's "fix it and resend" action. The record goes back exactly one step, to the previous approver (or to the creator if it was the first approver), and stays alive.
@@ -100,7 +100,7 @@ The Site Vendor's cost quote for an E-Call. It lists Price List items with quant
 _Avoid:_ cost proposal, quotation (as separate concepts)
 
 ## PM Checklist
-A configurable inspection template for one Equipment Category, made of Checklist Items. Every change creates a new version. A PM Task keeps the version it was generated with, so old PM Reports stay consistent.
+A configurable inspection template for one Equipment Category, made of Checklist Items. Every change creates a new version. A PM Task keeps the version it was generated with, so old PM Reports stay consistent. In the MVP there's one default checklist each for Genset, ACU and ATS, every item Pass/Fail with remarks required on Fail, changed only in code (issue 31); admin editing comes later (issue 50).
 
 ## Checklist Item
 One check in a PM Checklist (e.g. "Engine oil inspection"). It has a response type (Pass/Fail, Good/Defective, Yes/No, numeric reading, text, photo) and can be mandatory, require remarks when failed, or require a photo.
@@ -129,16 +129,26 @@ The read-only timeline of one Equipment's PM Tasks, E-Calls and Work Orders, in 
 A copy of an external Site's or Equipment's details (name, category, location) stored on a PSS record, so history still reads correctly after the item is renamed or removed in the external system.
 
 ## Needs Setup list
-An administrator's list of what stops work from moving: Sites with a PM Frequency but no Site Vendor or EIC, and Equipment with no installation date and no PM history (both stop PM Tasks from being generated). It also lists Work Orders whose Endorsement or Billing Endorsement level can't be filled from the Requestor's Immediate Head chain. It's worked out live, not stored, and only administrators who can manage Site settings can see it (`GET /api/needs-setup`).
+An administrator's list of what stops work from moving: Sites with a PM Frequency but no Site Vendor or EIC, and Equipment with no installation date, no PM Start Date and no PM history (both stop PM Tasks from being generated). It also lists Equipment waiting for the EIC to set the next PM due date after a Cancelled PM Task, Sites whose EIC is a deactivated user, and Work Orders whose Endorsement or Billing Endorsement level can't be filled from the Requestor's Immediate Head chain. It's worked out live, not stored, and only administrators who can manage Site settings can see it (`GET /api/needs-setup`).
 
 ## Dashboard
-The live operational counts (`GET /api/dashboard`): PM Tasks by open PM Status, E-Calls by status plus an open total, and Work Orders by status plus groups. It shows the current state, not a date range, and can be filtered by Site, Equipment Category and Vendor. A Work Order's E-Call counts in both the E-Call and Work Order figures. Every internal employee can see it; vendor staff see it forced to their own Vendor.
+The live operational counts (`GET /api/dashboard`): PM Tasks by open PM Status, E-Calls by status plus an open total, and Work Orders by status plus groups. These counts show the current state and ignore the date range. It can be filtered by Site, Equipment Category and Vendor, and by a date range (`from`/`to`, default the current Manila month) for PM Compliance, PM Tasks Completed (by Work Done Date) and the money totals: estimated (Work Orders not Rejected or Cancelled, by creation date), approved (past LVL2 and not Rejected later, by LVL2 approval date) and billing (Closed Work Orders, by close date), each by Site and by Vendor. A Work Order's E-Call counts in both the E-Call and Work Order figures. Every internal employee can see it; vendor staff see it forced to their own Vendor.
 
 ## PM Compliance
 The share of PM Tasks due in a period that were done on time: PM Tasks done on time ÷ PM Tasks due in the period. "On time" means the Work Done Date is on or before the due date. Late and not-done tasks don't count as compliant, and Cancelled tasks are left out. Shown on the Dashboard (issue 28).
 
 ## Equipment Requiring Attention
 Equipment flagged on the Dashboard for any of these reasons: an overdue PM Task (PM Timeliness), a failed item (Fail/Defective) on its latest approved PM Report, an open Emergency-priority E-Call, or not operating according to the external API. Equipment can have several reasons at once. Its operational status comes from the external API, and PSS never stores it.
+
+## Master Data Import
+The nightly, one-way copy of Sites, Equipment Categories, Equipment and Employees (with each one's Immediate Head and position title) from the source database into PSS tables, keyed by the source ID (`php artisan pss:import-master-data`). PSS reads these tables but never edits them. Rows missing from the source become inactive, never deleted.
+_Avoid:_ sync (it's one-way)
+
+## PM Start Date
+A PSS-owned fallback start date for an Equipment with no installation date, set, changed or cleared only by a System Administrator (with history). The first PM Task is due on it. An installation date from the master data always wins, and changing the start date never moves an existing PM Task.
+
+## Sign-in
+Email and password, checked against PSS's own users. A System Administrator adds each user with a temporary password, which they must change on first sign-in; users can change their own password, and an admin resets a forgotten one. There's no email reset.
 
 ## PSS Role
 A role granted inside PSS by a System Administrator, not taken from the external system. There are two: **System Administrator** (manages Vendors, Site settings, PM Checklists, Price Lists, Billing Thresholds, adds users, grants roles and links vendor staff; never vendor-linked) and **Management / Viewer** (can see Reports). The first System Administrator is set at install, and the last one can't lose the role. The other PRD roles aren't granted: anyone can be a Requestor, the EIC comes from Site settings, Vendor comes from the vendor staff link, and approvers come from the Immediate Head chain.
@@ -147,4 +157,4 @@ A role granted inside PSS by a System Administrator, not taken from the external
 A user who works for a Vendor. They sign in like everyone else. A System Administrator adds them to PSS with their Vendor, or links an existing user to it, by hand; their Access is then vendor. Vendor staff see only their own Vendor's records and can never act as an EIC, so a current Site EIC can't be linked to a Vendor. They can't hold the System Administrator role, but may hold Management / Viewer (Reports for their own Vendor only). Every internal employee sees every Site.
 
 ## Access
-Each PSS user's access state: **internal** (an employee; sees every Site), **vendor** (Vendor staff, linked to one Vendor) or **pending** (not yet classified). A System Administrator sets it when adding the user. Unlinking a user's Vendor makes them pending. A pending user can sign in but can't use PSS, or be granted roles, until an administrator links a Vendor or sets internal; who did it and when is recorded. Sign-in never creates a user: someone not added to PSS is refused with "Your account isn't set up in PSS yet."
+Each PSS user's access state: **internal** (an employee; sees every Site), **vendor** (Vendor staff, linked to one Vendor) or **pending** (not yet classified). A System Administrator sets it when adding the user. Unlinking a user's Vendor makes them pending. A pending user can sign in but can't use PSS, or be granted roles, until an administrator links a Vendor or sets internal; who did it and when is recorded. Separately, a System Administrator can **deactivate** a user (never delete): they can't sign in, their tokens stop working at once, and they can't be granted roles, made Site EIC or linked to a Vendor until reactivated; reactivating restores their previous access and roles. Sign-in never creates a user: someone not added to PSS is refused with "Your account isn't set up in PSS yet."

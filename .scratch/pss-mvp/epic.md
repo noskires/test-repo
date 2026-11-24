@@ -6,10 +6,11 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **28 — Define dashboard and report KPIs** (PR #48, 2026-11-24)
+- Last merged: **03 — Import master data from the source database into PSS tables** (PR #49, 2026-11-24)
 - In flight: none
-- Ready now (`ready-for-agent`, every blocker done), in number order: none. 29 is waiting on 42 (needs-info).
-- Waiting on the human (`needs-info`): 03, 15, 31, 33, 41, 42, 44, 47. The open questions are in each issue file. New: 47 (remove or deactivate users).
+- Build order (human hint, adjusted for dependencies): 44, 49, 42, 29 (after 42), 47 (after 44), 41, 33 (after 41), 31, 15.
+- Ready now (`ready-for-agent`, every blocker done): 15, 31, 33, 41, 42, 44, 49. Waiting on a blocker: 29 (42), 47 (44).
+- Waiting on the human (`needs-info`): none. Parked post-MVP (`needs-triage`): 50.
 - Doc follow-ups: none open
 
 ## Board
@@ -18,7 +19,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 |---|---|---|---|---|
 | 01 | Vendor registry | done | none | #4 |
 | 02 | Master data directory port (in-memory fake) | done | none | #5 |
-| 03 | HTTP adapter for the external master data API | needs-info | 02 | |
+| 03 | Import master data from the source database into PSS tables | done | 02 | #49 |
 | 04 | Login (JWT) and PSS roles (backend) | done | none | #43 |
 | 05 | Assign the Site Vendor and Site EIC | done | 01, 02 | #8 |
 | 06 | Site PM Frequency | done | 05 | #12 |
@@ -30,7 +31,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 12 | File an E-Call | done | 05 | #11 |
 | 13 | EIC files an E-Call from a PM Task's findings | done | 11, 12 | #32 |
 | 14 | Vendor Price List (manual entry) | done | 01 | #10 |
-| 15 | Upload a Price List from a file | needs-info | 14 | |
+| 15 | Upload a Price List from a file | ready-for-agent | 14 | |
 | 16 | Site Vendor submits the FSR and BOQ | done | 12, 14 | #13 |
 | 17 | EIC reviews the FSR and BOQ | done | 11, 16 | #21 |
 | 18 | Create a Work Order from an approved E-Call | done | 17, 37 | #23 |
@@ -46,9 +47,9 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 28 | Define dashboard and report KPIs | done | 09 | #48 |
 | 29 | Reports and export | ready-for-agent | 04, 26, 27, 28, 42 | |
 | 30 | Local dev master data fake | done | 02 | #7 |
-| 31 | Seed the fixed MVP PM Checklists | needs-info | 07 | |
+| 31 | Seed the default MVP PM Checklists (Genset, ACU, ATS) | ready-for-agent | 07, 03 | |
 | 32 | Admin "Needs Setup" list | done | 08, 19 | #38 |
-| 33 | PM start date for Equipment with no installation date | needs-info | 08, 32 | |
+| 33 | PM start date for Equipment with no installation date | ready-for-agent | 08, 32 | |
 | 34 | PM Report: Service Report + Work Done Date | done | 10 | #17 |
 | 35 | Application timezone Asia/Manila | done | none | #18 |
 | 36 | Concurrent-safe backend test suite (chore) | done | none | #20 |
@@ -56,14 +57,16 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 38 | Shared vendor-staff rule, endorsement hardening (chore) | done | none | #25 |
 | 39 | "Waiting for me": E-Call items | done | 24 | #36 |
 | 40 | "Waiting for me": Work Order items | done | 24 | #37 |
-| 41 | Cancel a PM Task | needs-info | 08, 25 | |
-| 42 | Dashboard: date range and financial sums | needs-info | 27 | |
+| 41 | Cancel a PM Task | ready-for-agent | 08, 25, 32 | |
+| 42 | Dashboard: date range and financial sums | ready-for-agent | 27 | |
 | 43 | Angular login screen, token handling, role-aware menu | done | 04 | #44 |
-| 44 | Real external-system credential checker | needs-info | 04, 46 | |
+| 44 | Email and password sign-in for every environment | ready-for-agent | 04, 46 | |
 | 45 | Vendor-linked users and the System Administrator role | done | 46 | #46 |
 | 46 | Admin-created users and pending access | done | none | #45 |
-| 47 | Remove or deactivate users | needs-info | 46 | |
+| 47 | Deactivate and reactivate users | ready-for-agent | 46, 44 | |
 | 48 | Restyle the Angular app to the PSS design (lucide-angular) | done | 46 | #47 |
+| 49 | Attention reasons: count only the Vendor's own records (chore, security) | ready-for-agent | 28 | |
+| 50 | Admin create and edit PM Checklists (parked, post-MVP) | needs-triage | 31 | |
 
 Other merged PRs: #1 PRD v2 docs, #2 project scaffold, #3 unblock answered issues, #15 no-duplicate-lines decision.
 
@@ -113,3 +116,5 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-24: product-owner cleared the 45 README follow-up (`pss:check-vendor-admins` in `backend/README.md`) and picked 48 over 28: the human asked for it right after 46, and every later Angular screen builds on its shell and tokens. 28 still waits in practice on 03 ("Equipment requiring attention" needs the operational status values).
 - 2026-11-24: issue 48 merged as PR #47; 28 is the only ready issue.
 - 2026-11-24: issue 28 merged as PR #48; nothing is ready (29 waits on 42).
+- 2026-11-24: product-owner recorded the human's 2026-11-24 grilling: 03 rewritten (import master data from a DB), 44 rewritten (email sign-in), 15, 31 (reduced), 33, 41, 42, 47 set ready-for-agent; new 49 (security chore from 28) and 50 (parked). ADRs 0001, 0004 and 0005 amended. Handed off 03.
+- 2026-11-24: issue 03 merged as PR #49; unblocks 31.

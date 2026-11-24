@@ -1,7 +1,7 @@
-# 31 — Seed the fixed MVP PM Checklists (Genset, ACU, ATS, Building)
+# 31 — Seed the default MVP PM Checklists (Genset, ACU, ATS)
 
-Status: needs-info
-Blocked by: 07
+Status: ready-for-agent
+Blocked by: 07, 03
 Type: task
 
 ## What to build
@@ -21,10 +21,25 @@ What the PRD §6.5 gives (examples only, "actual inspection requirements shall b
 3. **Per item**: what is the response type (Pass/Fail, Good/Defective, Yes/No, numeric reading, text, photo), and which items are mandatory, require remarks when failed, or require a photo? For numeric readings (e.g. generator output voltage), what are the acceptable min/max values and units?
 4. **Category mapping**: which external Equipment Category ID (or code) does each checklist belong to? This depends on the external API (issue 03). Until then, should local dev map the checklists onto the in-memory fake's sample categories from issue 30?
 
-## Acceptance criteria (draft, finalise once the questions are answered)
+## Decisions (human, 2026-11-24)
 
-- [ ] The four checklist definitions exist in one data location and load through issue 07's loader without errors.
-- [ ] A test asserts each checklist's item count and labels, and the response type and flags for each item, as agreed.
-- [ ] Each checklist is bound to the agreed external Equipment Category.
+- **Reduced scope**: seed **one default checklist each for Genset, ACU and ATS**, from the PRD §6.5 examples above. **Building is left out** (issue 03 imports no Building equipment).
+- Every item is **Pass/Fail**, with **remarks required on Fail**.
+- Bind each checklist to the **seeded Equipment Category** from issue 03 (codes `GENSET`, `ACU`, `ATS`).
+- They change **only in code**, using the existing versioning (issue 07).
+- Admin create/edit of checklists through the API and UI is **post-MVP**: issue 50 (parked).
+
+## Acceptance criteria
+
+- [ ] The three checklist definitions live in one data location and load through issue 07's loader (the `LoadChecklists` command) without errors.
+- [ ] A test asserts each checklist's items, in order, exactly as listed above (Genset 9, ACU 8, ATS 7), each `pass_fail` with "remarks required when failed".
+- [ ] Each checklist is bound to its seeded Equipment Category by code. Loading twice creates no new version. Changing an item in code and loading again creates a new version (issue 07's rule).
+- [ ] `DatabaseSeeder` (after issue 03's master data seeder) loads them, so a fresh local database generates PM Tasks with a checklist.
 
 ## Comments
+
+### Clarifications (product-owner, 2026-11-24)
+
+- Questions 1 to 4 are answered by the reduced scope above. Approved PM standards and numeric readings come later with issue 50.
+- **Provisional (to confirm with the human)**: every item is mandatory and none requires a photo. The human only said Pass/Fail with remarks on Fail.
+- Record your decisions under a dated "Decisions (dev-lead, ...)" heading here.

@@ -91,3 +91,8 @@ Scope: three KPIs, each a pure calculation in `app/Dashboard/` with PHPUnit unit
 13. **Issue 27 tests**: `DashboardApiTest` used `assertExactJson` on the whole payload. It now checks each issue 27 section exactly (`data.pm.by_status`, `data.e_calls`, `data.work_orders`), and its exact-structure test lists the new keys too. The values it checks haven't changed.
 14. **Vendor-staff forcing** moved into `DashboardCounts::visibleFilters()`, which both the counts and the KPIs use. The closed E-Call statuses are now `DashboardCounts::CLOSED_E_CALL_STATUSES`, shared with `emergency_e_call`.
 15. **Docs**: `backend/README.md` has no dashboard section, so it wasn't changed (the criterion says "if it has one").
+
+### Decisions (human, 2026-11-24)
+
+- All four provisional interpretations above are **confirmed**: Completed-only, tasks due later in the period left out, the current Manila month as the default period (issue 42 now adds `from`/`to`), and `operational` / empty / other for the operating status.
+- A security review found that for vendor staff, the attention reasons count every Vendor's PM Tasks and E-Calls. Follow-up: issue 49.

@@ -8,7 +8,7 @@ use App\MasterData\Data\EquipmentCategory;
 use App\MasterData\Data\Site;
 
 /**
- * Seedable in-memory fake of the master data port, used in tests until the real adapter exists (issue 03).
+ * Seedable in-memory fake of the master data port, used in tests (issue 03 keeps it for the testing environment).
  * Lists keep insertion order. Seeding an existing ID replaces that entry.
  */
 final class InMemoryMasterDataDirectory implements MasterDataDirectory
@@ -60,7 +60,7 @@ final class InMemoryMasterDataDirectory implements MasterDataDirectory
 
     public function listSites(): array
     {
-        return array_values($this->sites);
+        return array_values(array_filter($this->sites, fn (Site $site): bool => $site->isActive));
     }
 
     public function findEquipment(string $equipmentId): ?Equipment
@@ -72,7 +72,7 @@ final class InMemoryMasterDataDirectory implements MasterDataDirectory
     {
         return array_values(array_filter(
             $this->equipment,
-            fn (Equipment $equipment): bool => $equipment->siteId === $siteId,
+            fn (Equipment $equipment): bool => $equipment->siteId === $siteId && $equipment->isActive,
         ));
     }
 

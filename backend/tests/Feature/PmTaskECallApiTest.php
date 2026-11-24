@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\ECallStatus;
 use App\Enums\PmStatus;
+use App\Http\Requests\StoreECallRequest;
 use App\MasterData\Data\Equipment;
 use App\MasterData\Data\EquipmentCategory;
 use App\MasterData\Data\Site;
@@ -238,6 +239,18 @@ class PmTaskECallApiTest extends TestCase
         $this->postJson($this->url(), $this->payload())
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['equipment' => "The PM Task's Equipment is no longer at its Site in the equipment directory."]);
+
+        $this->assertDatabaseCount('e_calls', 0);
+    }
+
+    public function test_inactive_equipment_returns_422(): void
+    {
+        $this->directory->addEquipment(new Equipment(id: 'EQ-1', siteId: 'S-1', name: 'Lobby Aircon', categoryId: 'CAT-AC', isActive: false));
+        $this->actingAsEic();
+
+        $this->postJson($this->url(), $this->payload())
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['equipment' => StoreECallRequest::INACTIVE_EQUIPMENT_MESSAGE]);
 
         $this->assertDatabaseCount('e_calls', 0);
     }

@@ -28,6 +28,16 @@ PSS signs users in with JWT (`tymon/jwt-auth`). See `docs/adr/0004-jwt-login-and
 
 The local credential checker works only in `local` and `testing`. Sign-in in other environments needs the external credential checker (issue 44).
 
+## PSS: master data import
+
+Sites, Equipment, Equipment Categories and Employees belong to a separate source database (issue 03, `docs/adr/0001-master-data-owned-by-external-api.md`). PSS keeps a read-only copy in its own `sites`, `equipment`, `equipment_categories` and `employees` tables and never edits it.
+
+1. **Connection:** set `MASTER_SOURCE_DB_DRIVER` (default `mysql`), `MASTER_SOURCE_DB_HOST`, `MASTER_SOURCE_DB_PORT`, `MASTER_SOURCE_DB_DATABASE`, `MASTER_SOURCE_DB_USERNAME` and `MASTER_SOURCE_DB_PASSWORD` (connection `master_source` in `config/database.php`). Use a database user that can only `SELECT`. With `MASTER_SOURCE_DB_DATABASE` empty the import exits non-zero and changes nothing.
+2. **Import:** `php artisan pss:import-master-data`. It upserts by source ID, marks rows that left the source inactive (never deletes them), reactivates them when they return, and prints inserted / updated / deactivated per table. Safe to run again. The scheduler runs it nightly at 23:30 Asia/Manila, before the midnight PM Task generation, so `php artisan schedule:run` must be on cron.
+3. **Source schema is a guess.** Every source table and column name lives in `App\MasterData\Import\SourceSchema`. When the real schema is known, change only that class (and its tests). Equipment comes from `aircondition_units` (ACU), `gensets` (Genset) and `ats` (ATS); Building is not imported.
+4. **Inactive Equipment** gets no new PM Tasks and no new E-Calls (422). Its existing records still read from their Snapshots.
+5. **Local dev:** `php artisan migrate --seed` fills the master data tables with the sample data (`MasterDataSampleSeeder`) before the demo accounts. A later real import deactivates those sample rows.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

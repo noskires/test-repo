@@ -4,14 +4,15 @@ namespace Tests\Feature;
 
 use App\MasterData\Data\Equipment;
 use App\MasterData\Data\EquipmentCategory;
+use App\MasterData\DatabaseMasterDataDirectory;
 use App\MasterData\ImmediateHeadChain;
 use App\MasterData\InMemoryMasterDataDirectory;
 use App\MasterData\MasterDataDirectory;
 use App\MasterData\SampleMasterData;
 use App\Models\User;
 use App\Providers\AppServiceProvider;
+use Database\Seeders\MasterDataSampleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -30,13 +31,14 @@ class MasterDataBindingTest extends TestCase
         (new AppServiceProvider($this->app))->register();
     }
 
-    public function test_local_resolves_a_shared_fake_loaded_with_the_sample_data(): void
+    public function test_local_resolves_the_database_directory_serving_the_seeded_sample_data(): void
     {
         $this->registerProvidersIn('local');
+        $this->seed(MasterDataSampleSeeder::class);
 
         $directory = $this->app->make(MasterDataDirectory::class);
 
-        $this->assertInstanceOf(InMemoryMasterDataDirectory::class, $directory);
+        $this->assertInstanceOf(DatabaseMasterDataDirectory::class, $directory);
         $this->assertSame($directory, $this->app->make(MasterDataDirectory::class));
         $this->assertNotSame([], $directory->listSites());
         $this->assertNotNull($directory->findEmployee(SampleMasterData::REQUESTOR_EMPLOYEE_ID));
@@ -45,6 +47,7 @@ class MasterDataBindingTest extends TestCase
     public function test_local_serves_the_sample_sites_from_the_api(): void
     {
         $this->registerProvidersIn('local');
+        $this->seed(MasterDataSampleSeeder::class);
         $firstSite = $this->app->make(MasterDataDirectory::class)->listSites()[0];
 
         $this->actingAs(User::factory()->create());
@@ -72,20 +75,21 @@ class MasterDataBindingTest extends TestCase
     /**
      * @return array<string, array{string}>
      */
-    public static function environmentsWithoutAFake(): array
+    public static function nonTestingEnvironments(): array
     {
         return [
+            'local' => ['local'],
             'production' => ['production'],
             'staging' => ['staging'],
         ];
     }
 
-    #[DataProvider('environmentsWithoutAFake')]
-    public function test_other_environments_get_no_in_memory_fake_binding(string $environment): void
+    #[DataProvider('nonTestingEnvironments')]
+    public function test_every_environment_except_testing_gets_the_database_directory(string $environment): void
     {
         $this->registerProvidersIn($environment);
 
-        $this->assertFalse($this->app->bound(MasterDataDirectory::class));
+        $this->assertInstanceOf(DatabaseMasterDataDirectory::class, $this->app->make(MasterDataDirectory::class));
     }
 
     public function test_the_sample_data_has_at_least_two_sites_each_with_at_least_two_equipment(): void
@@ -129,13 +133,10 @@ class MasterDataBindingTest extends TestCase
         $this->assertNull($chain->headAtLevel(SampleMasterData::REQUESTOR_EMPLOYEE_ID, 5));
     }
 
-    public function test_the_local_fake_writes_no_master_data_tables(): void
+    public function test_the_sample_data_has_no_building_category_or_equipment(): void
     {
-        $this->registerProvidersIn('local');
-        $this->app->make(MasterDataDirectory::class)->listSites();
+        $directory = SampleMasterData::load(new InMemoryMasterDataDirectory);
 
-        foreach (['sites', 'equipment', 'equipment_categories', 'employees'] as $table) {
-            $this->assertFalse(Schema::hasTable($table), "PSS must not own a [{$table}] table (ADR 0001).");
-        }
+        $this->assertSame(['GENSET', 'ACU', 'ATS'], array_map(fn (EquipmentCategory $category): string => $category->id, $directory->listEquipmentCategories()));
     }
 }

@@ -64,6 +64,26 @@ return [
             ]) : [],
         ],
 
+        /*
+         * The source database that owns the master data (issue 03, ADR 0001). PSS only reads from it, in
+         * pss:import-master-data; give it a SELECT-only database user. Unset MASTER_SOURCE_DB_DATABASE means
+         * "not configured": the import refuses and changes nothing.
+         */
+        'master_source' => [
+            'driver' => env('MASTER_SOURCE_DB_DRIVER', 'mysql'),
+            'host' => env('MASTER_SOURCE_DB_HOST', '127.0.0.1'),
+            'port' => env('MASTER_SOURCE_DB_PORT', '3306'),
+            'database' => env('MASTER_SOURCE_DB_DATABASE'),
+            'username' => env('MASTER_SOURCE_DB_USERNAME'),
+            'password' => env('MASTER_SOURCE_DB_PASSWORD', ''),
+            'charset' => env('MASTER_SOURCE_DB_CHARSET', 'utf8mb4'),
+            'collation' => env('MASTER_SOURCE_DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
