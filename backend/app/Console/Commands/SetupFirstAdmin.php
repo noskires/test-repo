@@ -51,6 +51,10 @@ class SetupFirstAdmin extends Command
             $this->warn('This user is pending: they can sign in but can\'t use PSS until they are classified (internal or a Vendor) in the database or by another System Administrator.');
         }
 
+        if ($user->vendor_id !== null) {
+            $this->warn('This user is linked to a Vendor. Vendor-linked System Administrators are no longer allowed: run `php artisan pss:check-vendor-admins`.');
+        }
+
         return self::SUCCESS;
     }
 }

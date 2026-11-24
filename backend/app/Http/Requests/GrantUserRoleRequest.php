@@ -33,7 +33,8 @@ class GrantUserRoleRequest extends FormRequest
     }
 
     /**
-     * A pending user can't be granted any role until they are classified (issue 46, Q7).
+     * A pending user can't be granted any role until they are classified (issue 46, Q7), and a vendor-linked user can't
+     * be a System Administrator (issue 45, Q2).
      *
      * @return list<callable(Validator): void>
      */
@@ -45,6 +46,11 @@ class GrantUserRoleRequest extends FormRequest
 
                 if ($user instanceof User && $user->isPending()) {
                     $validator->errors()->add('role', 'Classify this user first (internal or a Vendor) before granting roles.');
+                }
+
+                if ($user instanceof User && $user->vendor_id !== null
+                    && $this->input('role') === PssRole::SystemAdministrator->value) {
+                    $validator->errors()->add('role', 'A user linked to a Vendor cannot be a System Administrator. Unlink the Vendor first.');
                 }
             },
         ];
