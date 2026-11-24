@@ -1,6 +1,7 @@
 # 45 — Vendor-linked users and the System Administrator role
 
-Status: ready-for-agent
+Status: done
+Merged: PR #46 (c387d46), 2026-11-24
 Blocked by: 46
 Type: task
 
@@ -12,10 +13,10 @@ Management / Viewer stays allowed for vendor staff (Q3); their Reports are limit
 
 ## Acceptance criteria
 
-- [ ] `POST /api/admin/users/{user}/roles` with `system-administrator` for a vendor-linked user (`access: vendor`) returns 422 with a clear message, and no role is stored (Q2).
-- [ ] `PUT /api/admin/users/{user}/vendor` with a `vendor_id` for a current System Administrator returns 422 with the message "Revoke the System Administrator role first.", and nothing changes (Q11). Unlinking (`null`) is unaffected.
-- [ ] Granting `management-viewer` to a vendor-linked user still succeeds (Q3, regression test).
-- [ ] A new artisan command (e.g. `php artisan pss:check-vendor-admins`) lists every vendor-linked user who holds `system-administrator` (employee ID, name, Vendor) and **changes nothing** (Q12). It prints a clear "none found" line when there are none and exits 0 in both cases. Test both.
+- [x] `POST /api/admin/users/{user}/roles` with `system-administrator` for a vendor-linked user (`access: vendor`) returns 422 with a clear message, and no role is stored (Q2).
+- [x] `PUT /api/admin/users/{user}/vendor` with a `vendor_id` for a current System Administrator returns 422 with the message "Revoke the System Administrator role first.", and nothing changes (Q11). Unlinking (`null`) is unaffected.
+- [x] Granting `management-viewer` to a vendor-linked user still succeeds (Q3, regression test).
+- [x] A new artisan command (e.g. `php artisan pss:check-vendor-admins`) lists every vendor-linked user who holds `system-administrator` (employee ID, name, Vendor) and **changes nothing** (Q12). It prints a clear "none found" line when there are none and exits 0 in both cases. Test both.
 
 ## Decisions (human, 2026-11-24)
 
@@ -42,6 +43,7 @@ Management / Viewer stays allowed for vendor staff (Q3); their Reports are limit
   - **Decisions to confirm** (product-owner defaults; put them in the PR's "Decisions to confirm"):
     1. `pss:setup-first-admin` stays unchanged (Q17) and doesn't apply the new refusal, because it only runs at install. If the configured employee is vendor-linked, it still grants the role but prints a warning naming the check command. The human may prefer it to refuse.
     2. The refusal applies only to `system-administrator`. Revoking it from a vendor-linked user found by the check is allowed as before (the last-admin rule still applies).
+- 2026-11-24 (qa-45): QA PASS. Backend `php artisan test --compact`: 1220 passed (5643 assertions); `vendor/bin/pint --test` passed; `tests/Feature/VendorAdminRefusalTest.php` 8 passed. Concern: the `pss:setup-first-admin` warning has no test (not an acceptance criterion).
 
 ## Implementation decisions
 
