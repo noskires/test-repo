@@ -26,27 +26,27 @@ Out of scope: building the Equipment, Checkups, E-Call and Work Order screens sh
 ## Acceptance criteria
 
 Package
-- [ ] `lucide-angular` is the only package added (approved by the human, 2026-11-24). Choose the release that supports the project's Angular version (`^21.2`) and record the exact version in the issue. No other npm package.
+- [x] `lucide-angular` is the only package added (approved by the human, 2026-11-24). Choose the release that supports the project's Angular version (`^21.2`) and record the exact version in the issue. No other npm package.
 
 Design tokens
-- [ ] The app has one global stylesheet with the design tokens from `docs/design/mock-screens/pss-design.css`: colour, radius, shadow and status-pill tokens, with the dark values. Components use the tokens (CSS custom properties), not hard-coded colours.
-- [ ] Dark mode follows the system setting (`prefers-color-scheme`). No theme switch is added (that would be a new feature).
-- [ ] Inter is the text font and Geist Mono is used for IDs (e.g. the employee ID). See "Decisions to confirm" 1 for how the fonts load.
+- [x] The app has one global stylesheet with the design tokens from `docs/design/mock-screens/pss-design.css`: colour, radius, shadow and status-pill tokens, with the dark values. Components use the tokens (CSS custom properties), not hard-coded colours.
+- [x] Dark mode follows the system setting (`prefers-color-scheme`). No theme switch is added (that would be a new feature).
+- [x] Inter is the text font and Geist Mono is used for IDs (e.g. the employee ID). See "Decisions to confirm" 1 for how the fonts load.
 
 Shell and menu
-- [ ] Signed-in pages use the design's layout: a left sidebar with the menu, and a main area with a page head (title) and a sub line.
-- [ ] The sidebar groups entries under the mock's headings. With today's entries: **Monitor**: Dashboard. **Admin**: Admin, Reports (the mock puts Reports under Admin). A group with no visible entries for the user, such as **Repairs** today, isn't shown.
-- [ ] Each menu entry has a lucide icon at 16px. The active route is highlighted with the sidebar-active tokens.
-- [ ] Which entries each role sees is unchanged (the existing menu tests from issue 43 keep passing, updated only for markup).
-- [ ] The user's name and the Log out button stay visible on every signed-in page.
-- [ ] On narrow screens (phone width) the layout follows the mobile mocks: the sidebar isn't shown permanently, the menu is still reachable, and there's no horizontal page scroll. Check at 375px wide.
+- [x] Signed-in pages use the design's layout: a left sidebar with the menu, and a main area with a page head (title) and a sub line.
+- [x] The sidebar groups entries under the mock's headings. With today's entries: **Monitor**: Dashboard. **Admin**: Admin, Reports (the mock puts Reports under Admin). A group with no visible entries for the user, such as **Repairs** today, isn't shown.
+- [x] Each menu entry has a lucide icon at 16px. The active route is highlighted with the sidebar-active tokens.
+- [x] Which entries each role sees is unchanged (the existing menu tests from issue 43 keep passing, updated only for markup).
+- [x] The user's name and the Log out button stay visible on every signed-in page.
+- [x] On narrow screens (phone width) the layout follows the mobile mocks: the sidebar isn't shown permanently, the menu is still reachable, and there's no horizontal page scroll. Check at 375px wide.
 
 Screens
-- [ ] The login screen, the pending page (issue 46) and the Home/Dashboard, Admin and Reports placeholders use the tokens, card style and page head. Their text, messages and behaviour are unchanged. The main action on each screen (e.g. "Sign in") uses the orange accent.
+- [x] The login screen, the pending page (issue 46) and the Home/Dashboard, Admin and Reports placeholders use the tokens, card style and page head. Their text, messages and behaviour are unchanged. The main action on each screen (e.g. "Sign in") uses the orange accent.
 
 Tests
-- [ ] The existing Angular unit tests pass, changed only where markup selectors moved. Add a unit test that the menu renders a group heading only when the group has a visible entry (e.g. a Management / Viewer sees Monitor and Admin with Reports only; an ordinary employee doesn't see Admin).
-- [ ] The backend test suite is untouched.
+- [x] The existing Angular unit tests pass, changed only where markup selectors moved. Add a unit test that the menu renders a group heading only when the group has a visible entry (e.g. a Management / Viewer sees Monitor and Admin with Reports only; an ordinary employee doesn't see Admin).
+- [x] The backend test suite is untouched.
 
 ## Decisions (human, 2026-11-24)
 
@@ -69,6 +69,8 @@ Tests
     3. No theme switch: dark follows the system setting only.
 - 2026-11-24 (product-owner), re-checked after 46 (PR #45) and 45 (PR #46) merged: the pending page is `PendingPage` behind `pendingGuard` at `/pending`. For a pending user the top bar hides the menu but keeps the name and Log out (issue 46 decision 16). Keep that: a pending user sees the new shell **without the sidebar menu**, and doesn't see empty group headings either. The login screen's 403 message from 46 must stay. Issue 45 changed nothing in the frontend.
 - 2026-11-24 (product-owner): mock screens with no Angular screen yet (Equipment, Checkups, E-Call, Work Order, the full Dashboard) are reference for the issues that build those screens. When such an issue is written or picked, add `docs/design/mock-screens/project/<Screen>.dc.html` to its clarifications.
+
+- 2026-11-24 (qa-48b): QA PASS. `npx ng test --watch=false` = 8 files, 69 tests passed; `npx ng build` passed (prerendered 1 static route). Backend untouched. Every criterion maps to a real test except the 375px no-horizontal-scroll check, done by hand (no unit test).
 
 ## Implementation decisions
 
