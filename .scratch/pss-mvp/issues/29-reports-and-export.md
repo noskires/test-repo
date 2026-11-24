@@ -39,3 +39,7 @@ From the issue 04 grilling:
 - Q5: (a) every internal employee sees every Site. Vendor staff see only their own Vendor's records. This answers the "visible Sites" dependency.
 
 - 2026-11-24 (product-owner): acceptance criteria updated for Q11 (`view-reports` gate) and Q5 (Site filtering). Still blocked by 04, 26, 27, 28, 42.
+
+From the issue 45/46 grilling (second session, 2026-11-24):
+- Q3 (issue 45): **Management / Viewer stays allowed for vendor staff**, and their Reports are limited to their own Vendor. This confirms the Site filtering criterion above. A System Administrator can't be vendor-linked (issue 45), so a vendor-linked user with report access always holds Management / Viewer.
+- Q5 (issue 46): a pending user gets 403 on every report endpoint through the shared pending block; this issue adds nothing for it. Use `access` (`internal` / `vendor`) or `vendor_id` for the filter, whichever issue 46 leaves as the single source on `User`.

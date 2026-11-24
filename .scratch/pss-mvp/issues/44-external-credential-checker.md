@@ -1,7 +1,7 @@
 # 44 — Real external-system credential checker
 
 Status: needs-info
-Blocked by: 04
+Blocked by: 04, 46
 Type: task
 
 ## What to build
@@ -21,4 +21,12 @@ Issue 04 adds a `CredentialChecker` port and a local version that works only in 
 - [ ] Feature tests use `Http::fake()` for valid credentials, wrong credentials and the external system being down. Login returns a token, 401, and an error (status to decide) respectively.
 - [ ] No new package (Laravel's HTTP client is enough).
 
+## Decisions (human, 2026-11-24)
+
+From the issue 45/46 grilling:
+- Users are no longer created on sign-in (issue 46, Q13). A System Administrator adds each user and picks internal or a Vendor (Q14), so **this issue doesn't need to classify users** (vendor staff vs internal) from the external system's response. Superseded by 46.
+- Sign-in order is fixed by issue 46 (Q16): the checker runs first; a refusal is 401 whether or not the person is registered; a correct password from someone not in PSS is 403. This issue only replaces the checker and must keep that order. Questions 1 to 4 above are still open.
+
 ## Comments
+
+- 2026-11-24 (product-owner): now also blocked by 46, which changes the login flow this checker plugs into.

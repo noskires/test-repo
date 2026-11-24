@@ -79,6 +79,11 @@ Grilling answers. The human said yes to every recommendation unless noted.
 - Q13: refuse removing the System Administrator role from the **last holder**, including self-removal.
 - Q14: refuse linking a user to a Vendor while they're the **current EIC of any Site** (clear error; replace them as EIC first). Keeps alignment item 4.
 
+Later changes (human, 2026-11-24, issue 45/46 grilling; follow-ups 46 and 45 change this merged behaviour):
+- **Superseded by issue 46 (Q13, Q16):** users are no longer created on first sign-in (Q7 above); a System Administrator adds them. The product-owner default "an employee unknown to `MasterDataDirectory` gets 401" ("Decisions to confirm" 2) is replaced: a wrong password is 401 whether or not the person is registered, and a correct password from someone not in PSS is 403.
+- **Superseded by issue 46 (Q8):** unlinking a Vendor makes the user **pending**, not "an ordinary employee again". `users.employee_id` becomes unique (Q15).
+- **Changed by issue 45 (Q2, Q11):** a vendor-linked user can't be granted System Administrator, and a System Administrator can't be linked to a Vendor. Management / Viewer stays allowed (Q3).
+
 Earlier decisions (grilling, 2026-11-22), still valid: vendor staff are in the existing system and log in the same way; **anyone** can file an E-Call; System Administrator and Management/Viewer are granted inside PSS (first admin seeded at install); approver roles come from the Immediate Head chain. The 2026-11-22 "same as the existing system (SSO)" login is now JWT with a swappable checker; the external SSO/credential details move to issue 44.
 
 ## Comments
