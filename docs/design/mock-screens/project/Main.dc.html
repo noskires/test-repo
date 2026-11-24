@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PSS Dashboard</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="../pss-design.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2563EB}a:hover{color:#3B82F6}
+</style>
+</helmet>
+<div class="app">
+  <nav class="nav" aria-label="Main">
+    <div class="brand"><span class="brand-tile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg></span><span>Passive Support Services<small>Facilities maintenance</small></span></div>
+    <div class="navsec">Monitor</div>
+    <a class="on" href="Main.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>Dashboard</a>
+    <a href="Equipment.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>Equipment</a>
+    <a href="Checkups.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>Check-ups (PM)</a>
+    <div class="navsec">Repairs</div>
+    <a href="ECall.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>E-Calls</a>
+    <a href="WorkOrder.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>Work Orders</a>
+    <div class="navsec">Admin</div>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>Vendors</span>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>Approvals</span>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>Reports</span>
+  </nav>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Operations overview</h1>
+        <div class="sub">Sunday, 22 November 2026 · showing your sites · sample data</div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+        <div class="tabs" role="group" aria-label="Filter by site">
+          <sc-for list="{{sites}}" as="s" hint-placeholder-count="4">
+            <button class="{{s.cls}}" onClick="{{s.pick}}" aria-pressed="{{s.pressed}}">{{s.label}}</button>
+          </sc-for>
+        </div>
+        <a class="btn accent" href="ECall.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>New E-Call</a>
+      </div>
+    </div>
+
+    <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px" aria-label="Summary">
+      <div class="panel" style="display: flex; flex-direction: column; gap: 8px">
+        <div class="sub">Registered equipment</div>
+        <div class="stat-num">{{k.equip}}</div>
+        <div><span class="chip c-red">{{k.nonOp}} not operating</span></div>
+      </div>
+      <div class="panel" style="display: flex; flex-direction: column; gap: 8px">
+        <div class="sub">Check-ups due this month</div>
+        <div class="stat-num">{{k.pmDue}}</div>
+        <div><span class="chip c-amber">{{k.pmOverdue}} overdue</span></div>
+      </div>
+      <div class="panel" style="display: flex; flex-direction: column; gap: 8px">
+        <div class="sub">Check-ups done on time (YTD)</div>
+        <div class="stat-num">{{k.compliance}}%</div>
+        <div class="track" style="height: 8px"><div style="height: 8px; border-radius: 4px; background: var(--primary-600); width: {{k.complianceW}}"></div></div>
+      </div>
+      <div class="panel" style="display: flex; flex-direction: column; gap: 8px">
+        <div class="sub">Open repair requests</div>
+        <div class="stat-num">{{k.ecalls}}</div>
+        <div class="sub num">{{k.woApproval}} in approval · {{k.woImpl}} being done</div>
+      </div>
+      <div class="panel" style="display: flex; flex-direction: column; gap: 8px">
+        <div class="sub">Validated spend (YTD)</div>
+        <div class="stat-num mono">₱{{k.spend}}</div>
+        <div class="sub">Actual amounts checked by EICs</div>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <section class="panel" style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 16px">
+        <h2>Needs attention</h2>
+        <sc-if value="{{noAttention}}" hint-placeholder-val="{{ false }}">
+          <p class="sub" style="margin: 0">Nothing needs attention at this site.</p>
+        </sc-if>
+        <div style="display: flex; flex-direction: column">
+          <sc-for list="{{attention}}" as="a" hint-placeholder-count="4">
+            <a href="{{a.href}}" style="display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--border); color: var(--foreground); font-weight: 400">
+              <span style="width: 32px; height: 32px; border-radius: 8px; background: var(--selected-icon-bg); color: var(--selected-icon-fg); display: inline-flex; align-items: center; justify-content: center; flex: none">
+                <sc-if value="{{a.isBan}}" hint-placeholder-val="{{ false }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg></sc-if>
+                <sc-if value="{{a.isUndo}}" hint-placeholder-val="{{ false }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path></svg></sc-if>
+                <sc-if value="{{a.isClock}}" hint-placeholder-val="{{ false }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></sc-if>
+                <sc-if value="{{a.isZap}}" hint-placeholder-val="{{ false }}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg></sc-if>
+              </span>
+              <span style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+                <span style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+                  <strong class="{{a.refCls}}" style="font-size: 14px; font-weight: 600">{{a.ref}}</strong>
+                  <span class="sub">{{a.site}}</span>
+                  <sc-for list="{{a.chips}}" as="c" hint-placeholder-count="1"><span class="{{c.cls}}">{{c.label}}</span></sc-for>
+                </span>
+                <span style="font-size: 14px">{{a.text}}</span>
+              </span>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+
+      <section class="panel" style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 16px">
+        <h2>Work Orders by step</h2>
+        <sc-for list="{{pipeline}}" as="p" hint-placeholder-count="7">
+          <div style="display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr) 32px; gap: 12px; align-items: center; font-size: 14px">
+            <span>{{p.label}}</span>
+            <div class="track" style="height: 12px"><div style="height: 12px; border-radius: 4px; background: {{p.color}}; width: {{p.w}}"></div></div>
+            <span class="num" style="text-align: right; font-weight: 600">{{p.n}}</span>
+          </div>
+        </sc-for>
+      </section>
+    </div>
+
+    <section class="panel" style="display: flex; flex-direction: column; gap: 16px; padding: 24px 0 8px">
+      <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; padding: 0 24px">
+        <h2>Waiting for approval</h2>
+        <button class="btn ghost sm" type="button">Export to Excel</button>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Item</th><th>Site</th><th>Step</th><th>Waiting on</th><th class="r">Waiting</th></tr></thead>
+          <tbody>
+            <sc-for list="{{approvals}}" as="r" hint-placeholder-count="4">
+              <tr>
+                <td><a class="{{r.refCls}}" href="{{r.href}}">{{r.ref}}</a><div class="muted" style="font-size: 12px">{{r.what}}</div></td>
+                <td>{{r.site}}</td>
+                <td>{{r.step}}</td>
+                <td>{{r.who}}</td>
+                <td class="r num">{{r.age}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { site: 'All sites' }; }
+  renderVals() {
+    const data = {
+      'Makati Office': { equip: 96, nonOp: 4, pmDue: 14, pmOverdue: 3, compliance: 92, ecalls: 3, woApproval: 2, woImpl: 1, spend: 1284300 },
+      'Cebu Site': { equip: 71, nonOp: 3, pmDue: 11, pmOverdue: 2, compliance: 89, ecalls: 2, woApproval: 1, woImpl: 1, spend: 642800 },
+      'Davao Site': { equip: 47, nonOp: 1, pmDue: 8, pmOverdue: 1, compliance: 95, ecalls: 1, woApproval: 1, woImpl: 1, spend: 318450 }
+    };
+    const site = this.state.site;
+    let k;
+    if (site === 'All sites') {
+      k = { equip: 0, nonOp: 0, pmDue: 0, pmOverdue: 0, ecalls: 0, woApproval: 0, woImpl: 0, spend: 0 };
+      Object.values(data).forEach(d => { Object.keys(k).forEach(key => { k[key] += d[key]; }); });
+      k.compliance = 92;
+    } else {
+      k = Object.assign({}, data[site]);
+    }
+    k.complianceW = k.compliance + '%';
+    k.spend = k.spend.toLocaleString('en-PH');
+    const sites = ['All sites', 'Makati Office', 'Cebu Site', 'Davao Site'].map(s => ({
+      label: s, cls: s === site ? 'tab sel' : 'tab', pressed: s === site ? 'true' : 'false',
+      pick: () => this.setState({ site: s })
+    }));
+    const isCode = r => /^[A-Z]{2}-\d/.test(r);
+    const allAttention = [
+      { ref: 'WO-2026-0139', site: 'Cebu Site', kind: 'ban', href: 'WorkOrder.dc.html', chips: [{ cls: 'chip c-red', label: 'Blocked' }], text: 'Billing approval can’t continue: the Center Head position in the requestor’s chain is vacant. It resumes once the HR system fills it.' },
+      { ref: 'Iloilo Site', site: 'Iloilo Site', kind: 'ban', href: 'Main.dc.html', chips: [{ cls: 'chip c-amber', label: 'Needs setup' }], text: 'New site from the asset system. No vendor or EIC is assigned yet, so no check-ups are being created.' },
+      { ref: 'Aircon #5 · Oct check-up', site: 'Makati Office', kind: 'undo', href: 'Checkups.dc.html', chips: [{ cls: 'chip c-blue', label: 'Returned' }, { cls: 'chip c-red', label: 'Overdue 25 days' }], text: 'The EIC sent the report back to PowerPro Services for missing coil photos.' },
+      { ref: 'Genset #2 · Q4 check-up', site: 'Cebu Site', kind: 'clock', href: 'Checkups.dc.html', chips: [{ cls: 'chip c-grey', label: 'In progress' }, { cls: 'chip c-red', label: 'Overdue 9 days' }], text: 'Vendor started on 18 Nov and hasn’t submitted the report yet.' },
+      { ref: 'EC-2026-0331', site: 'Davao Site', kind: 'zap', href: 'ECall.dc.html', chips: [{ cls: 'chip c-red', label: 'Emergency' }], text: 'ATS #1 failed to switch to generator power. Waiting for the vendor’s field report and quote.' }
+    ];
+    const attention = (site === 'All sites' ? allAttention : allAttention.filter(a => a.site === site)).map(a => Object.assign({}, a, {
+      refCls: isCode(a.ref) ? 'mono' : '', isBan: a.kind === 'ban', isUndo: a.kind === 'undo', isClock: a.kind === 'clock', isZap: a.kind === 'zap'
+    }));
+    const allApprovals = [
+      { ref: 'WO-2026-0142', what: 'Genset #1 battery and starter replacement', site: 'Makati Office', step: 'Billing endorsement, level 2 of 3', who: 'Pedro Reyes, Division Head', age: '2 days', href: 'WorkOrder.dc.html' },
+      { ref: 'EC-2026-0327', what: 'Aircon #5 compressor quote', site: 'Makati Office', step: 'Quote review', who: 'Juan Dela Cruz, EIC', age: '1 day', href: 'ECall.dc.html' },
+      { ref: 'ATS #2 · Q4 check-up', what: 'Check-up report submitted by vendor', site: 'Davao Site', step: 'Report validation', who: 'Leo Navarro, EIC', age: '3 days', href: 'Checkups.dc.html' },
+      { ref: 'WO-2026-0145', what: 'Roof leak repair, Building A', site: 'Cebu Site', step: 'Work Order endorsement, level 1', who: 'Grace Tan, Team Head', age: 'Today', href: 'WorkOrder.dc.html' }
+    ];
+    const approvals = (site === 'All sites' ? allApprovals : allApprovals.filter(a => a.site === site)).map(a => Object.assign({}, a, { refCls: isCode(a.ref) ? 'mono' : '' }));
+    const steps = [['Draft', 2, 'var(--chart-idle)'], ['Endorsement level 1', 2, 'var(--chart-1)'], ['Endorsement level 2', 1, 'var(--chart-1)'], ['Vendor doing the work', 3, 'var(--chart-ok)'], ['Waiting for EIC check', 2, 'var(--chart-warn)'], ['Billing endorsement', 4, 'var(--chart-1)'], ['Closed this month', 9, 'var(--chart-idle)']];
+    const pipeline = steps.map(s => ({ label: s[0], n: s[1], color: s[2], w: Math.round(s[1] / 9 * 100) + '%' }));
+    return { sites, k, attention, noAttention: attention.length === 0, approvals, pipeline };
+  }
+}
+</script>
+</body>
+</html>

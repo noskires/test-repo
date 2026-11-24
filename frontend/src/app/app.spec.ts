@@ -26,6 +26,7 @@ describe('App', () => {
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('header')).toBeNull();
+    expect(el.querySelector('.sidebar')).toBeNull();
     expect(el.querySelector('router-outlet')).not.toBeNull();
   });
 
@@ -49,6 +50,26 @@ describe('App', () => {
     expect(el.querySelector('header button')?.textContent).toContain('Log out');
   });
 
+  it('uses the design layout: a sidebar with grouped menu, and the main area', () => {
+    TestBed.inject(AuthService).setSession('tok', {
+      employee_id: 'EMP-9001',
+      name: 'Sam System Administrator',
+      roles: ['system-administrator'],
+      vendor_id: null,
+      access: 'internal',
+    });
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('.sidebar nav')).not.toBeNull();
+    expect(
+      Array.from(el.querySelectorAll('.sidebar .navsec')).map((h) => h.textContent?.trim()),
+    ).toEqual(['Monitor', 'Admin']);
+    expect(el.querySelector('main.main router-outlet')).not.toBeNull();
+    expect(el.querySelector('header .mono')?.textContent).toContain('EMP-9001');
+  });
+
   it('shows no menu entries for a pending user, only the name and logout', () => {
     TestBed.inject(AuthService).setSession('tok', {
       employee_id: 'EMP-P',
@@ -62,13 +83,20 @@ describe('App', () => {
     const el = fixture.nativeElement as HTMLElement;
 
     expect(el.querySelector('nav')).toBeNull();
+    expect(el.querySelector('.navsec')).toBeNull();
     expect(el.querySelector('header')?.textContent).toContain('Paula Pending');
     expect(el.querySelector('header button')?.textContent).toContain('Log out');
   });
 
   it('the logout button calls the API, clears the token and goes to login', () => {
     const auth = TestBed.inject(AuthService);
-    auth.setSession('tok', { employee_id: 'EMP-1', name: 'X', roles: [], vendor_id: null, access: 'internal' });
+    auth.setSession('tok', {
+      employee_id: 'EMP-1',
+      name: 'X',
+      roles: [],
+      vendor_id: null,
+      access: 'internal',
+    });
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();

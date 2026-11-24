@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Check-ups</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="../pss-design.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2563EB}a:hover{color:#3B82F6}
+</style>
+</helmet>
+<div class="app">
+  <nav class="nav" aria-label="Main">
+    <div class="brand"><span class="brand-tile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg></span><span>Passive Support Services<small>Facilities maintenance</small></span></div>
+    <div class="navsec">Monitor</div>
+    <a href="Main.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>Dashboard</a>
+    <a href="Equipment.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>Equipment</a>
+    <a class="on" href="Checkups.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>Check-ups (PM)</a>
+    <div class="navsec">Repairs</div>
+    <a href="ECall.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>E-Calls</a>
+    <a href="WorkOrder.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>Work Orders</a>
+    <div class="navsec">Admin</div>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>Vendors</span>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>Approvals</span>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>Reports</span>
+  </nav>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Check-ups</h1>
+        <div class="sub">Makati Office · reviewed by Juan Dela Cruz (site EIC) · vendor PowerPro Services</div>
+      </div>
+      <div class="tabs" role="group" aria-label="Filter by timing">
+        <sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+          <button class="{{f.cls}}" onClick="{{f.pick}}" aria-pressed="{{f.pressed}}">{{f.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <section class="panel" style="display: flex; flex-direction: column; gap: 16px; padding: 24px 0 8px">
+      <div style="display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline; justify-content: space-between; padding: 0 24px">
+        <h2>Scheduled check-ups</h2>
+        <span class="sub">Upcoming = within 7 days · Overdue = from the day after the due date · on time is judged by the Work Done Date</span>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Equipment</th><th>Check-up</th><th>Due</th><th>Step</th><th>Timing</th></tr></thead>
+          <tbody>
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="7">
+              <tr>
+                <td><a href="Equipment.dc.html">{{r.equip}}</a><div class="muted mono" style="font-size: 12px">{{r.id}}</div></td>
+                <td>{{r.cycle}}</td>
+                <td class="num">{{r.due}}</td>
+                <td><span class="{{r.stepCls}}">{{r.step}}</span></td>
+                <td><span class="{{r.timeCls}}">{{r.time}}</span></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <section class="panel" style="flex: 999 1 520px; display: flex; flex-direction: column; gap: 20px" aria-label="Report waiting for review">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <h2>Aircon #3 · November check-up</h2>
+            <div class="sub"><span class="mono">ACU-MKT-003</span> · 2F office area · ACU checklist v3 · submitted by PowerPro Services</div>
+          </div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap">
+            <span class="{{d.stepCls}}">{{d.step}}</span>
+            <span class="chip c-amber">Due 25 Nov</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+          <div class="soft"><div class="eyebrow">Work Done Date (vendor)</div><div class="num" style="font-weight: 600; margin-top: 4px">21 Nov 2026</div></div>
+          <div class="soft"><div class="eyebrow">Frequency</div><div style="font-weight: 600; margin-top: 4px">Monthly (all Makati equipment)</div></div>
+          <div class="soft"><div class="eyebrow">Service report</div><div style="margin-top: 4px"><a href="#report" style="display: inline-flex; gap: 6px; align-items: center"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>PM-report-ACU-003-Nov.pdf</a></div></div>
+        </div>
+        <div class="tbl" style="margin: 0 -24px">
+          <table>
+            <thead><tr><th>Checklist item</th><th>Result</th><th class="r">Accepted range</th></tr></thead>
+            <tbody>
+              <sc-for list="{{checklist}}" as="c" hint-placeholder-count="8">
+                <tr><td>{{c.item}}</td><td><span class="{{c.cls}}">{{c.result}}</span></td><td class="r muted num">{{c.range}}</td></tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size: 14px"><strong style="font-weight: 600">Vendor findings:</strong> Drain pan has light algae build-up, cleaned. Thermostat reads 1.5 °C high; recommend recalibration at next visit.</div>
+      </section>
+
+      <section class="panel" style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 16px" aria-label="Your review">
+        <h2>Your review</h2>
+        <sc-if value="{{d.pending}}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div class="field">
+              <label for="remarks">Remarks <span class="muted" style="font-weight: 400">(required to return)</span></label>
+              <textarea id="remarks" value="{{remarks}}" onChange="{{onRemarks}}" placeholder="What should the vendor fix?"></textarea>
+            </div>
+            <sc-if value="{{showErr}}" hint-placeholder-val="{{ false }}"><div class="err">Add a remark so the vendor knows what to fix.</div></sc-if>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px">
+              <button class="btn accent" onClick="{{approve}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Approve report</button>
+              <button class="btn ghost" onClick="{{ret}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path></svg>Return to vendor</button>
+            </div>
+            <p class="sub" style="margin: 0">Check-up reports can't be rejected. The check-up still has to be done, so send it back with remarks instead.</p>
+          </div>
+        </sc-if>
+        <sc-if value="{{d.approved}}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px">
+            <div style="display: flex; gap: 6px"><span class="chip c-green">Completed</span><span class="chip c-green">On time</span></div>
+            <div>Approved with Work Done Date <strong style="font-weight: 600">21 Nov 2026</strong>.</div>
+            <div class="bn bn-info" style="gap: 4px">
+              <div>Next check-up created: <strong class="num" style="font-weight: 600">21 Dec 2026</strong></div>
+              <div style="font-size: 12px">21 Nov + 1 month. Late or early work moves the next date.</div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{d.returned}}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px">
+            <div style="display: flex; gap: 6px"><span class="chip c-blue">Returned</span><span class="chip c-amber">Due 25 Nov</span></div>
+            <div>Sent back to PowerPro Services: “{{remarks}}”</div>
+            <div class="sub">If it isn't resubmitted and approved by 25 Nov, it will also show as Overdue.</div>
+          </div>
+        </sc-if>
+        <div class="divider" style="padding-top: 16px; display: flex; flex-direction: column; gap: 8px">
+          <div style="font-size: 14px; font-weight: 500">Found something that needs repair?</div>
+          <a href="ECall.dc.html">Raise an E-Call from this check-up</a>
+          <div class="sub">The check-up keeps its own step. Raising an E-Call doesn't complete it.</div>
+        </div>
+        <sc-if value="{{d.done}}" hint-placeholder-val="{{ false }}"><div><button class="btn ghost sm" onClick="{{reset}}">Reset demo</button></div></sc-if>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { filter: 'All', decision: null, remarks: '', err: false }; }
+  renderVals() {
+    const S = { Scheduled: 'chip c-grey', 'In progress': 'chip c-grey', 'For validation': 'chip c-blue', Returned: 'chip c-blue', Completed: 'chip c-green' };
+    const T = { Later: 'chip c-grey', Upcoming: 'chip c-amber', Due: 'chip c-amber', Overdue: 'chip c-red', 'On time': 'chip c-green', Late: 'chip c-amber' };
+    const dec = this.state.decision;
+    const ac3Step = dec === 'approved' ? 'Completed' : dec === 'returned' ? 'Returned' : 'For validation';
+    const ac3Time = dec === 'approved' ? 'On time' : 'Upcoming';
+    const ac3Label = dec === 'approved' ? 'On time' : 'Upcoming · in 3 days';
+    const all = [
+      { equip: 'Main electrical panel', id: 'PNL-MKT-004', cycle: 'Monthly, September', due: '3 Sep 2026', step: 'Scheduled', time: 'Overdue', timeLabel: 'Overdue 80 days' },
+      { equip: 'Aircon #5, server room', id: 'ACU-MKT-005', cycle: 'Monthly, October', due: '28 Oct 2026', step: 'Returned', time: 'Overdue', timeLabel: 'Overdue 25 days' },
+      { equip: 'Aircon #3', id: 'ACU-MKT-003', cycle: 'Monthly, November', due: '25 Nov 2026', step: ac3Step, time: ac3Time, timeLabel: ac3Label },
+      { equip: 'Genset #1', id: 'GEN-MKT-001', cycle: 'Monthly, December', due: '4 Dec 2026', step: 'Scheduled', time: 'Later', timeLabel: 'Due in 12 days' },
+      { equip: 'ATS #2', id: 'ATS-MKT-002', cycle: 'Monthly, December', due: '15 Dec 2026', step: 'Scheduled', time: 'Later', timeLabel: 'Due in 23 days' },
+      { equip: 'Aircon #1', id: 'ACU-MKT-001', cycle: 'Monthly, November', due: '12 Nov 2026', step: 'Completed', time: 'On time', timeLabel: 'On time' },
+      { equip: 'Genset #3', id: 'GEN-MKT-003', cycle: 'Monthly, November', due: '2 Nov 2026', step: 'Completed', time: 'Late', timeLabel: 'Late by 6 days' }
+    ];
+    const f = this.state.filter;
+    const match = r => f === 'All' || (f === 'Done' ? r.step === 'Completed' : r.time === f);
+    const rows = all.filter(match).map(r => ({ equip: r.equip, id: r.id, cycle: r.cycle, due: r.due, step: r.step, stepCls: S[r.step], time: r.timeLabel, timeCls: T[r.time] }));
+    const filters = ['All', 'Overdue', 'Upcoming', 'Later', 'Done'].map(x => ({ label: x, cls: x === f ? 'tab sel' : 'tab', pressed: x === f ? 'true' : 'false', pick: () => this.setState({ filter: x }) }));
+    const checklist = [
+      ['Air filter cleaning', 'Pass', '—'], ['Evaporator coil', 'Good', '—'], ['Condenser coil', 'Good', '—'],
+      ['Refrigerant pressure', '118 psi', '110–130 psi'], ['Drainage system', 'Pass', '—'], ['Electrical connections', 'Pass', '—'],
+      ['Thermostat working', 'Yes', '—'], ['Supply air temperature', '13.5 °C', '12–15 °C']
+    ].map(c => ({ item: c[0], result: c[1], range: c[2], cls: 'chip c-green' }));
+    const d = { step: ac3Step, stepCls: S[ac3Step], pending: !dec, approved: dec === 'approved', returned: dec === 'returned', done: !!dec };
+    return {
+      rows, filters, checklist, d, remarks: this.state.remarks, showErr: this.state.err,
+      onRemarks: (e) => this.setState({ remarks: e.target.value, err: false }),
+      approve: () => this.setState({ decision: 'approved', err: false }),
+      ret: () => this.state.remarks.trim() ? this.setState({ decision: 'returned', err: false }) : this.setState({ err: true }),
+      reset: () => this.setState({ decision: null, remarks: '', err: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

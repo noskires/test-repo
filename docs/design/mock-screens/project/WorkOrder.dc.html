@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Work Order WO-2026-0142</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="../pss-design.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2563EB}a:hover{color:#3B82F6}
+</style>
+</helmet>
+<div class="app">
+  <nav class="nav" aria-label="Main">
+    <div class="brand"><span class="brand-tile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg></span><span>Passive Support Services<small>Facilities maintenance</small></span></div>
+    <div class="navsec">Monitor</div>
+    <a href="Main.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>Dashboard</a>
+    <a href="Equipment.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>Equipment</a>
+    <a href="Checkups.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>Check-ups (PM)</a>
+    <div class="navsec">Repairs</div>
+    <a href="ECall.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>E-Calls</a>
+    <a class="on" href="WorkOrder.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>Work Orders</a>
+    <div class="navsec">Admin</div>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>Vendors</span>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>Approvals</span>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>Reports</span>
+  </nav>
+
+  <main class="main">
+    <div class="page-head" style="align-items: flex-start">
+      <div>
+        <h1><span class="mono" style="font-weight: 600">WO-2026-0142</span> · Genset #1 battery and starter</h1>
+        <div class="sub">Makati Office · from E-Call <a class="mono" href="ECall.dc.html">EC-2026-0318</a> (closed) · vendor PowerPro Services · created by Juan Dela Cruz, who filed the E-Call from a check-up finding</div>
+      </div>
+      <span class="{{statusCls}}">{{status}}</span>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+        <section class="panel" style="display: flex; flex-direction: column; gap: 16px" aria-label="Current step">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline">
+            <h2>{{cur.label}}</h2>
+            <span class="sub">Waiting on {{cur.who}}</span>
+          </div>
+
+          <sc-if value="{{showBlocked}}" hint-placeholder-val="{{ false }}">
+            <div class="bn bn-critical" role="alert" aria-live="assertive" style="gap: 10px">
+              <div style="display: flex; gap: 8px; align-items: center; font-weight: 600"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>Blocked: no Center Head in Pedro Reyes's chain</div>
+              <div>This Work Order needs a level 3 billing approver, but the Center Head position is vacant. It stays here until the HR system fills the position.</div>
+              <div><button class="btn ghost sm" onClick="{{fixChain}}">Demo: HR system fills the position</button></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{showActions}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 12px">
+              <sc-if value="{{needsRemarksField}}" hint-placeholder-val="{{ true }}">
+                <div class="field">
+                  <label for="remarks">Remarks <span class="muted" style="font-weight: 400">(required to return or reject)</span></label>
+                  <textarea id="remarks" value="{{remarks}}" onChange="{{onRemarks}}" style="min-height: 72px"></textarea>
+                  <sc-if value="{{err}}" hint-placeholder-val="{{ false }}"><div class="err">Add a remark first so the next person knows why.</div></sc-if>
+                </div>
+              </sc-if>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                <button class="btn accent" onClick="{{primary}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>{{primaryLabel}}</button>
+                <sc-if value="{{canReturn}}" hint-placeholder-val="{{ true }}"><button class="btn ghost" onClick="{{ret}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path></svg>Return to {{prevWho}}</button></sc-if>
+                <sc-if value="{{canReject}}" hint-placeholder-val="{{ true }}"><button class="btn danger" onClick="{{reject}}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>Reject</button></sc-if>
+              </div>
+              <sc-if value="{{canReject}}" hint-placeholder-val="{{ true }}"><div class="sub">Reject ends this Work Order for good. To try again, someone files a new E-Call.</div></sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{closed}}" hint-placeholder-val="{{ false }}">
+            <div class="bn bn-info">All billing endorsements are done. The vendor can now bill ₱{{amount}}.</div>
+          </sc-if>
+          <sc-if value="{{rejected}}" hint-placeholder-val="{{ false }}">
+            <div class="bn bn-critical">Rejected. This Work Order is closed for good. Any further work needs a new E-Call.</div>
+          </sc-if>
+          <sc-if value="{{ended}}" hint-placeholder-val="{{ false }}"><div><button class="btn ghost sm" onClick="{{reset}}">Reset demo</button></div></sc-if>
+        </section>
+
+        <section class="panel" style="display: flex; flex-direction: column; gap: 16px; padding: 24px 0 8px">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; padding: 0 24px">
+            <h2>Approved vs actual</h2>
+            <span class="sub">Prices from PowerPro's contract price list</span>
+          </div>
+          <div class="tbl">
+            <table>
+              <thead><tr><th>Item</th><th class="r">Unit price</th><th class="r">Approved qty</th><th class="r">Actual qty</th><th class="r">Actual cost</th></tr></thead>
+              <tbody>
+                <sc-for list="{{lines}}" as="l" hint-placeholder-count="5">
+                  <tr>
+                    <td>{{l.item}} <sc-if value="{{l.offList}}" hint-placeholder-val="{{ false }}"><span class="chip c-amber">Not on price list</span></sc-if></td>
+                    <td class="r mono">{{l.price}}</td><td class="r num">{{l.aq}}</td><td class="r num">{{l.xq}}</td><td class="r mono">{{l.cost}}</td>
+                  </tr>
+                </sc-for>
+                <tr><td style="font-weight: 600">Total</td><td></td><td class="r mono muted">₱180,000</td><td></td><td class="r mono" style="font-weight: 600">₱230,450</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel" style="display: flex; flex-direction: column; gap: 12px">
+          <h2>History</h2>
+          <div style="display: flex; flex-direction: column">
+            <sc-for list="{{log}}" as="h" hint-placeholder-count="6">
+              <div style="display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 16px; padding: 12px 0; border-top: 1px solid var(--border); font-size: 14px">
+                <span class="muted num" style="font-size: 12px; padding-top: 2px">{{h.when}}</span>
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                  <div><strong style="font-weight: 600">{{h.who}}</strong> {{h.action}}</div>
+                  <div class="muted">{{h.note}}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+
+      <aside style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 24px; min-width: 0">
+        <section class="panel" style="display: flex; flex-direction: column; gap: 12px" aria-label="Billing amount">
+          <h2>Billing amount</h2>
+          <div class="stat-num mono">₱{{amount}}</div>
+          <div class="sub">The actual cost the EIC validated decides how many billing approvers are needed: {{levels}} levels here. Thresholds are an admin setting (now ₱200,000 / ₱1,000,000). If an admin changes them, Work Orders already in billing follow the new rule.</div>
+          <div class="divider" style="display: flex; flex-direction: column; gap: 8px; padding-top: 12px">
+            <span class="eyebrow" id="sc-lbl">Try another actual amount</span>
+            <div role="group" aria-labelledby="sc-lbl" style="display: flex; flex-wrap: wrap; gap: 8px">
+              <sc-for list="{{scenarios}}" as="s" hint-placeholder-count="3"><button class="{{s.cls}}" onClick="{{s.pick}}" aria-pressed="{{s.pressed}}">{{s.label}}</button></sc-for>
+            </div>
+          </div>
+          <label style="display: flex; gap: 10px; align-items: center; font-size: 14px; min-height: 44px; cursor: pointer"><input type="checkbox" checked="{{vacant}}" onChange="{{toggleVacant}}" style="width: 16px; height: 16px"> Center Head position is vacant</label>
+        </section>
+
+        <section class="panel" style="display: flex; flex-direction: column; gap: 16px" aria-label="Approval route">
+          <h2>Route</h2>
+          <sc-for list="{{steps}}" as="s" hint-placeholder-count="9">
+            <div class="step">
+              <span class="{{s.dotCls}}">{{s.n}}</span>
+              <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+                <span style="font-size: 14px; font-weight: {{s.weight}}">{{s.label}}</span>
+                <span class="muted" style="font-size: 12px">{{s.who}}</span>
+              </div>
+            </div>
+          </sc-for>
+          <div class="sub divider" style="padding-top: 12px">Approvers come from the creator's Immediate Head chain in the HR system (Juan → Maria → Pedro → Center Head → Sector Head). They were locked in when Juan submitted. A Return from billing level 1 goes back to the EIC check.</div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { amount: 230450, step: 6, baseStep: 6, vacant: false, rejected: false, remarks: '', err: false, extra: [] }; }
+  baseLog(step) {
+    const all = [
+      { when: '2 Nov', who: 'Juan Dela Cruz', action: 'created the Work Order', note: 'From approved field report and quote on EC-2026-0318. The E-Call closed.' },
+      { when: '3 Nov', who: 'Juan Dela Cruz', action: 'submitted it for approval', note: 'Estimated ₱180,000' },
+      { when: '4 Nov', who: 'Maria Santos', action: 'approved endorsement level 1', note: '' },
+      { when: '6 Nov', who: 'Pedro Reyes', action: 'approved endorsement level 2', note: 'Now on PowerPro Services’ “Waiting for me” list: authorized to start' },
+      { when: '16 Nov', who: 'PowerPro Services', action: 'marked the work done', note: 'Uploaded completion photos and report' },
+      { when: '18 Nov', who: 'Juan Dela Cruz', action: 'approved the finished work', note: 'Actual ₱230,450: 2 extra cable kits and injector cleaning found during the job' },
+      { when: '20 Nov', who: 'Maria Santos', action: 'approved billing level 1', note: '' }
+    ];
+    return all.slice(0, Math.min(step + 1, all.length));
+  }
+  renderVals() {
+    const s = this.state;
+    const levels = s.amount < 200000 ? 2 : s.amount <= 1000000 ? 3 : 4;
+    const billers = [
+      { who: 'Maria Santos, Team Head' }, { who: 'Pedro Reyes, Division Head' },
+      { who: s.vacant ? 'Vacant Center Head position' : 'Liza Gomez, Center Head', vacant: s.vacant }, { who: 'Ramon Villanueva, Sector Head' }
+    ];
+    const steps = [
+      { label: 'Draft', who: 'Juan Dela Cruz, EIC', kind: 'submit', status: 'Open' },
+      { label: 'Endorsement, level 1', who: 'Maria Santos, Team Head', kind: 'approve', status: 'For level 1 endorsement' },
+      { label: 'Endorsement, level 2', who: 'Pedro Reyes, Division Head', kind: 'approve', status: 'For level 2 endorsement' },
+      { label: 'Vendor doing the work', who: 'PowerPro Services', kind: 'vendor', status: 'For implementation' },
+      { label: 'EIC checks the finished work', who: 'Juan Dela Cruz, EIC', kind: 'approve', status: 'Implemented' }
+    ];
+    for (let i = 0; i < levels; i++) steps.push({ label: 'Billing endorsement, level ' + (i + 1) + ' of ' + levels, who: billers[i].who, kind: 'approve', vacant: !!billers[i].vacant, status: 'For billing endorsement, level ' + (i + 1) });
+    steps.push({ label: 'Closed', who: 'Vendor can bill', kind: 'closed', status: 'Closed' });
+    const step = Math.min(s.step, steps.length - 1);
+    const cur = steps[step];
+    const closed = cur.kind === 'closed' && !s.rejected;
+    const blocked = !!cur.vacant && !s.rejected;
+    const viewSteps = steps.map((x, i) => ({
+      n: i < step ? '✓' : String(i + 1), label: x.label, who: x.who,
+      dotCls: 'dot ' + (i < step || (closed && i === step) ? 'd-done' : i === step ? (blocked ? 'd-block' : 'd-cur') : 'd-next'),
+      weight: i === step ? '600' : '400'
+    }));
+    const log = this.baseLog(s.baseStep).concat(s.extra).slice().reverse();
+    const say = (who, action, note) => this.state.extra.concat([{ when: 'Just now', who, action, note: note || '' }]);
+    const needRemark = () => { if (!s.remarks.trim()) { this.setState({ err: true }); return false; } return true; };
+    const primaryLabel = cur.kind === 'submit' ? 'Submit for approval' : cur.kind === 'vendor' ? 'Vendor: mark work done' : 'Approve';
+    const prev = step > 0 ? steps[step - 1] : null;
+    const status = s.rejected ? 'Rejected' : blocked ? 'Blocked · ' + cur.status : cur.status;
+    const statusCls = s.rejected ? 'chip c-red' : closed ? 'chip c-green' : blocked ? 'chip c-red' : 'chip c-blue';
+    const scenarios = [180000, 230450, 1250000].map(a => ({
+      label: '₱' + a.toLocaleString('en-PH'), cls: a === s.amount ? 'pill sel mono' : 'pill mono', pressed: a === s.amount ? 'true' : 'false',
+      pick: () => this.setState({ amount: a, step: 5, baseStep: 5, rejected: false, extra: [], remarks: '', err: false })
+    }));
+    const lines = [
+      { item: 'Battery, 12 V 200 Ah', price: '₱18,500', aq: '2', xq: '2', cost: '₱37,000' },
+      { item: 'Starter motor, 24 V', price: '₱96,000', aq: '1', xq: '1', cost: '₱96,000' },
+      { item: 'Labor, genset electrical (per job)', price: '₱45,000', aq: '1', xq: '1', cost: '₱45,000' },
+      { item: 'Cable and terminal kit', price: '₱2,000', aq: '1', xq: '3', cost: '₱6,000' },
+      { item: 'Fuel injector cleaning', price: '₱46,450', aq: '0', xq: '1', cost: '₱46,450', offList: true }
+    ];
+    return {
+      status, statusCls, cur, steps: viewSteps, log, lines, scenarios, levels,
+      amount: s.amount.toLocaleString('en-PH'), vacant: s.vacant,
+      showBlocked: blocked, showActions: !blocked && !closed && !s.rejected,
+      needsRemarksField: cur.kind === 'approve',
+      canReturn: cur.kind === 'approve' && !!prev, canReject: cur.kind === 'approve',
+      prevWho: prev ? prev.who.split(',')[0] : '',
+      closed, rejected: s.rejected, ended: closed || s.rejected,
+      primaryLabel, remarks: s.remarks, err: s.err,
+      onRemarks: (e) => this.setState({ remarks: e.target.value, err: false }),
+      primary: () => this.setState({ step: step + 1, remarks: '', err: false, extra: say(cur.who.split(',')[0], cur.kind === 'submit' ? 'submitted it for approval' : cur.kind === 'vendor' ? 'marked the work done' : 'approved: ' + cur.label.toLowerCase(), s.remarks) }),
+      ret: () => { if (needRemark()) this.setState({ step: step - 1, remarks: '', extra: say(cur.who.split(',')[0], 'returned it to ' + prev.who.split(',')[0], s.remarks) }); },
+      reject: () => { if (needRemark()) this.setState({ rejected: true, remarks: '', extra: say(cur.who.split(',')[0], 'rejected the Work Order', s.remarks) }); },
+      toggleVacant: () => this.setState({ vacant: !s.vacant }),
+      fixChain: () => this.setState({ vacant: false, extra: say('HR system', 'filled the Center Head position (Liza Gomez)', 'Routing resumed') }),
+      reset: () => this.setState({ step: 6, baseStep: 6, amount: 230450, rejected: false, remarks: '', err: false, extra: [] })
+    };
+  }
+}
+</script>
+</body>
+</html>

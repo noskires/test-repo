@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Equipment</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="../pss-design.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2563EB}a:hover{color:#3B82F6}
+dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px 24px;margin:0}
+dt{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted-foreground)}
+dd{margin:4px 0 0;font-size:14px;font-weight:500}
+</style>
+</helmet>
+<div class="app">
+  <nav class="nav" aria-label="Main">
+    <div class="brand"><span class="brand-tile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path><path d="M10 18h4"></path></svg></span><span>Passive Support Services<small>Facilities maintenance</small></span></div>
+    <div class="navsec">Monitor</div>
+    <a href="Main.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>Dashboard</a>
+    <a class="on" href="Equipment.dc.html" aria-current="page"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>Equipment</a>
+    <a href="Checkups.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>Check-ups (PM)</a>
+    <div class="navsec">Repairs</div>
+    <a href="ECall.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>E-Calls</a>
+    <a href="WorkOrder.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>Work Orders</a>
+    <div class="navsec">Admin</div>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>Vendors</span>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>Approvals</span>
+    <span class="off"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>Reports</span>
+  </nav>
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Equipment</h1>
+        <div class="sub">Makati Office · 96 items from the asset register · machines and buildings share one list</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <section class="panel" style="flex: 1 1 300px; max-width: 100%; padding: 8px; display: flex; flex-direction: column; gap: 4px" aria-label="Equipment list">
+        <sc-for list="{{items}}" as="e" hint-placeholder-count="5">
+          <button class="{{e.cls}}" onClick="{{e.pick}}" aria-pressed="{{e.pressed}}">
+            <span class="{{e.dotCls}}" style="width: 8px; height: 8px; border-radius: 4px; padding: 0; flex: none" aria-hidden="true"></span>
+            <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto">
+              <strong style="font-size: 14px; font-weight: 600">{{e.name}}</strong>
+              <span class="muted" style="font-size: 12px"><span class="mono">{{e.id}}</span> · {{e.category}}</span>
+            </span>
+            <svg class="ic muted" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+          </button>
+        </sc-for>
+      </section>
+
+      <div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+        <section class="panel" style="display: flex; flex-direction: column; gap: 20px">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <h2>{{e.name}}</h2>
+              <div class="sub"><span class="mono">{{e.id}}</span> · {{e.location}}</div>
+            </div>
+            <span class="{{e.statusCls}}">{{e.status}}</span>
+          </div>
+          <dl>
+            <div><dt>Category</dt><dd>{{e.category}}</dd></div>
+            <div><dt>Specifications</dt><dd>{{e.spec}}</dd></div>
+            <div><dt>Commissioned</dt><dd>{{e.since}}</dd></div>
+            <div><dt>Vendor</dt><dd>PowerPro Services <span class="muted" style="font-weight: 400">(Makati site vendor)</span></dd></div>
+            <div><dt>Check-up frequency</dt><dd>{{e.freq}}</dd></div>
+            <div><dt>Next check-up due</dt><dd class="num">{{e.next}}</dd></div>
+          </dl>
+          <div class="bn al-tip" style="flex-direction: row; gap: 10px; align-items: flex-start">
+            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="margin-top: 2px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+            <span>The next due date is counted from the last confirmed Work Done Date ({{e.lastDone}}), not from a fixed calendar.</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <a class="btn accent" href="ECall.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>Report a problem</a>
+            <a class="btn ghost" href="Checkups.dc.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>View check-ups</a>
+          </div>
+        </section>
+
+        <section class="panel" style="display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px">
+            <h2>Maintenance history</h2>
+            <div class="tabs" role="group" aria-label="Filter history">
+              <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+                <button class="{{t.cls}}" onClick="{{t.pick}}" aria-pressed="{{t.pressed}}">{{t.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{noHistory}}" hint-placeholder-val="{{ false }}">
+            <p class="sub" style="margin: 0">No records of this kind yet.</p>
+          </sc-if>
+          <div style="display: flex; flex-direction: column">
+            <sc-for list="{{history}}" as="h" hint-placeholder-count="4">
+              <div style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 16px; padding: 12px 0; border-top: 1px solid var(--border)">
+                <div class="num muted" style="font-size: 12px; padding-top: 2px">{{h.date}}</div>
+                <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+                    <span class="{{h.kindCls}}">{{h.kind}}</span>
+                    <strong style="font-size: 14px; font-weight: 600">{{h.title}}</strong>
+                  </div>
+                  <div style="font-size: 14px">{{h.detail}}</div>
+                  <div class="muted num" style="font-size: 12px">{{h.meta}}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { sel: 'GEN-MKT-001', tab: 'All' }; }
+  renderVals() {
+    const ok = { status: 'Operating', statusCls: 'chip c-green', dotCls: 'chip c-green' };
+    const bad = { status: 'Not operating', statusCls: 'chip c-red', dotCls: 'chip c-red' };
+    const watch = { status: 'Needs attention', statusCls: 'chip c-amber', dotCls: 'chip c-amber' };
+    const list = [
+      Object.assign({ id: 'GEN-MKT-001', name: 'Genset #1', category: 'Genset', location: 'Makati Office › Basement, genset room', spec: '500 kVA diesel, 3-phase', since: '14 Mar 2019', freq: 'Monthly (all Makati equipment)', lastDone: '4 Nov 2026', next: '4 Dec 2026',
+        history: [
+          { date: '4 Nov 2026', type: 'Check-ups', title: 'November check-up', detail: 'All 9 checklist items passed.', meta: 'Work Done Date 4 Nov · approved 6 Nov by Juan Dela Cruz' },
+          { date: '18 Nov 2026', type: 'Repairs', title: 'WO-2026-0142 · Battery and starter replacement', detail: 'Vendor replaced 2 batteries and the starter motor. Actual cost ₱230,450 vs ₱180,000 approved.', meta: 'In billing endorsement, level 2 of 3' },
+          { date: '2 Nov 2026', type: 'Repairs', title: 'EC-2026-0318 · Genset failed to start during test', detail: 'Filed by Juan Dela Cruz from a check-up finding. Closed when the Work Order was created.', meta: 'Priority: High' },
+          { date: '4 Sep 2026', type: 'Check-ups', title: 'September check-up', detail: 'Battery voltage low (11.9 V). Other items passed. EIC raised an E-Call from this finding.', meta: 'Work Done Date 4 Sep · approved 9 Sep by Juan Dela Cruz' },
+          { date: '1 Jun 2026', type: 'Check-ups', title: 'June check-up', detail: 'All 9 checklist items passed. Coolant topped up.', meta: 'Work Done Date 1 Jun · approved 3 Jun' }
+        ] }, ok),
+      Object.assign({ id: 'ACU-MKT-005', name: 'Aircon #5, server room', category: 'ACU', location: 'Makati Office › 3F server room', spec: '5 TR split type, inverter', since: '2 Aug 2021', freq: 'Monthly (all Makati equipment)', lastDone: '28 Sep 2026', next: '28 Oct 2026 · overdue',
+        history: [
+          { date: '30 Oct 2026', type: 'Check-ups', title: 'October check-up', detail: 'Returned to vendor: condenser coil photos missing.', meta: 'Returned · overdue 25 days' },
+          { date: '20 Oct 2026', type: 'Repairs', title: 'EC-2026-0327 · Compressor noise', detail: 'Vendor quote of ₱86,200 waiting for EIC review.', meta: 'Priority: Normal' }
+        ] }, watch),
+      Object.assign({ id: 'ATS-MKT-002', name: 'ATS #2', category: 'ATS', location: 'Makati Office › Ground floor, power room', spec: '800 A, 4-pole', since: '10 Jan 2020', freq: 'Monthly (all Makati equipment)', lastDone: '15 Nov 2026', next: '15 Dec 2026', history: [
+          { date: '15 Nov 2026', type: 'Check-ups', title: 'November check-up', detail: 'All 7 checklist items passed.', meta: 'Work Done Date 15 Nov · approved 16 Nov' }
+        ] }, ok),
+      Object.assign({ id: 'BLD-MKT-001', name: 'Makati Office Building', category: 'Building Facilities', location: 'Makati Office › Whole building', spec: '6 storeys, concrete, metal roof', since: '1998', freq: 'Monthly (all Makati equipment)', lastDone: '12 Nov 2026', next: '12 Dec 2026', history: [
+          { date: '12 Nov 2026', type: 'Check-ups', title: 'Roof and drainage inspection', detail: 'Minor rust on 2 roof sheets noted for monitoring.', meta: 'Work Done Date 12 Nov · approved 15 Nov' }
+        ] }, ok),
+      Object.assign({ id: 'PNL-MKT-004', name: 'Main electrical panel', category: 'Electrical Panel', location: 'Makati Office › Ground floor, power room', spec: '400 A main breaker', since: '1998', freq: 'Monthly (all Makati equipment)', lastDone: '3 Aug 2026', next: '3 Sep 2026 · overdue', history: [] }, bad)
+    ];
+    const items = list.map(e => Object.assign({}, e, {
+      cls: e.id === this.state.sel ? 'row sel' : 'row', pressed: e.id === this.state.sel ? 'true' : 'false',
+      pick: () => this.setState({ sel: e.id })
+    }));
+    const e = list.find(x => x.id === this.state.sel);
+    const tabs = ['All', 'Check-ups', 'Repairs'].map(t => ({ label: t, cls: t === this.state.tab ? 'tab sel' : 'tab', pressed: t === this.state.tab ? 'true' : 'false', pick: () => this.setState({ tab: t }) }));
+    const history = e.history.filter(h => this.state.tab === 'All' || h.type === this.state.tab).map(h => Object.assign({}, h, {
+      kind: h.type === 'Repairs' ? 'Repair' : 'Check-up', kindCls: h.type === 'Repairs' ? 'chip c-amber' : 'chip c-blue'
+    }));
+    return { items, e, tabs, history, noHistory: history.length === 0 };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PSS Work Order (mobile)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/4c9866e5ac71aed9d9092b6082c0da2a">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2563EB}a:hover{color:#1D4ED8}
+</style>
+</helmet>
+<div class="m" data-theme="{{theme}}">
+  <div class="scroll">
+    <header class="head" style="align-items: flex-start">
+      <div class="head-l">
+        <span class="sub">Approvals · Makati Office</span>
+        <h1 class="mono" style="font-weight: 600; letter-spacing: -0.02em">WO-2026-0142</h1>
+        <span class="sub" style="font-size: 14px">Genset #1 battery and starter</span>
+      </div>
+      <span class="{{statusCls}}" style="margin-top: 8px">{{statusShort}}</span>
+    </header>
+
+    <section class="hero" aria-label="Billing amount">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <span class="hsub">Validated billing amount</span>
+          <span class="mono" style="font-size: 24px; line-height: 32px; font-weight: 600">₱{{amount}}</span>
+          <span class="hsub">Needs {{levels}} billing approvers · approved ₱180,000</span>
+        </div>
+        <span style="width: 44px; height: 44px; border-radius: 16px; background: rgba(255,255,255,.16); display: inline-flex; align-items: center; justify-content: center; flex: none">
+          <svg class="ic" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="12" x="2" y="6" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+        </span>
+      </div>
+    </section>
+
+    <section class="card pad" aria-label="Current step" style="gap: 14px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <span class="eyebrow">Step {{stepNo}} of {{stepTotal}}</span>
+        <h2>{{cur.label}}</h2>
+        <span class="row-meta">Waiting on {{cur.who}}</span>
+      </div>
+
+      <sc-if value="{{showBlocked}}" hint-placeholder-val="{{ false }}">
+        <div class="bn bn-danger" role="alert" aria-live="assertive" style="flex-direction: column; gap: 8px">
+          <span style="font-weight: 600; display: flex; gap: 8px; align-items: center"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>Blocked: Center Head is vacant</span>
+          <span>No level 3 approver: the Center Head position is vacant. It waits here until the HR system fills it.</span>
+          <button class="btn btn-line sm" onClick="{{fixChain}}">Demo: HR fills the position</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{showActions}}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <sc-if value="{{needsRemarksField}}" hint-placeholder-val="{{ true }}">
+            <div class="field">
+              <label for="remarks">Remarks <span class="sub" style="font-weight: 400">(to return or reject)</span></label>
+              <textarea id="remarks" value="{{remarks}}" onChange="{{onRemarks}}" style="min-height: 80px"></textarea>
+              <sc-if value="{{err}}" hint-placeholder-val="{{ false }}"><div class="err">Add a remark first so the next person knows why.</div></sc-if>
+            </div>
+          </sc-if>
+          <button class="btn btn-cta block" onClick="{{primary}}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>{{primaryLabel}}</button>
+          <sc-if value="{{canReject}}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; gap: 8px">
+              <button class="btn btn-soft sm" style="flex: 1 1 0" onClick="{{ret}}">Return to {{prevWho}}</button>
+              <button class="btn btn-danger sm" style="flex: 1 1 0" onClick="{{reject}}">Reject</button>
+            </div>
+            <span class="sub" style="font-size: 12px">Reject ends this Work Order for good. Any retry needs a new E-Call.</span>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{closed}}" hint-placeholder-val="{{ false }}">
+        <div class="bn bn-success">All billing endorsements done. The vendor can now bill ₱{{amount}}.</div>
+      </sc-if>
+      <sc-if value="{{rejected}}" hint-placeholder-val="{{ false }}">
+        <div class="bn bn-danger">Rejected. This Work Order is closed for good.</div>
+      </sc-if>
+      <sc-if value="{{ended}}" hint-placeholder-val="{{ false }}"><button class="link" onClick="{{reset}}">Reset demo</button></sc-if>
+    </section>
+
+    <section class="card pad" aria-label="Try another amount" style="gap: 10px">
+      <span class="eyebrow" id="sc-lbl">Demo: try another actual amount</span>
+      <div role="group" aria-labelledby="sc-lbl" style="display: flex; gap: 8px; flex-wrap: wrap">
+        <sc-for list="{{scenarios}}" as="s" hint-placeholder-count="3"><button class="{{s.cls}}" onClick="{{s.pick}}" aria-pressed="{{s.pressed}}">{{s.label}}</button></sc-for>
+      </div>
+      <label style="display: flex; gap: 10px; align-items: center; font-size: 14px; min-height: 44px; cursor: pointer"><input type="checkbox" checked="{{vacant}}" onChange="{{toggleVacant}}" style="width: 18px; height: 18px; accent-color: var(--m-accent)"> Center Head position is vacant</label>
+    </section>
+
+    <section aria-labelledby="route-h" style="display: flex; flex-direction: column; gap: 8px">
+      <div class="sec-h"><h2 id="route-h">Route</h2></div>
+      <div class="card pad" style="gap: 14px">
+        <sc-for list="{{steps}}" as="s" hint-placeholder-count="9">
+          <div class="step">
+            <span class="{{s.dotCls}}">{{s.n}}</span>
+            <div style="display: flex; flex-direction: column; gap: 0; min-width: 0">
+              <span style="font-size: 14px; font-weight: {{s.weight}}">{{s.label}}</span>
+              <span class="row-meta">{{s.who}}</span>
+            </div>
+          </div>
+        </sc-for>
+        <span class="row-meta" style="white-space: normal; border-top: 1px solid var(--m-line); padding-top: 12px">Approvers follow Juan's boss chain in the HR system (he filed the E-Call), locked in when he submitted. Billing thresholds are an admin setting.</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="cost-h" style="display: flex; flex-direction: column; gap: 8px">
+      <div class="sec-h"><h2 id="cost-h">Approved vs actual</h2></div>
+      <div class="card" style="overflow: hidden">
+        <sc-for list="{{lines}}" as="l" hint-placeholder-count="5">
+          <div class="row" style="cursor: default; min-height: 56px">
+            <span class="row-main">
+              <span class="row-title" style="white-space: normal">{{l.item}}</span>
+              <span class="row-meta">Approved {{l.aq}} · Actual {{l.xq}} × <span class="mono">{{l.price}}</span></span>
+              <sc-if value="{{l.offList}}" hint-placeholder-val="{{ false }}"><span><span class="pill p-warn">Not on price list</span></span></sc-if>
+            </span>
+            <span class="mono" style="font-size: 14px; font-weight: 500; white-space: nowrap">{{l.cost}}</span>
+          </div>
+        </sc-for>
+        <div class="row" style="cursor: default; min-height: 56px; background: var(--m-soft)">
+          <span class="row-main"><span class="row-title">Total actual</span><span class="row-meta">Approved <span class="mono">₱180,000</span></span></span>
+          <span class="mono" style="font-size: 16px; font-weight: 600">₱230,450</span>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="log-h" style="display: flex; flex-direction: column; gap: 8px">
+      <div class="sec-h"><h2 id="log-h">History</h2></div>
+      <div class="card" style="overflow: hidden">
+        <sc-for list="{{log}}" as="h" hint-placeholder-count="6">
+          <div class="row" style="cursor: default; align-items: flex-start">
+            <span class="row-main">
+              <span style="font-size: 14px"><strong style="font-weight: 600">{{h.who}}</strong> {{h.action}}</span>
+              <span class="row-meta" style="white-space: normal">{{h.note}}</span>
+            </span>
+            <span class="sub num" style="font-size: 12px; white-space: nowrap">{{h.when}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+
+  <nav class="dock" aria-label="Tabs">
+    <a class="tab" href="MobileOverviewDS.dc.html"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>Overview</a>
+    <a class="tab" href="MobileEquipment.dc.html"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>Equipment</a>
+    <a class="tab" href="MobileCheckups.dc.html"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>Check-ups</a>
+    <a class="tab on" href="MobileWorkOrder.dc.html" aria-current="page"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>Approvals</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { amount: 230450, step: 6, baseStep: 6, vacant: false, rejected: false, remarks: '', err: false, extra: [] }; }
+  baseLog(step) {
+    const all = [
+      { when: '2 Nov', who: 'Juan Dela Cruz', action: 'created the Work Order', note: 'From the approved quote on EC-2026-0318. The E-Call closed.' },
+      { when: '3 Nov', who: 'Juan Dela Cruz', action: 'submitted it for approval', note: 'Estimated ₱180,000' },
+      { when: '4 Nov', who: 'Maria Santos', action: 'approved endorsement level 1', note: '' },
+      { when: '6 Nov', who: 'Pedro Reyes', action: 'approved endorsement level 2', note: 'PowerPro authorized to start' },
+      { when: '16 Nov', who: 'PowerPro Services', action: 'marked the work done', note: 'Uploaded completion photos and report' },
+      { when: '18 Nov', who: 'Juan Dela Cruz', action: 'approved the finished work', note: 'Actual ₱230,450: extra cable kits and injector cleaning' },
+      { when: '20 Nov', who: 'Maria Santos', action: 'approved billing level 1', note: '' }
+    ];
+    return all.slice(0, Math.min(step + 1, all.length));
+  }
+  renderVals() {
+    const s = this.state;
+    const levels = s.amount < 200000 ? 2 : s.amount <= 1000000 ? 3 : 4;
+    const billers = [
+      { who: 'Maria Santos, Team Head' }, { who: 'Pedro Reyes, Division Head' },
+      { who: s.vacant ? 'Vacant Center Head position' : 'Liza Gomez, Center Head', vacant: s.vacant }, { who: 'Ramon Villanueva, Sector Head' }
+    ];
+    const steps = [
+      { label: 'Draft', who: 'Juan Dela Cruz, EIC', kind: 'submit', short: 'Open' },
+      { label: 'Endorsement, level 1', who: 'Maria Santos, Team Head', kind: 'approve', short: 'Endorsement L1' },
+      { label: 'Endorsement, level 2', who: 'Pedro Reyes, Division Head', kind: 'approve', short: 'Endorsement L2' },
+      { label: 'Vendor doing the work', who: 'PowerPro Services', kind: 'vendor', short: 'In progress' },
+      { label: 'EIC checks the work', who: 'Juan Dela Cruz, EIC', kind: 'approve', short: 'Implemented' }
+    ];
+    for (let i = 0; i < levels; i++) steps.push({ label: 'Billing, level ' + (i + 1) + ' of ' + levels, who: billers[i].who, kind: 'approve', vacant: !!billers[i].vacant, short: 'Billing L' + (i + 1) });
+    steps.push({ label: 'Closed', who: 'Vendor can bill', kind: 'closed', short: 'Closed' });
+    const step = Math.min(s.step, steps.length - 1);
+    const cur = steps[step];
+    const closed = cur.kind === 'closed' && !s.rejected;
+    const blocked = !!cur.vacant && !s.rejected;
+    const viewSteps = steps.map((x, i) => ({
+      n: i < step ? '✓' : String(i + 1), label: x.label, who: x.who,
+      dotCls: 'sdot ' + (i < step || (closed && i === step) ? 's-done' : i === step ? (blocked ? 's-block' : 's-cur') : 's-next'),
+      weight: i === step ? '600' : '400'
+    }));
+    const log = this.baseLog(s.baseStep).concat(s.extra).slice().reverse();
+    const say = (who, action, note) => this.state.extra.concat([{ when: 'Now', who, action, note: note || '' }]);
+    const needRemark = () => { if (!s.remarks.trim()) { this.setState({ err: true }); return false; } return true; };
+    const primaryLabel = cur.kind === 'submit' ? 'Submit for approval' : cur.kind === 'vendor' ? 'Vendor: mark work done' : 'Approve';
+    const prev = step > 0 ? steps[step - 1] : null;
+    const statusShort = s.rejected ? 'Rejected' : blocked ? 'Blocked' : cur.short;
+    const statusCls = s.rejected || blocked ? 'pill p-danger' : closed ? 'pill p-success' : 'pill p-brand';
+    const scenarios = [180000, 230450, 1250000].map(a => ({
+      label: '₱' + a.toLocaleString('en-PH'), cls: a === s.amount ? 'choice sel mono' : 'choice mono', pressed: a === s.amount ? 'true' : 'false',
+      pick: () => this.setState({ amount: a, step: 5, baseStep: 5, rejected: false, extra: [], remarks: '', err: false })
+    }));
+    const lines = [
+      { item: 'Battery, 12 V 200 Ah', price: '₱18,500', aq: '2', xq: '2', cost: '₱37,000' },
+      { item: 'Starter motor, 24 V', price: '₱96,000', aq: '1', xq: '1', cost: '₱96,000' },
+      { item: 'Labor, genset electrical', price: '₱45,000', aq: '1', xq: '1', cost: '₱45,000' },
+      { item: 'Cable and terminal kit', price: '₱2,000', aq: '1', xq: '3', cost: '₱6,000' },
+      { item: 'Fuel injector cleaning', price: '₱46,450', aq: '0', xq: '1', cost: '₱46,450', offList: true }
+    ];
+    return {
+      theme: this.props.theme ?? 'system',
+      statusShort, statusCls, cur, stepNo: step + 1, stepTotal: steps.length, steps: viewSteps, log, lines, scenarios, levels,
+      amount: s.amount.toLocaleString('en-PH'), vacant: s.vacant,
+      showBlocked: blocked, showActions: !blocked && !closed && !s.rejected,
+      needsRemarksField: cur.kind === 'approve',
+      canReject: cur.kind === 'approve' && !!prev,
+      prevWho: prev ? prev.who.split(',')[0].split(' ')[0] : '',
+      closed, rejected: s.rejected, ended: closed || s.rejected,
+      primaryLabel, remarks: s.remarks, err: s.err,
+      onRemarks: (e) => this.setState({ remarks: e.target.value, err: false }),
+      primary: () => this.setState({ step: step + 1, remarks: '', err: false, extra: say(cur.who.split(',')[0], cur.kind === 'submit' ? 'submitted it for approval' : cur.kind === 'vendor' ? 'marked the work done' : 'approved ' + cur.label.toLowerCase(), s.remarks) }),
+      ret: () => { if (needRemark()) this.setState({ step: step - 1, remarks: '', extra: say(cur.who.split(',')[0], 'returned it to ' + prev.who.split(',')[0], s.remarks) }); },
+      reject: () => { if (needRemark()) this.setState({ rejected: true, remarks: '', extra: say(cur.who.split(',')[0], 'rejected the Work Order', s.remarks) }); },
+      toggleVacant: () => this.setState({ vacant: !s.vacant }),
+      fixChain: () => this.setState({ vacant: false, extra: say('HR system', 'filled the Center Head position (Liza Gomez)', 'Routing resumed') }),
+      reset: () => this.setState({ step: 6, baseStep: 6, amount: 230450, rejected: false, remarks: '', err: false, extra: [] })
+    };
+  }
+}
+</script>
+</body>
+</html>

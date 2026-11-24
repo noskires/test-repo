@@ -46,15 +46,13 @@ describe('LoginPage', () => {
     const login = http.expectOne('/api/auth/login');
     expect(login.request.body).toEqual({ employee_id: 'EMP-9001', password: 'password' });
     login.flush({ access_token: 'tok', token_type: 'bearer', expires_in: 3600 });
-    http
-      .expectOne('/api/auth/me')
-      .flush({
-        employee_id: 'EMP-9001',
-        name: 'Ada',
-        roles: ['system-administrator'],
-        vendor_id: null,
-        access: 'internal',
-      });
+    http.expectOne('/api/auth/me').flush({
+      employee_id: 'EMP-9001',
+      name: 'Ada',
+      roles: ['system-administrator'],
+      vendor_id: null,
+      access: 'internal',
+    });
     await fixture.whenStable();
 
     expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBe('tok');
@@ -119,5 +117,15 @@ describe('LoginPage', () => {
     const { fill, http } = setup();
     fill('', '');
     http.expectNone('/api/auth/login');
+  });
+
+  it('uses the card style with Sign in as the orange main action', () => {
+    const { el } = setup();
+    expect(el.querySelector('.panel h1')?.textContent).toContain('Sign in to PSS');
+    const button = el.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    expect(button.classList).toContain('btn');
+    expect(button.classList).toContain('accent');
+    expect(button.textContent).toContain('Sign in');
+    expect(el.querySelector('input[name="employee_id"]')!.classList).toContain('mono');
   });
 });

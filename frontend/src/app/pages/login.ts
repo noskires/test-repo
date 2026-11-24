@@ -6,22 +6,30 @@ import { AuthService } from '../auth/auth.service';
 @Component({
   selector: 'app-login-page',
   template: `
-    <section class="login">
-      <h1>Sign in to PSS</h1>
+    <section class="login panel">
+      <div class="page-head">
+        <div>
+          <h1>Sign in to PSS</h1>
+          <div class="sub">Use your employee ID and password.</div>
+        </div>
+      </div>
       <form (submit)="submit($event)" novalidate>
-        <label>
-          Employee ID
+        <div class="field">
+          <label for="login-employee-id">Employee ID</label>
           <input
+            id="login-employee-id"
+            class="mono"
             name="employee_id"
             autocomplete="username"
             required
             [value]="employeeId()"
             (input)="employeeId.set(inputValue($event))"
           />
-        </label>
-        <label>
-          Password
+        </div>
+        <div class="field">
+          <label for="login-password">Password</label>
           <input
+            id="login-password"
             name="password"
             type="password"
             autocomplete="current-password"
@@ -29,11 +37,11 @@ import { AuthService } from '../auth/auth.service';
             [value]="password()"
             (input)="password.set(inputValue($event))"
           />
-        </label>
+        </div>
         @if (error()) {
-          <p class="error" role="alert">{{ error() }}</p>
+          <p class="err" role="alert">{{ error() }}</p>
         }
-        <button type="submit" [disabled]="busy()">
+        <button type="submit" class="btn accent" [disabled]="busy()">
           {{ busy() ? 'Signing in...' : 'Sign in' }}
         </button>
       </form>
@@ -41,31 +49,18 @@ import { AuthService } from '../auth/auth.service';
   `,
   styles: `
     .login {
-      max-width: 22rem;
-      margin: 4rem auto;
-      padding: 0 1rem;
+      width: 100%;
+      max-width: 24rem;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
     form {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 16px;
     }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    input {
-      padding: 0.5rem;
-      font: inherit;
-    }
-    button {
-      padding: 0.5rem;
-      font: inherit;
-      cursor: pointer;
-    }
-    .error {
-      color: #b00020;
+    .err {
       margin: 0;
     }
   `,
@@ -113,7 +108,9 @@ export class LoginPage {
         return error.error?.message ?? 'Invalid employee ID or password.';
       }
       if (error.status === 403) {
-        return error.error?.message ?? "Your account isn't set up in PSS yet. Ask an administrator.";
+        return (
+          error.error?.message ?? "Your account isn't set up in PSS yet. Ask an administrator."
+        );
       }
       if (error.status === 429) {
         return 'Too many sign-in attempts. Wait a minute and try again.';

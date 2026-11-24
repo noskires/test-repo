@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PSS Equipment (mobile)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/4c9866e5ac71aed9d9092b6082c0da2a">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2563EB}a:hover{color:#1D4ED8}
+</style>
+</helmet>
+<div class="m" data-theme="{{theme}}">
+  <div class="scroll">
+
+    <sc-if value="{{isList}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 20px">
+        <header class="head">
+          <div class="head-l">
+            <span class="sub">Makati Office · 96 from the asset register</span>
+            <h1>Equipment</h1>
+          </div>
+          <button class="iconbtn" aria-label="Scan equipment QR code">
+            <svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
+          </button>
+        </header>
+
+        <div style="position: relative">
+          <svg class="ic sub" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; left: 14px; top: 15px"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <input type="search" aria-label="Search equipment" placeholder="Search name or ID" style="padding-left: 42px">
+        </div>
+
+        <div class="segs" role="group" aria-label="Filter equipment">
+          <sc-for list="{{filters}}" as="f" hint-placeholder-count="2">
+            <button class="{{f.cls}}" onClick="{{f.pick}}" aria-pressed="{{f.pressed}}">{{f.label}}</button>
+          </sc-for>
+        </div>
+
+        <div class="card" style="overflow: hidden">
+          <sc-for list="{{items}}" as="e" hint-placeholder-count="5">
+            <button class="row" onClick="{{e.pick}}">
+              <span class="tile">
+                <sc-if value="{{e.isBuilding}}" hint-placeholder-val="{{ false }}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path><path d="M10 6h4"></path><path d="M10 10h4"></path><path d="M10 14h4"></path></svg></sc-if>
+                <sc-if value="{{e.isMachine}}" hint-placeholder-val="{{ true }}"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg></sc-if>
+              </span>
+              <span class="row-main">
+                <span class="row-title">{{e.name}}</span>
+                <span class="row-meta"><span class="mono">{{e.id}}</span> · {{e.category}}</span>
+              </span>
+              <span class="{{e.statusCls}}">{{e.short}}</span>
+              <svg class="ic chev" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isDetail}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 20px">
+        <div class="topbar">
+          <button class="textbtn" onClick="{{back}}">
+            <svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>Equipment
+          </button>
+          <span class="{{e.statusCls}}">{{e.status}}</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <h1>{{e.name}}</h1>
+          <span class="sub" style="font-size: 14px"><span class="mono">{{e.id}}</span> · {{e.location}}</span>
+        </div>
+
+        <div class="card pad">
+          <dl class="kv">
+            <div><dt>Category</dt><dd>{{e.category}}</dd></div>
+            <div><dt>Commissioned</dt><dd>{{e.since}}</dd></div>
+            <div><dt>Frequency</dt><dd>{{e.freq}}</dd></div>
+            <div><dt>Next due</dt><dd class="num">{{e.next}}</dd></div>
+            <div style="grid-column: 1 / -1"><dt>Specifications</dt><dd>{{e.spec}}</dd></div>
+            <div style="grid-column: 1 / -1"><dt>Vendor</dt><dd>PowerPro Services <span class="sub" style="font-weight: 400">(site vendor)</span></dd></div>
+          </dl>
+          <div class="bn bn-tip">
+            <svg class="ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="margin-top: 3px; color: var(--m-accent)"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+            <span>Next due is counted from the last confirmed Work Done Date ({{e.lastDone}}).</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <a class="btn btn-cta block" href="MobileECall.dc.html"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>Report a problem</a>
+          <a class="btn btn-line block" href="MobileCheckups.dc.html">View check-ups</a>
+        </div>
+
+        <section aria-labelledby="hist-h" style="display: flex; flex-direction: column; gap: 8px">
+          <div class="sec-h"><h2 id="hist-h">History</h2></div>
+          <div class="segs" role="group" aria-label="Filter history">
+            <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+              <button class="{{t.cls}}" onClick="{{t.pick}}" aria-pressed="{{t.pressed}}">{{t.label}}</button>
+            </sc-for>
+          </div>
+          <div class="card" style="overflow: hidden">
+            <sc-if value="{{noHistory}}" hint-placeholder-val="{{ false }}">
+              <div class="sub" style="padding: 20px 16px">No records of this kind yet.</div>
+            </sc-if>
+            <sc-for list="{{history}}" as="h" hint-placeholder-count="3">
+              <div class="row" style="align-items: flex-start; cursor: default">
+                <div class="row-main" style="gap: 4px">
+                  <div style="display: flex; justify-content: space-between; gap: 8px; align-items: center">
+                    <span class="{{h.kindCls}}">{{h.kind}}</span>
+                    <span class="sub num" style="font-size: 12px">{{h.date}}</span>
+                  </div>
+                  <span style="font-size: 14px; font-weight: 600">{{h.title}}</span>
+                  <span class="sub" style="font-size: 14px; line-height: 20px">{{h.detail}}</span>
+                  <span class="sub" style="font-size: 12px">{{h.meta}}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+  </div>
+
+  <nav class="dock" aria-label="Tabs">
+    <a class="tab" href="MobileOverviewDS.dc.html"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>Overview</a>
+    <a class="tab on" href="MobileEquipment.dc.html" aria-current="page"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>Equipment</a>
+    <a class="tab" href="MobileCheckups.dc.html"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>Check-ups</a>
+    <a class="tab" href="MobileWorkOrder.dc.html"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>Approvals</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { sel: null, tab: 'All', filter: 'All' }; }
+  renderVals() {
+    const ok = { status: 'Operating', short: 'OK', statusCls: 'pill p-success' };
+    const bad = { status: 'Not operating', short: 'Down', statusCls: 'pill p-danger' };
+    const watch = { status: 'Needs attention', short: 'Watch', statusCls: 'pill p-warn' };
+    const list = [
+      Object.assign({ id: 'GEN-MKT-001', name: 'Genset #1', category: 'Genset', location: 'Basement, genset room', spec: '500 kVA diesel, 3-phase', since: '14 Mar 2019', freq: 'Monthly (whole site)', lastDone: '4 Nov 2026', next: '4 Dec 2026',
+        history: [
+          { date: '4 Nov', type: 'Check-ups', title: 'November check-up', detail: 'All 9 checklist items passed.', meta: 'Approved 6 Nov by Juan Dela Cruz' },
+          { date: '18 Nov', type: 'Repairs', title: 'WO-2026-0142 · Battery and starter', detail: 'Replaced 2 batteries and the starter motor. Actual ₱230,450 vs ₱180,000 approved.', meta: 'Billing endorsement, level 2 of 3' },
+          { date: '2 Nov', type: 'Repairs', title: 'EC-2026-0318 · Failed to start', detail: 'Filed from a check-up finding. Closed when the Work Order was created.', meta: 'Priority: High' },
+          { date: '4 Sep', type: 'Check-ups', title: 'September check-up', detail: 'Battery voltage low (11.9 V). Other items passed.', meta: 'Approved 9 Sep by Juan Dela Cruz' },
+          { date: '1 Jun', type: 'Check-ups', title: 'June check-up', detail: 'All 9 checklist items passed. Coolant topped up.', meta: 'Approved 3 Jun' }
+        ] }, ok),
+      Object.assign({ id: 'ACU-MKT-005', name: 'Aircon #5, server room', category: 'ACU', location: '3F server room', spec: '5 TR split type, inverter', since: '2 Aug 2021', freq: 'Monthly (whole site)', lastDone: '28 Sep 2026', next: '28 Oct · overdue',
+        history: [
+          { date: '30 Oct', type: 'Check-ups', title: 'October check-up', detail: 'Returned to vendor: condenser coil photos missing.', meta: 'Returned · overdue 25 days' },
+          { date: '20 Oct', type: 'Repairs', title: 'EC-2026-0327 · Compressor noise', detail: 'Vendor quote of ₱86,200 waiting for EIC review.', meta: 'Priority: Normal' }
+        ] }, watch),
+      Object.assign({ id: 'ATS-MKT-002', name: 'ATS #2', category: 'ATS', location: 'Ground floor, power room', spec: '800 A, 4-pole', since: '10 Jan 2020', freq: 'Monthly (whole site)', lastDone: '15 Nov 2026', next: '15 Dec 2026', history: [
+          { date: '15 Nov', type: 'Check-ups', title: 'November check-up', detail: 'All 7 checklist items passed.', meta: 'Approved 16 Nov' }
+        ] }, ok),
+      Object.assign({ id: 'BLD-MKT-001', name: 'Makati Office Building', category: 'Building Facilities', building: true, location: 'Whole building', spec: '6 storeys, concrete, metal roof', since: '1998', freq: 'Monthly (whole site)', lastDone: '12 Nov 2026', next: '12 Dec 2026', history: [
+          { date: '12 Nov', type: 'Check-ups', title: 'Roof and drainage inspection', detail: 'Minor rust on 2 roof sheets noted for monitoring.', meta: 'Approved 15 Nov' }
+        ] }, ok),
+      Object.assign({ id: 'PNL-MKT-004', name: 'Main electrical panel', category: 'Electrical Panel', location: 'Ground floor, power room', spec: '400 A main breaker', since: '1998', freq: 'Monthly (whole site)', lastDone: '3 Aug 2026', next: '3 Sep · overdue', history: [] }, bad)
+    ];
+    const st = this.state;
+    const shown = st.filter === 'All' ? list : list.filter(x => x.short !== 'OK');
+    const items = shown.map(e => Object.assign({}, e, { isBuilding: !!e.building, isMachine: !e.building, pick: () => this.setState({ sel: e.id, tab: 'All' }) }));
+    const filters = ['All', 'Issues'].map(f => ({ label: f === 'Issues' ? 'Needs attention' : 'All', cls: f === st.filter ? 'seg sel' : 'seg', pressed: f === st.filter ? 'true' : 'false', pick: () => this.setState({ filter: f }) }));
+    const e = list.find(x => x.id === st.sel) || list[0];
+    const tabs = ['All', 'Check-ups', 'Repairs'].map(t => ({ label: t, cls: t === st.tab ? 'seg sel' : 'seg', pressed: t === st.tab ? 'true' : 'false', pick: () => this.setState({ tab: t }) }));
+    const history = e.history.filter(h => st.tab === 'All' || h.type === st.tab).map(h => Object.assign({}, h, {
+      kind: h.type === 'Repairs' ? 'Repair' : 'Check-up', kindCls: h.type === 'Repairs' ? 'pill p-warn' : 'pill p-brand'
+    }));
+    return {
+      theme: this.props.theme ?? 'system', isList: !st.sel, isDetail: !!st.sel,
+      items, filters, e, tabs, history, noHistory: history.length === 0,
+      back: () => this.setState({ sel: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

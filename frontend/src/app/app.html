@@ -1,14 +1,36 @@
 @if (auth.isSignedIn()) {
-  <header class="topbar">
-    <span class="brand">PSS</span>
-    @if (!auth.isPending()) {
-      <app-menu />
-    }
-    <span class="spacer"></span>
-    <span class="who">{{ auth.user()?.name }}</span>
-    <button type="button" (click)="logout()">Log out</button>
-  </header>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-tile"><svg lucideBuildingComplex size="16"></svg></span>
+        <span>PSS<small>Passive Support Services</small></span>
+      </div>
+      @if (!auth.isPending()) {
+        <app-menu />
+      }
+    </aside>
+    <div class="content">
+      <header class="topbar">
+        <span class="brand brand-compact">
+          <span class="brand-tile"><svg lucideBuildingComplex size="16"></svg></span>
+          <span>PSS</span>
+        </span>
+        <span class="spacer"></span>
+        <span class="who">
+          <span class="who-name">{{ auth.user()?.name }}</span>
+          <span class="who-id mono muted">{{ auth.user()?.employee_id }}</span>
+        </span>
+        <button type="button" class="btn ghost sm" (click)="logout()">
+          <svg lucideLogOut size="16"></svg>Log out
+        </button>
+      </header>
+      <main class="main">
+        <router-outlet />
+      </main>
+    </div>
+  </div>
+} @else {
+  <main class="main main-signed-out">
+    <router-outlet />
+  </main>
 }
-<main>
-  <router-outlet />
-</main>
