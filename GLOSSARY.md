@@ -134,6 +134,12 @@ An administrator's list of what stops work from moving: Sites with a PM Frequenc
 ## Dashboard
 The live operational counts (`GET /api/dashboard`): PM Tasks by open PM Status, E-Calls by status plus an open total, and Work Orders by status plus groups. It shows the current state, not a date range, and can be filtered by Site, Equipment Category and Vendor. A Work Order's E-Call counts in both the E-Call and Work Order figures. Every internal employee can see it; vendor staff see it forced to their own Vendor.
 
+## PM Compliance
+The share of PM Tasks due in a period that were done on time: PM Tasks done on time ÷ PM Tasks due in the period. "On time" means the Work Done Date is on or before the due date. Late and not-done tasks don't count as compliant, and Cancelled tasks are left out. Shown on the Dashboard (issue 28).
+
+## Equipment Requiring Attention
+Equipment flagged on the Dashboard for any of these reasons: an overdue PM Task (PM Timeliness), a failed item (Fail/Defective) on its latest approved PM Report, an open Emergency-priority E-Call, or not operating according to the external API. Equipment can have several reasons at once. Its operational status comes from the external API, and PSS never stores it.
+
 ## PSS Role
 A role granted inside PSS by a System Administrator, not taken from the external system. There are two: **System Administrator** (manages Vendors, Site settings, PM Checklists, Price Lists, Billing Thresholds, adds users, grants roles and links vendor staff; never vendor-linked) and **Management / Viewer** (can see Reports). The first System Administrator is set at install, and the last one can't lose the role. The other PRD roles aren't granted: anyone can be a Requestor, the EIC comes from Site settings, Vendor comes from the vendor staff link, and approvers come from the Immediate Head chain.
 

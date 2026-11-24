@@ -12,6 +12,13 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+## Design setup (issue 48)
+
+- **Tokens**: colours, radii, shadows and status colours are CSS variables in `src/styles.css`. They were copied as-is from `docs/design/mock-screens/pss-design.css` (dark selectors included). Use the tokens and don't hard-code colours. When the design changes, copy from that file.
+- **Icons**: `@lucide/angular` is pinned at exactly `1.71.0` in `package.json`. Don't change the version without human approval.
+- **Fonts**: Inter (text) and Geist Mono (IDs) load from Google Fonts in `src/index.html`, so they need internet. Offline, the app falls back to the system fonts.
+- **Production build**: `angular.json` sets `optimization.fonts: false` so the build doesn't try to download and inline the Google Fonts CSS. Leave it off unless the fonts are self-hosted.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
