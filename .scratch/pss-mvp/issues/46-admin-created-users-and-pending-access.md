@@ -1,6 +1,7 @@
 # 46 — Admin-created users and pending access
 
-Status: ready-for-agent
+Status: done
+Merged: PR #45 (34382ce), 2026-11-24
 Blocked by: none
 Type: task
 
