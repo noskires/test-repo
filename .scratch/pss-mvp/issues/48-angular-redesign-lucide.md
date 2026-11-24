@@ -1,6 +1,7 @@
 # 48 — Restyle the Angular app to the PSS design (lucide-angular)
 
-Status: ready-for-agent
+Status: done
+Merged: PR #47 (5274b9f), 2026-11-24
 Blocked by: 46
 Type: task
 
