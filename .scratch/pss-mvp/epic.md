@@ -6,9 +6,9 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **48 — Restyle the Angular app to the PSS design (lucide-angular)** (PR #47, 2026-11-24)
-- In flight: **28 — Define dashboard and report KPIs** (handed off 2026-11-24)
-- Ready now (`ready-for-agent`, every blocker done), in number order: none (28 is in flight).
+- Last merged: **28 — Define dashboard and report KPIs** (PR #48, 2026-11-24)
+- In flight: none
+- Ready now (`ready-for-agent`, every blocker done), in number order: none. 29 is waiting on 42 (needs-info).
 - Waiting on the human (`needs-info`): 03, 15, 31, 33, 41, 42, 44, 47. The open questions are in each issue file. New: 47 (remove or deactivate users).
 - Doc follow-ups: none open
 
@@ -43,7 +43,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 25 | Cancelling E-Calls and Work Orders | done | 12, 18 | #40 |
 | 26 | Equipment maintenance history | done | 11, 13, 18 | #41 |
 | 27 | Dashboard: operational counts | done | 11, 17, 21 | #42 |
-| 28 | Define dashboard and report KPIs | ready-for-agent | 09 | |
+| 28 | Define dashboard and report KPIs | done | 09 | #48 |
 | 29 | Reports and export | ready-for-agent | 04, 26, 27, 28, 42 | |
 | 30 | Local dev master data fake | done | 02 | #7 |
 | 31 | Seed the fixed MVP PM Checklists | needs-info | 07 | |
@@ -112,3 +112,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-24: issue 45 merged as PR #46; 28 and 48 are ready.
 - 2026-11-24: product-owner cleared the 45 README follow-up (`pss:check-vendor-admins` in `backend/README.md`) and picked 48 over 28: the human asked for it right after 46, and every later Angular screen builds on its shell and tokens. 28 still waits in practice on 03 ("Equipment requiring attention" needs the operational status values).
 - 2026-11-24: issue 48 merged as PR #47; 28 is the only ready issue.
+- 2026-11-24: issue 28 merged as PR #48; nothing is ready (29 waits on 42).

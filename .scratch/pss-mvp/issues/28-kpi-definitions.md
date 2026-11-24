@@ -1,6 +1,7 @@
 # 28 — Define dashboard and report KPIs
 
-Status: ready-for-agent
+Status: done
+Merged: PR #48 (99373ef), 2026-11-24
 Blocked by: 09
 Type: task
 
