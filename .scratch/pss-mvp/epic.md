@@ -7,10 +7,10 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **27 — Dashboard: operational counts** (PR #42, 2026-11-24)
-- In flight: none
-- Ready now (`ready-for-agent`, every blocker done), in number order: **28**
-- Waiting on the human (`needs-info`): 03, 04, 15, 31, 33, 41, 42. The open questions are in each issue file.
-- Doc follow-ups: 1 open (GLOSSARY.md: Dashboard entry)
+- In flight: **04 — Login (JWT) and PSS roles (backend)** (handed off 2026-11-24)
+- Ready now (`ready-for-agent`, every blocker done), in number order: **04**, **28**
+- Waiting on the human (`needs-info`): 03, 15, 31, 33, 41, 42, 44. The open questions are in each issue file.
+- Doc follow-ups: none open
 
 ## Board
 
@@ -19,7 +19,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 01 | Vendor registry | done | none | #4 |
 | 02 | Master data directory port (in-memory fake) | done | none | #5 |
 | 03 | HTTP adapter for the external master data API | needs-info | 02 | |
-| 04 | Login via SSO and PSS roles | needs-info | none | |
+| 04 | Login (JWT) and PSS roles (backend) | ready-for-agent | none | |
 | 05 | Assign the Site Vendor and Site EIC | done | 01, 02 | #8 |
 | 06 | Site PM Frequency | done | 05 | #12 |
 | 07 | PM Checklist templates | done | 02 | #9 |
@@ -58,6 +58,8 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 40 | "Waiting for me": Work Order items | done | 24 | #37 |
 | 41 | Cancel a PM Task | needs-info | 08, 25 | |
 | 42 | Dashboard: date range and financial sums | needs-info | 27 | |
+| 43 | Angular login screen, token handling, role-aware menu | ready-for-agent | 04 | |
+| 44 | Real external-system credential checker | needs-info | 04 | |
 
 Other merged PRs: #1 PRD v2 docs, #2 project scaffold, #3 unblock answered issues, #15 no-duplicate-lines decision.
 
@@ -69,7 +71,7 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - [x] GLOSSARY.md: the E-Call entry doesn't say an E-Call can be filed from a PM Task by the Site EIC (For Validation or Returned) and keeps a link to it (found in issue 13)
 - [x] GLOSSARY.md: the Needs Setup list entry says it lists what stops PM Tasks, but it now also lists Work Orders with a billing chain gap (Implemented / For Billing Endorsement LVLn), and the endpoint is `GET /api/needs-setup` behind `manage-site-settings` (found in issue 32)
 - [x] GLOSSARY.md: no entry for Maintenance History (the Equipment timeline of PM Tasks, E-Calls and Work Orders, newest first; entry date = due date / filing date / creation date; `GET /api/equipment/{equipmentId}/history`) (found in issue 26)
-- [ ] GLOSSARY.md: no entry for Dashboard counts (`GET /api/dashboard`: PM Tasks by open PM Status, E-Calls by status plus open, Work Orders by status plus groups; current state; filters site, equipment category, vendor; vendor staff forced to own vendor; a Work Order's E-Call counts in both) (found in issue 27)
+- [x] GLOSSARY.md: no entry for Dashboard counts (`GET /api/dashboard`: PM Tasks by open PM Status, E-Calls by status plus open, Work Orders by status plus groups; current state; filters site, equipment category, vendor; vendor staff forced to own vendor; a Work Order's E-Call counts in both) (found in issue 27)
 
 ## Log
 
@@ -92,3 +94,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-24: issue 26 merged as PR #41.
 - 2026-11-24: product-owner cleared the 26 GLOSSARY follow-up (Maintenance History entry). Split 27: the date range and financial sums moved to the new 42 (needs-info), and 29 is now also blocked by 42. Picked 27 (current status counts; first slice of the dashboard, PRD §4.1, which 28 and 42 then extend). 28 waits because "Equipment requiring attention" needs the operational status values from issue 03.
 - 2026-11-24: issue 27 merged as PR #42; 28 is the only ready issue.
+- 2026-11-24: product-owner cleared the 27 GLOSSARY follow-up (Dashboard entry). Recorded the human's issue 04 grilling decisions (JWT via `tymon/jwt-auth`, swappable credential checker, PSS roles, manual vendor staff link, all internal employees see every Site, one approval-history rule; ADR 0004). Split 04: Angular login and menu moved to the new 43 (ready-for-agent, blocked by 04), the external credential checker to the new 44 (needs-info). 04 is now ready-for-agent. Updated 29: reports only for System Administrator and Management / Viewer. Picked 04 over 28: it replaces every placeholder gate, unblocks 29 and 43, and lets the Angular screens start.

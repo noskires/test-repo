@@ -24,9 +24,9 @@ Equipment, Sites, Equipment Categories, employees (with each one's Immediate Hea
 
 ## Cross-cutting technical rules for every issue
 
-- Slices are delivered **API-first**: migrations, models, endpoints under `/api`, and PHPUnit feature and unit tests (the project uses PHPUnit; Pest is not installed). The Angular screens follow once login (issue 04) is settled, because the frontend can't sign in until then.
+- Slices are delivered **API-first**: migrations, models, endpoints under `/api`, and PHPUnit feature and unit tests (the project uses PHPUnit; Pest is not installed). The Angular screens follow once login is built: backend issue 04, then the Angular login and menu in issue 43.
 - Register `routes/api.php` in `bootstrap/app.php`. Do **not** run `php artisan install:api` or add packages without approval.
-- **Authorization** goes through named Laravel Gates or Policies (e.g. `manage-vendors`). Until issue 04 decides where roles come from, tests set the gate outcome. The acting user is Laravel's authenticated user, and tests use `actingAs`. Each user carries an external `employee_id`, and vendor staff also carry a `vendor_id`. Issue 04 decides how these get filled in at login.
+- **Authorization** goes through named Laravel Gates or Policies (e.g. `manage-vendors`). From issue 04 the gates resolve from PSS Roles (ADR 0004). The acting user is Laravel's authenticated user (JWT `api` guard), and tests use `actingAs`. Each user carries an external `employee_id`. Vendor staff also carry a `vendor_id`, set only when a PSS admin links them to a Vendor.
 - Every approval action (Approve / Return / Reject) writes an **Approval Record** with the approver, action, timestamp, remarks, previous status and resulting status (PRD Module 7). The shared mechanism is built in issue 11 and reused afterwards.
 - Money is in PHP (₱), stored as integer centavos or a decimal with 2 places. Never use floats.
 
@@ -54,6 +54,10 @@ Equipment, Sites, Equipment Categories, employees (with each one's Immediate Hea
 - **Endorsement hardening** (issue 38, 2026-11-23): **separation of duties**. The endorsers at each level (Work Order and billing) must be distinct people, none may be the Requestor, the same person can't approve two different levels in one submission cycle (re-approving the same level after a return is fine, and Return/Reject aren't blocked), and a cycle in the chain counts as broken. Any of these gives 422, no record, and the Work Order on Needs Setup. **No status oracle**: endorsement endpoints authorize `view` first, and outsiders get a plain 403.
 - **Work Order quantities** (issue 20, 2026-11-23): the vendor may report an actual quantity **above** the approved quantity, subject to the EIC's review. Each line's discrepancy against the approved quantity (over / under / equal, exact per ADR 0002) and a Work Order-level "has discrepancies" flag are shown to the EIC before validation (issue 21). Vendor staff see their Work Orders from `Open` (overrides PRD v2 §8.2).
 - **Application timezone is Asia/Manila** (docs/adr/0003-application-timezone-asia-manila.md), switched before go-live (issue 35). "Today", the Work Done Date window, PM due dates, PM Timeliness and the daily generation job all use Manila time.
+
+- **Login and roles** (issue 04 grilling, 2026-11-24; docs/adr/0004-jwt-login-and-pss-roles.md): JWT via `tymon/jwt-auth` (approved), 60-minute access token, 14-day refresh window, logout blacklists. Credentials go through a swappable `CredentialChecker` port; the local version (hashed passwords, seeded demo accounts) runs only in local/testing, and the external one is issue 44. A PSS user is created on first sign-in; the first System Administrator comes from `PSS_FIRST_ADMIN_EMPLOYEE_ID` via an artisan command. PSS stores two roles: **System Administrator** (all `manage-*` gates plus granting roles) and **Management / Viewer**. A PSS admin links vendor staff to a Vendor by hand; linking a current Site EIC is refused, and the last System Administrator can't lose the role. Angular keeps the token in localStorage (issue 43).
+- **Visibility** (2026-11-24): every internal employee sees every Site; vendor staff see only their own Vendor's records. Anyone who can view a record can read its approval history (PM Tasks, E-Calls, Work Orders).
+- **Reports access** (2026-11-24): Reports & Export (issue 29) only for System Administrator and Management / Viewer. The dashboard (issue 27) stays open to all internal employees. This replaces the 2026-11-22 "everyone sees reports" answer.
 
 ## Issues
 
