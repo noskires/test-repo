@@ -14,13 +14,13 @@ Split on 2026-11-24: the **date range filter**, "PM Tasks Completed in the date 
 
 ## Acceptance criteria
 
-- [ ] With seeded fixtures, every count matches a hand-calculated expectation:
+- [x] With seeded fixtures, every count matches a hand-calculated expectation:
   - PM: one count per open PM Status (`Scheduled`, `In Progress`, `For Validation`, `Returned`); `Completed` and `Cancelled` tasks aren't counted.
   - E-Calls: one count per E-Call Status (all seven, zero included), and `open` = every status except `Closed`, `Rejected` and `Cancelled`.
   - Work Orders: one count per Work Order Status (all of them, zero included), and the groups `awaiting_endorsement` (For Lvl1 + For Lvl2 Endorsement), `under_implementation` (For Implementation), `awaiting_eic_validation` (Implemented), `awaiting_billing_endorsement` (For Billing Endorsement LVL1–LVL4), `closed` (Closed).
-- [ ] `site_id`, `equipment_category_id` and `vendor_id` each narrow every count, a test each, and they combine (AND).
-- [ ] Vendor staff only ever get counts for their own Vendor, even if they pass another `vendor_id`.
-- [ ] An unknown filter value returns all-zero counts (200), not an error. A `vendor_id` that isn't an integer returns 422.
+- [x] `site_id`, `equipment_category_id` and `vendor_id` each narrow every count, a test each, and they combine (AND).
+- [x] Vendor staff only ever get counts for their own Vendor, even if they pass another `vendor_id`.
+- [x] An unknown filter value returns all-zero counts (200), not an error. A `vendor_id` that isn't an integer returns 422.
 
 ## Comments
 
@@ -32,6 +32,7 @@ Split on 2026-11-24: the **date range filter**, "PM Tasks Completed in the date 
   - **"Cancelled"**: the original text said open E-Calls = not `Closed` / `Rejected`. That was written before Cancel existed (issue 25); `Cancelled` isn't open either (GLOSSARY "Cancel").
   - **Queries**: use grouped counts (`GROUP BY status`), not one query per status and not loading rows into PHP.
   - **Out of scope**: frontend screen, caching.
+- 2026-11-24 (qa-27b): QA PASS. `php artisan test --compact` (backend/): 1078 passed (5188 assertions). `vendor/bin/pint --test` passed. DashboardApiTest: 15 tests. Every criterion maps to a real test; frontend untouched.
 
 ## Implementation decisions
 
