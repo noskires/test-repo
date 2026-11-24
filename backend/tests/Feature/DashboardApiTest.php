@@ -152,23 +152,21 @@ class DashboardApiTest extends TestCase
 
         $this->dashboard()
             ->assertOk()
-            ->assertExactJson(['data' => [
-                'pm' => ['by_status' => ['scheduled' => 2, 'in_progress' => 1, 'for_validation' => 3, 'returned' => 0]],
-                'e_calls' => [
-                    'by_status' => array_fill_keys(array_column(ECallStatus::cases(), 'value'), 0),
-                    'open' => 0,
+            ->assertJsonPath('data.pm.by_status', ['scheduled' => 2, 'in_progress' => 1, 'for_validation' => 3, 'returned' => 0])
+            ->assertJsonPath('data.e_calls', [
+                'by_status' => array_fill_keys(array_column(ECallStatus::cases(), 'value'), 0),
+                'open' => 0,
+            ])
+            ->assertJsonPath('data.work_orders', [
+                'by_status' => array_fill_keys(array_column(WorkOrderStatus::cases(), 'value'), 0),
+                'groups' => [
+                    'awaiting_endorsement' => 0,
+                    'under_implementation' => 0,
+                    'awaiting_eic_validation' => 0,
+                    'awaiting_billing_endorsement' => 0,
+                    'closed' => 0,
                 ],
-                'work_orders' => [
-                    'by_status' => array_fill_keys(array_column(WorkOrderStatus::cases(), 'value'), 0),
-                    'groups' => [
-                        'awaiting_endorsement' => 0,
-                        'under_implementation' => 0,
-                        'awaiting_eic_validation' => 0,
-                        'awaiting_billing_endorsement' => 0,
-                        'closed' => 0,
-                    ],
-                ],
-            ]]);
+            ]);
     }
 
     public function test_counts_e_calls_by_every_status_and_the_open_total(): void
@@ -185,7 +183,7 @@ class DashboardApiTest extends TestCase
 
         $this->dashboard()
             ->assertOk()
-            ->assertExactJsonStructure(['data' => ['pm' => ['by_status' => ['scheduled', 'in_progress', 'for_validation', 'returned']], 'e_calls' => ['by_status' => array_column(ECallStatus::cases(), 'value'), 'open'], 'work_orders' => ['by_status' => array_column(WorkOrderStatus::cases(), 'value'), 'groups' => ['awaiting_endorsement', 'under_implementation', 'awaiting_eic_validation', 'awaiting_billing_endorsement', 'closed']]]])
+            ->assertExactJsonStructure(['data' => ['pm' => ['by_status' => ['scheduled', 'in_progress', 'for_validation', 'returned'], 'compliance' => ['period_from', 'period_to', 'due', 'on_time', 'percent']], 'e_calls' => ['by_status' => array_column(ECallStatus::cases(), 'value'), 'open'], 'work_orders' => ['by_status' => array_column(WorkOrderStatus::cases(), 'value'), 'groups' => ['awaiting_endorsement', 'under_implementation', 'awaiting_eic_validation', 'awaiting_billing_endorsement', 'closed']], 'equipment' => ['operating' => ['operational', 'non_operational', 'unknown'], 'requiring_attention' => ['count', 'items']]]])
             ->assertJsonPath('data.e_calls.by_status', [
                 'for_vendor_assessment' => 2,
                 'for_eic_review' => 1,

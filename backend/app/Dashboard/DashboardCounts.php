@@ -20,15 +20,31 @@ use Illuminate\Database\Eloquent\Builder;
  */
 final class DashboardCounts
 {
+    /** E-Call statuses that are not open. Every other E-Call status is open. */
+    public const CLOSED_E_CALL_STATUSES = [ECallStatus::Closed, ECallStatus::Rejected, ECallStatus::Cancelled];
+
+    /**
+     * The filters the user may use: vendor staff are always forced to their own Vendor, whatever vendor_id they pass.
+     *
+     * @param  array{site_id?: string, equipment_category_id?: string, vendor_id?: int}  $filters
+     * @return array{site_id?: string, equipment_category_id?: string, vendor_id?: int}
+     */
+    public static function visibleFilters(User $user, array $filters): array
+    {
+        if ($user->vendor_id !== null) {
+            $filters['vendor_id'] = $user->vendor_id;
+        }
+
+        return $filters;
+    }
+
     /**
      * @param  array{site_id?: string, equipment_category_id?: string, vendor_id?: int}  $filters
      * @return array<string, mixed>
      */
     public static function for(User $user, array $filters): array
     {
-        if ($user->vendor_id !== null) {
-            $filters['vendor_id'] = $user->vendor_id;
-        }
+        $filters = self::visibleFilters($user, $filters);
 
         $pm = self::countByStatus(
             PmTask::query()->whereNotIn('status', [PmStatus::Completed, PmStatus::Cancelled]),
@@ -44,7 +60,7 @@ final class DashboardCounts
         );
 
         $openPm = array_filter(PmStatus::cases(), fn (PmStatus $status): bool => $status->isOpen());
-        $closedECall = [ECallStatus::Closed, ECallStatus::Rejected, ECallStatus::Cancelled];
+        $closedECall = self::CLOSED_E_CALL_STATUSES;
         $eCallsByStatus = self::keyed(ECallStatus::cases(), $eCalls);
         $woByStatus = self::keyed(WorkOrderStatus::cases(), $workOrders);
         $sum = fn (array $statuses): int => array_sum(array_map(fn (WorkOrderStatus $s): int => $woByStatus[$s->value], $statuses));
