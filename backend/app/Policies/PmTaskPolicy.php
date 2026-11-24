@@ -7,12 +7,12 @@ use App\Models\SiteSetting;
 use App\Models\User;
 
 /**
- * Only staff of a PM Task's assigned Vendor work on it, and only the Site's current EIC validates its report. Vendor staff only see their own Vendor's tasks; other users are not scoped yet (issue 04).
+ * Only staff of a PM Task's assigned Vendor work on it, and only the Site's current EIC validates its report. Vendor staff only see their own Vendor's tasks; every internal employee sees every Site's tasks (issue 04, Q5).
  */
 class PmTaskPolicy
 {
     /**
-     * Determine whether the user can see the task and its reports.
+     * Determine whether the user can see the task, its reports and its Approval Records.
      */
     public function view(User $user, PmTask $pmTask): bool
     {
@@ -35,14 +35,5 @@ class PmTaskPolicy
     public function validate(User $user, PmTask $pmTask): bool
     {
         return SiteSetting::isActingEic($pmTask->site_id, $user);
-    }
-
-    /**
-     * Determine whether the user can read the task's Approval Records: the Site's current EIC and the task's
-     * Vendor's staff.
-     */
-    public function viewApprovals(User $user, PmTask $pmTask): bool
-    {
-        return $this->validate($user, $pmTask) || $this->work($user, $pmTask);
     }
 }

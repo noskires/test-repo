@@ -2,11 +2,15 @@
 
 namespace App\Providers;
 
+use App\Auth\CredentialChecker;
+use App\Auth\LocalCredentialChecker;
+use App\Enums\PssRole;
 use App\MasterData\InMemoryMasterDataDirectory;
 use App\MasterData\MasterDataDirectory;
 use App\MasterData\SampleMasterData;
 use App\Models\ECall;
 use App\Models\PmTask;
+use App\Models\User;
 use App\Models\WorkOrder;
 use App\Waiting\ApprovedECallsProvider;
 use App\Waiting\ECallsForEicReviewProvider;
@@ -19,6 +23,7 @@ use App\Waiting\VendorWorkOrdersProvider;
 use App\Waiting\WaitingItemProvider;
 use App\Waiting\WorkOrderEndorsementsProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->registerMasterDataDirectory();
+        $this->registerCredentialChecker();
         $this->registerWaitingItemProviders();
     }
 
@@ -67,11 +73,39 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
+     * Login checks credentials only through this port (ADR 0004). Until the external checker lands (issue 44) every
+     * environment gets the local one, which itself refuses to resolve outside local and testing.
+     */
+    private function registerCredentialChecker(): void
+    {
+        $this->app->bind(CredentialChecker::class, LocalCredentialChecker::class);
+    }
+
+    /**
      * Bootstrap any application services.
      */
     public function boot(): void
     {
         $this->registerMorphMap();
+        $this->registerAdminGates();
+    }
+
+    /**
+     * The System Administrator holds every admin gate (Q4). Everyone else, including Management / Viewer and vendor
+     * staff, is denied. Roles are read from the database, so a revoke takes effect on the next request.
+     */
+    private function registerAdminGates(): void
+    {
+        foreach ([
+            'manage-vendors',
+            'manage-site-settings',
+            'manage-checklists',
+            'manage-price-lists',
+            'manage-billing-thresholds',
+            'manage-roles',
+        ] as $gate) {
+            Gate::define($gate, fn (User $user): bool => $user->hasRole(PssRole::SystemAdministrator));
+        }
     }
 
     /**
@@ -85,6 +119,7 @@ class AppServiceProvider extends ServiceProvider
             'pm_task' => PmTask::class,
             'e_call' => ECall::class,
             'work_order' => WorkOrder::class,
+            'user' => User::class,
         ]);
     }
 }

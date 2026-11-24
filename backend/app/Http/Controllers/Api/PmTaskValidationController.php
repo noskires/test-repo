@@ -33,11 +33,11 @@ class PmTaskValidationController extends Controller
     }
 
     /**
-     * The task's Approval Records, oldest first.
+     * The task's Approval Records, oldest first. Anyone who can view the task reads them (issue 04, Q6).
      */
     public function approvals(PmTask $pmTask): AnonymousResourceCollection
     {
-        Gate::authorize('viewApprovals', $pmTask);
+        Gate::authorize('view', $pmTask);
 
         return ApprovalRecordResource::collection($pmTask->approvalRecords()->chronological()->get());
     }

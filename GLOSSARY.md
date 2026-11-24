@@ -130,3 +130,12 @@ A copy of an external Site's or Equipment's details (name, category, location) s
 
 ## Needs Setup list
 An administrator's list of what stops work from moving: Sites with a PM Frequency but no Site Vendor or EIC, and Equipment with no installation date and no PM history (both stop PM Tasks from being generated). It also lists Work Orders whose Endorsement or Billing Endorsement level can't be filled from the Requestor's Immediate Head chain. It's worked out live, not stored, and only administrators who can manage Site settings can see it (`GET /api/needs-setup`).
+
+## Dashboard
+The live operational counts (`GET /api/dashboard`): PM Tasks by open PM Status, E-Calls by status plus an open total, and Work Orders by status plus groups. It shows the current state, not a date range, and can be filtered by Site, Equipment Category and Vendor. A Work Order's E-Call counts in both the E-Call and Work Order figures. Every internal employee can see it; vendor staff see it forced to their own Vendor.
+
+## PSS Role
+A role granted inside PSS by a System Administrator, not taken from the external system. There are two: **System Administrator** (manages Vendors, Site settings, PM Checklists, Price Lists, Billing Thresholds, and grants roles and links vendor staff) and **Management / Viewer** (can see Reports). The first System Administrator is set at install, and the last one can't lose the role. The other PRD roles aren't granted: anyone can be a Requestor, the EIC comes from Site settings, Vendor comes from the vendor staff link, and approvers come from the Immediate Head chain.
+
+## Vendor staff
+A user who works for a Vendor. They sign in like everyone else, and a System Administrator links their account to that Vendor by hand. Until linked they're treated as an ordinary employee. Vendor staff see only their own Vendor's records and can never act as an EIC, so a current Site EIC can't be linked to a Vendor. Every internal employee sees every Site.

@@ -17,6 +17,13 @@ final class SampleMasterData
 {
     public const string REQUESTOR_EMPLOYEE_ID = 'EMP-1001';
 
+    /** Demo accounts (DemoAccountsSeeder, issue 04). */
+    public const string SYSTEM_ADMINISTRATOR_EMPLOYEE_ID = 'EMP-9001';
+
+    public const string MANAGEMENT_VIEWER_EMPLOYEE_ID = 'EMP-9002';
+
+    public const string VENDOR_STAFF_EMPLOYEE_ID = 'EMP-8001';
+
     public static function load(InMemoryMasterDataDirectory $directory): InMemoryMasterDataDirectory
     {
         return $directory
@@ -75,6 +82,9 @@ final class SampleMasterData
             ->addEmployee(new Employee(id: 'EMP-3001', name: 'Diana Division Head', immediateHeadId: 'EMP-4001'))
             ->addEmployee(new Employee(id: 'EMP-4001', name: 'Carlo Center Head', immediateHeadId: 'EMP-5001'))
             ->addEmployee(new Employee(id: 'EMP-5001', name: 'Sofia Sector Head'))
-            ->addEmployee(new Employee(id: 'EMP-6001', name: 'Erwin Engineer-in-Charge', immediateHeadId: 'EMP-3001'));
+            ->addEmployee(new Employee(id: 'EMP-6001', name: 'Erwin Engineer-in-Charge', immediateHeadId: 'EMP-3001'))
+            ->addEmployee(new Employee(id: self::SYSTEM_ADMINISTRATOR_EMPLOYEE_ID, name: 'Ada Administrator'))
+            ->addEmployee(new Employee(id: self::MANAGEMENT_VIEWER_EMPLOYEE_ID, name: 'Mario Management Viewer'))
+            ->addEmployee(new Employee(id: self::VENDOR_STAFF_EMPLOYEE_ID, name: 'Victor Vendor Staff'));
     }
 }

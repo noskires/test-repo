@@ -38,4 +38,16 @@ return [
         'max_lines' => (int) env('PSS_BOQ_MAX_LINES', 200),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | First System Administrator
+    |--------------------------------------------------------------------------
+    |
+    | The external employee ID that `php artisan pss:setup-first-admin` grants
+    | the System Administrator role at install (ADR 0004).
+    |
+    */
+
+    'first_admin_employee_id' => env('PSS_FIRST_ADMIN_EMPLOYEE_ID'),
+
 ];

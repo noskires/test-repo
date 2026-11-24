@@ -363,13 +363,13 @@ class PmTaskValidationApiTest extends TestCase
         $this->assertSame(0, ApprovalRecord::query()->count());
     }
 
-    public function test_the_current_eic_and_not_the_replaced_one_reads_the_approval_history(): void
+    public function test_the_replaced_and_the_current_eic_both_read_the_approval_history(): void
     {
         $this->actingAsEic();
         $this->postJson("/api/pm-tasks/{$this->task->id}/return", ['remarks' => 'Fix it.'])->assertOk();
         $this->replaceSiteEic('P-NEW');
 
-        $this->getJson("/api/pm-tasks/{$this->task->id}/approvals")->assertForbidden();
+        $this->getJson("/api/pm-tasks/{$this->task->id}/approvals")->assertOk()->assertJsonCount(1, 'data');
 
         $this->actingAs(User::factory()->create(['employee_id' => 'P-NEW']));
         $this->getJson("/api/pm-tasks/{$this->task->id}/approvals")->assertOk()->assertJsonCount(1, 'data');
@@ -488,10 +488,20 @@ class PmTaskValidationApiTest extends TestCase
     public static function usersWhoCannotReadTheHistory(): array
     {
         return [
-            'another employee' => [fn (): User => User::factory()->create(['employee_id' => 'P-OTHER'])],
             'staff of another vendor' => [fn (): User => User::factory()->vendorStaff()->create()],
-            'a user with no identity' => [fn (): User => User::factory()->create()],
         ];
+    }
+
+    /**
+     * One rule for approval history (issue 04, Q6): anyone who can view the task reads it.
+     */
+    public function test_an_internal_employee_who_is_not_the_eic_reads_the_approval_history(): void
+    {
+        $this->actingAsEic();
+        $this->postJson("/api/pm-tasks/{$this->task->id}/return", ['remarks' => 'Fix it.'])->assertOk();
+
+        $this->actingAs(User::factory()->create(['employee_id' => 'P-OTHER']));
+        $this->getJson("/api/pm-tasks/{$this->task->id}/approvals")->assertOk()->assertJsonCount(1, 'data');
     }
 
     /**
