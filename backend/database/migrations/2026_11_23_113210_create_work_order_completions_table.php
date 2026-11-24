@@ -33,7 +33,7 @@ return new class extends Migration
             $table->unsignedBigInteger('actual_quantity_thousandths');
             $table->timestamps();
 
-            $table->unique(['work_order_completion_id', 'work_order_line_id']);
+            $table->unique(['work_order_completion_id', 'work_order_line_id'], 'wo_completion_lines_completion_line_unique');
         });
 
         Schema::create('work_order_completion_files', function (Blueprint $table) {

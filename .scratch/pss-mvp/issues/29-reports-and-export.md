@@ -1,7 +1,7 @@
 # 29 — Reports and export
 
 Status: ready-for-agent
-Blocked by: 04, 26, 27, 28
+Blocked by: 04, 26, 27, 28, 42
 Type: task
 
 ## What to build
@@ -29,3 +29,4 @@ PRD Module 8 and §6 "Exportable reports": inventory, PM accomplishment (monthly
 - Q3 answered: **everyone sees the dashboard and reports, filtered to their own sites**. Vendors see only their own Sites' jobs. How a user's sites are determined is still open (see issue 04).
 
 - 2026-11-22 (product-owner): Human decision: **`phpoffice/phpspreadsheet` is approved** for XLSX export (closes the Q2 package confirmation). Q1, Q2 and Q3 are all answered, so this issue has no open questions of its own and is flipped to **ready-for-agent**. The one remaining dependency is how a user's Sites are determined, which is an open question in issue 04 (needs-info). Issue 04 is therefore added to `Blocked by`. Site filtering must use whatever 04 decides and must not invent its own rule.
+- 2026-11-24 (product-owner): `Blocked by` now also lists 42. Issue 27 was split, and its financial sums and date range moved to 42; the "Work Order status + costs" and "Spend by site/vendor" reports need those definitions.
