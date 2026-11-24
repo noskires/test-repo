@@ -50,4 +50,17 @@ describe('PendingPage', () => {
     expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
     expect(navigate).toHaveBeenCalledWith('/login');
   });
+
+  it('uses the page head and card, with Log out as the orange main action', () => {
+    const fixture = TestBed.createComponent(PendingPage);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('.page-head h1')?.textContent).toContain(
+      'Waiting for an administrator',
+    );
+    expect(el.querySelector('.page-head .sub')).not.toBeNull();
+    expect(el.querySelector('.panel')).not.toBeNull();
+    expect(el.querySelector('button')!.classList).toContain('accent');
+  });
 });

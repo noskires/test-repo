@@ -9,24 +9,29 @@ import { AuthService } from '../auth/auth.service';
 @Component({
   selector: 'app-pending-page',
   template: `
-    <section class="page">
-      <h1>Waiting for an administrator</h1>
+    <div class="page-head">
+      <div>
+        <h1>Waiting for an administrator</h1>
+        <div class="sub">Your access isn't set up yet.</div>
+      </div>
+    </div>
+    <section class="panel">
       <p>
-        Hello, {{ auth.user()?.name }}. Your PSS account is waiting for an administrator to
-        set up your access. Ask a System Administrator, then sign in again.
+        Hello, {{ auth.user()?.name }}. Your PSS account is waiting for an administrator to set up
+        your access. Ask a System Administrator, then sign in again.
       </p>
-      <button type="button" (click)="logout()">Log out</button>
+      <button type="button" class="btn accent" (click)="logout()">Log out</button>
     </section>
   `,
   styles: `
-    .page {
-      padding: 1.5rem;
-      max-width: 36rem;
+    :host {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 40rem;
     }
-    button {
-      padding: 0.5rem 1rem;
-      font: inherit;
-      cursor: pointer;
+    p {
+      margin: 0 0 16px;
     }
   `,
 })
