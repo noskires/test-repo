@@ -9,7 +9,6 @@ use App\MasterData\MasterDataDirectory;
 use App\Models\User;
 use DateTimeImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -106,10 +105,25 @@ class SiteApiTest extends TestCase
         $this->getJson($uri)->assertUnauthorized();
     }
 
-    public function test_pss_has_no_master_data_tables(): void
+    /**
+     * ADR 0001 (amended by issue 03): PSS keeps a read-only copy of the master data. Only the import touches it.
+     */
+    public function test_only_the_master_data_layer_touches_the_master_data_tables(): void
     {
-        foreach (['sites', 'equipment', 'equipment_categories', 'employees'] as $table) {
-            $this->assertFalse(Schema::hasTable($table), "PSS must not own a [{$table}] table (ADR 0001).");
+        $normalisePath = fn (string $path): string => str_replace('\\', '/', $path);
+        $masterDataDirectory = $normalisePath(app_path('MasterData')).'/';
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(app_path(), \FilesystemIterator::SKIP_DOTS));
+
+        foreach ($files as $file) {
+            if ($file->getExtension() !== 'php' || str_starts_with($normalisePath($file->getPathname()), $masterDataDirectory)) {
+                continue;
+            }
+
+            $this->assertDoesNotMatchRegularExpression(
+                "/table\\(\\s*'(sites|equipment|equipment_categories|employees)'/",
+                file_get_contents($file->getPathname()),
+                "{$file->getPathname()} reads or writes a master data table outside App\\MasterData.",
+            );
         }
     }
 

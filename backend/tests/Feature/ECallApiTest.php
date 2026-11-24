@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\ECallPriority;
 use App\Enums\ECallStatus;
+use App\Http\Requests\StoreECallRequest;
 use App\MasterData\Data\Employee;
 use App\MasterData\Data\Equipment;
 use App\MasterData\Data\EquipmentCategory;
@@ -145,6 +146,31 @@ class ECallApiTest extends TestCase
             Storage::disk(config('pss.e_call_attachments.disk'))->assertExists($attachment->path);
         }
         $this->assertSame(['leak.jpg', 'quote.pdf', 'specs.docx'], $eCall->attachments->pluck('original_name')->all());
+    }
+
+    public function test_filing_an_e_call_for_inactive_equipment_returns_422(): void
+    {
+        $this->directory->addEquipment(new Equipment(id: 'EQ-1', siteId: 'S-1', name: 'Lobby Aircon', categoryId: 'CAT-AC', isActive: false));
+        $this->actingAsRequestor();
+
+        $this->postJson('/api/e-calls', $this->validPayload(['equipment_id' => 'EQ-1']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['equipment_id' => StoreECallRequest::INACTIVE_EQUIPMENT_MESSAGE]);
+
+        $this->assertDatabaseCount('e_calls', 0);
+    }
+
+    public function test_an_e_call_still_reads_its_snapshots_after_its_equipment_goes_inactive(): void
+    {
+        $this->actingAsRequestor();
+        $id = $this->postJson('/api/e-calls', $this->validPayload(['equipment_id' => 'EQ-1']))->assertCreated()->json('data.id');
+
+        $this->directory->addEquipment(new Equipment(id: 'EQ-1', siteId: 'S-1', name: 'Renamed Aircon', categoryId: 'CAT-AC', isActive: false));
+
+        $this->getJson("/api/e-calls/{$id}")
+            ->assertOk()
+            ->assertJsonPath('data.site.name', 'Makati Office')
+            ->assertJsonPath('data.equipment.name', 'Lobby Aircon');
     }
 
     public function test_the_routing_and_snapshots_are_kept_after_the_site_changes(): void

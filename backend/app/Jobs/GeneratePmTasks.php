@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
  * Eligible: the Site has a PM Frequency, a Site Vendor and an EIC, and the Equipment has a start date
  * (PmStartDates: the latest Completed task's Work Done Date, else its installation date). Equipment skipped for
  * lack of a start date shows on the Needs Setup list (issue 32), which uses the same PmStartDates rule.
+ * Inactive Equipment (gone from the source database, issue 03) gets no new task, and its open task is flagged.
  */
 class GeneratePmTasks implements ShouldQueue
 {
@@ -69,7 +70,7 @@ class GeneratePmTasks implements ShouldQueue
 
     private function ensureOpenTask(Site $site, Equipment $equipment, SiteSetting $setting): void
     {
-        if ($this->startDates->hasOpenTask($equipment->id)) {
+        if (! $equipment->isActive || $this->startDates->hasOpenTask($equipment->id)) {
             return;
         }
 
@@ -122,13 +123,14 @@ class GeneratePmTasks implements ShouldQueue
     }
 
     /**
-     * Keep open tasks whose Equipment left the directory, flagged for the EIC (issue 25). Never cancel them.
+     * Keep open tasks whose Equipment left the directory or is inactive (issue 03), flagged for the EIC (issue 25).
+     * Never cancel them.
      */
     private function flagRemovedEquipment(MasterDataDirectory $directory): void
     {
         PmTask::query()->open()->chunkById(200, function ($tasks) use ($directory): void {
             foreach ($tasks as $task) {
-                $task->equipment_removed = $directory->findEquipment($task->equipment_id) === null;
+                $task->equipment_removed = ! ($directory->findEquipment($task->equipment_id)?->isActive ?? false);
 
                 if ($task->isDirty('equipment_removed')) {
                     $task->save();

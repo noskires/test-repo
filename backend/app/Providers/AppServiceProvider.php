@@ -5,9 +5,9 @@ namespace App\Providers;
 use App\Auth\CredentialChecker;
 use App\Auth\LocalCredentialChecker;
 use App\Enums\PssRole;
+use App\MasterData\DatabaseMasterDataDirectory;
 use App\MasterData\InMemoryMasterDataDirectory;
 use App\MasterData\MasterDataDirectory;
-use App\MasterData\SampleMasterData;
 use App\Models\ECall;
 use App\Models\PmTask;
 use App\Models\User;
@@ -57,18 +57,15 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Until the real adapter lands (issue 03): tests get an empty fake, local dev gets the sample data,
-     * and every other environment gets no fake binding at all.
+     * Tests get an empty in-memory fake. Every other environment reads the imported master data tables (issue 03);
+     * local dev fills them with MasterDataSampleSeeder.
      */
     private function registerMasterDataDirectory(): void
     {
         if ($this->app->environment('testing')) {
             $this->app->singleton(MasterDataDirectory::class, InMemoryMasterDataDirectory::class);
-        } elseif ($this->app->environment('local')) {
-            $this->app->singleton(
-                MasterDataDirectory::class,
-                fn (): InMemoryMasterDataDirectory => SampleMasterData::load(new InMemoryMasterDataDirectory),
-            );
+        } else {
+            $this->app->singleton(MasterDataDirectory::class, DatabaseMasterDataDirectory::class);
         }
     }
 

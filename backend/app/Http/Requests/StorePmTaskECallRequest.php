@@ -103,8 +103,12 @@ class StorePmTaskECallRequest extends FormRequest
                     return;
                 }
 
-                if ($this->directory()->findEquipment($task->equipment_id)?->siteId !== $task->site_id) {
+                $equipment = $this->directory()->findEquipment($task->equipment_id);
+
+                if ($equipment?->siteId !== $task->site_id) {
                     $validator->errors()->add('equipment', self::EQUIPMENT_NOT_AT_SITE_MESSAGE);
+                } elseif (! $equipment->isActive) {
+                    $validator->errors()->add('equipment', StoreECallRequest::INACTIVE_EQUIPMENT_MESSAGE);
                 }
             },
         ];

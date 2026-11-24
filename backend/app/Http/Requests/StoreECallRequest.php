@@ -21,6 +21,8 @@ class StoreECallRequest extends FormRequest
 {
     public const string NO_SITE_VENDOR_MESSAGE = 'This Site has no Site Vendor assigned, so the E-Call cannot be routed. Ask an administrator to assign one.';
 
+    public const string INACTIVE_EQUIPMENT_MESSAGE = 'This Equipment is no longer active in the master data, so no new E-Call can be filed for it.';
+
     public const string NO_EIC_MESSAGE = 'This Site has no EIC assigned, so the E-Call cannot be routed. Ask an administrator to assign one.';
 
     /**
@@ -68,8 +70,12 @@ class StoreECallRequest extends FormRequest
                 'string',
                 'max:255',
                 function (string $attribute, mixed $value, Closure $fail): void {
-                    if ($this->directory()->findEquipment($value)?->siteId !== $this->input('site_id')) {
+                    $equipment = $this->directory()->findEquipment($value);
+
+                    if ($equipment?->siteId !== $this->input('site_id')) {
                         $fail('The selected equipment is not at the selected site.');
+                    } elseif (! $equipment->isActive) {
+                        $fail(self::INACTIVE_EQUIPMENT_MESSAGE);
                     }
                 },
             ],
