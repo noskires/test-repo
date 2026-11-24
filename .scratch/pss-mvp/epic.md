@@ -7,7 +7,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **46 — Admin-created users and pending access** (PR #45, 2026-11-24)
-- In flight: none
+- In flight: **45 — Vendor-linked users and the System Administrator role** (handed off 2026-11-24)
 - Ready now (`ready-for-agent`, every blocker done), in number order: **28**, **45**, **48**.
 - Waiting on the human (`needs-info`): 03, 15, 31, 33, 41, 42, 44, 47. The open questions are in each issue file. New: 47 (remove or deactivate users).
 - Doc follow-ups: none open
@@ -106,3 +106,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-24: product-owner recorded the human's issue 45/46 grilling decisions (ADR 0005, GLOSSARY Access entry, spec). Added 46 (ready-for-agent: admin-created users, access internal/vendor/pending, unique employee_id; closes the gap where an unlinked new user saw every Vendor's data) and 47 (needs-info: remove or deactivate users). 45 is now ready-for-agent, blocked by 46. 44 no longer classifies users and is also blocked by 46. Picked 46 over 28: it closes a data-visibility gap in merged code and unblocks 45.
 - 2026-11-24: product-owner added 48 (ready-for-agent, blocked by 46): restyle the existing Angular screens to the "PSS Mock Screens" design (`docs/design/mock-screens/`) with `lucide-angular` (approved by the human). Restyle only; the other mock screens are reference for their later issues.
 - 2026-11-24: issue 46 merged as PR #45; unblocks 45 and 48 (44 and 47 stay needs-info).
+- 2026-11-24: product-owner picked 45 over 48 and 28: it stops vendor staff holding System Administrator (who could manage their own Vendor's Price List and assignments) and closes the "unlinked admin becomes pending" gap from 46. Small backend change. Added the post-46 clarifications.

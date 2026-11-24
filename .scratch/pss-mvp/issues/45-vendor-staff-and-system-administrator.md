@@ -33,3 +33,20 @@ Management / Viewer stays allowed for vendor staff (Q3); their Reports are limit
   - Put both refusals in the same place as the existing vendor-link rules (current Site EIC check), not in the controllers.
   - The check command is read-only. What to do with any admin it finds is the human's call; don't revoke or unlink anything.
   - Issue 29 must filter a vendor-linked Management / Viewer's Reports to their own Vendor. That belongs to 29, not this issue; the product-owner added it there.
+- 2026-11-24 (product-owner), re-checked after issue 46 merged (PR #45). Clarifications for dev-lead:
+  - **Read issue 46's "Implementation decisions"** (`issues/46-admin-created-users-and-pending-access.md`), especially 2 (`User::linkToVendor` / `markInternal`, the `saving` hook), 8 (vendor create goes through `linkToVendor` in a transaction) and 11 (the pending-user role refusal lives in `GrantUserRoleRequest::after()`, and `User::grantRole` itself doesn't refuse).
+  - **Where the refusals go:** the System Administrator grant refusal goes in `GrantUserRoleRequest::after()` next to the pending check (422 on `role`). The link refusal goes with the existing EIC check used by `PUT /api/admin/users/{user}/vendor` (422 on `vendor_id`). "Vendor-linked" means `access = vendor` (equivalently `vendor_id` set; the model hook keeps them in step).
+  - **`POST /api/admin/users` needs nothing new:** it creates users without roles, so neither refusal can be bypassed there. One regression test (create with `vendor_id`, then grant `system-administrator` → 422) is enough.
+  - **Unlinking a System Administrator** isn't affected by this issue. After 45 no System Administrator can be vendor-linked, so the "unlinked admin becomes pending" gap noted in 46 can only come from data created before this issue; the check command lists such users.
+  - **Check command output:** one line per user (employee ID, name, Vendor name), sorted by employee ID; exit 0 whether or not any are found. Read-only: test that no row changes.
+  - **Decisions to confirm** (product-owner defaults; put them in the PR's "Decisions to confirm"):
+    1. `pss:setup-first-admin` stays unchanged (Q17) and doesn't apply the new refusal, because it only runs at install. If the configured employee is vendor-linked, it still grants the role but prints a warning naming the check command. The human may prefer it to refuse.
+    2. The refusal applies only to `system-administrator`. Revoking it from a vendor-linked user found by the check is allowed as before (the last-admin rule still applies).
+
+## Implementation decisions
+
+1. **Grant refusal** is in `GrantUserRoleRequest::after()` beside the pending check: 422 on `role` ("A user linked to a Vendor cannot be a System Administrator. Unlink the Vendor first.") when the user has a `vendor_id` and the role is `system-administrator`. Nothing is stored. `User::grantRole` itself does not refuse, so `pss:setup-first-admin` still works.
+2. **Link refusal** is in `User::linkToVendor`, inside its transaction next to the EIC check: 422 on `vendor_id`, "Revoke the System Administrator role first.". It therefore covers `PUT .../vendor` and the vendor create path. Unlinking (`null`) is untouched.
+3. **`pss:check-vendor-admins`** (`App\Console\Commands\CheckVendorAdmins`): read-only; prints a count line then one `EMPLOYEE_ID | Name | Vendor name` line per user, sorted by employee ID; "No vendor-linked System Administrators found." when none; exit 0 both ways.
+4. **PO defaults confirmed:** `pss:setup-first-admin` is unchanged except a warning naming the check command when the configured employee is vendor-linked (it still grants the role; the human may prefer it to refuse). Only `system-administrator` is refused; revoking it from a vendor-linked user is allowed as before (last-admin rule applies).
+5. Tests: `backend/tests/Feature/VendorAdminRefusalTest.php`. No migration, no data change, no frontend change.
