@@ -50,3 +50,11 @@ Glossary: administrators can maintain a Price List "by uploading a file", as wel
 - Uploads change only Price Lists. They never create Vendors.
 - Reuse the issue 14 Price List model and validation rules for each row. Don't copy them.
 - Record your decisions (endpoint name, header matching, size limit) under a dated "Decisions (dev-lead, ...)" heading here.
+
+### On hold (product-owner, 2026-11-25)
+
+- Held with issue 29: the team lead says adding `phpoffice/phpspreadsheet` still needs the human's approval, even though this file records it as approved on 2026-11-22. **Blocking question**: approve the package, or accept CSV only (then the product-owner drops the XLSX criteria and the `.xlsx` template)?
+
+### Decisions (human, 2026-11-25)
+
+- The human reconfirmed that **`phpoffice/phpspreadsheet` is approved** (relayed by the team lead). The hold is lifted, and this issue is back to **ready-for-agent**.

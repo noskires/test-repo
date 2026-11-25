@@ -65,6 +65,35 @@ From the issue 45/46 grilling (second session, 2026-11-24):
 - Docs: don't edit GLOSSARY.md. If a "Report" entry is needed, the releaser's docs review flags it as a follow-up and the product-owner writes it.
 - Record your decisions under a dated "Decisions (dev-lead, ...)" heading here.
 
+### Clarifications (product-owner, 2026-11-25, at hand-off)
+
+- Issue 51 merged (PR #53). `DashboardKpis::pmCompliance` now selects the due window as `due_date >= from` and `< windowEnd + 1 day`. Your row query must use the **same** window. Better still, share one query or scope so the `rows` count always equals `summary.due`, and test that equality with tasks due on the first and last day.
+- No other changes since the split. The acceptance criteria above are final for this slice.
+
+## On hold (team lead, 2026-11-25)
+
+Held before any code was written. The team lead says adding `phpoffice/phpspreadsheet` still needs the human's approval. Note that this file records an approval on 2026-11-22 (see the Decisions above); the product-owner has asked the team lead to confirm it with the human.
+
+**Resolved 2026-11-25**: the human reconfirmed the approval (see Decisions below).
+
+### Decisions (human, 2026-11-25)
+
+- The human reconfirmed that **`phpoffice/phpspreadsheet` is approved** (relayed by the team lead). The hold is lifted, and this issue is back to **ready-for-agent**.
+
 ## Open questions (for the human, not blocking)
 
 1. Are these columns right for the Check-up compliance report: Site, Equipment, Equipment category, Vendor, Due date, Work Done Date, PM Status, On time? Should Cancelled PM Tasks or the EIC also appear?
+
+## Implementation decisions
+
+### Decisions (dev-lead, 2026-11-25)
+
+1. **Package**: `phpoffice/phpspreadsheet` ^5.12 (5.12.0) added with `composer require`. Composer also pulled its own dependencies: `composer/pcre`, `maennchen/zipstream-php`, `markbaker/complex`, `markbaker/matrix` and `phpoffice/wmf`. No existing package changed version. The PHP extensions it needs (`zip`, `gd`, `xml`, `xmlreader`, `xmlwriter`, `zlib`, `mbstring`, `iconv`, `ctype`, `dom`, `fileinfo`, `SimpleXML`) are all enabled on PHP 8.4.11 here. **Deployment:** the production PHP must have the same extensions.
+2. **One shared query**: the PM Compliance due-window query moved out of `DashboardKpis::pmCompliance` into a public `DashboardKpis::pmComplianceDueTasks()`, which the dashboard and the report both use. The report's `summary` is `PmCompliance::calculate()` over its own rows, so `rows` count always equals `summary.due` and equals the dashboard's `pm.compliance` (tested, including tasks due on the first and last day). The per-task on-time rule moved into `PmCompliance::isOnTime()` with no change in behaviour.
+3. **API shape**: `GET /api/reports/pm-compliance` returns `{period: {from, to}, summary: {due, on_time, compliance}, rows: [...]}` with no `data` wrapper, exactly as the criterion states. `compliance` is the dashboard's `percent` (0-100, one decimal, half-up), or `null` when nothing is due.
+4. **Row values**: `status` is the PM Status enum value (`scheduled`, `in_progress`, `for_validation`, `returned`, `completed`), in JSON and in the xlsx. `vendor_name` is the current name in the PSS `vendors` table (not a snapshot), so a renamed Vendor shows its new name on old tasks. `on_time` is true only for a Completed task with a Work Done Date on or before its due date (the existing PM Compliance rule). The tie-break after due date, Site name and Equipment name is the PM Task id.
+5. **Export layout**: one sheet with the default name ("Worksheet"), no title rows and no styling. The header labels are `Site, Equipment, Equipment category, Vendor, Due date, Work done date, Status, On time`. Every cell is written as text, dates included; an empty Work Done Date is an empty cell. The filename is `pm-compliance-{from}-to-{to}.xlsx`, using the default period when none is given. Content-Type is `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`.
+6. **Shared parts for 52-54**: `App\Http\Requests\ReportRequest` (filter and period validation, the same rules as the dashboard; `filters()` and `period($today)`), `App\Reports\XlsxExport::download($filename, $header, $rows)`, and the route group `reports.*` behind `can:view-reports` in `routes/api.php`. The `view-reports` gate is defined in `AppServiceProvider::registerReportGates()`.
+7. **Gate order**: the pending block runs before the gate, so a pending user always gets the pending 403, even with a role. The gate runs before validation, so a user without access gets 403, not 422, for bad filters.
+8. **Vendor scoping**: reuses `DashboardCounts::visibleFilters()`, so a vendor-linked user's `vendor_id` replaces any `vendor_id` they pass. Unknown `site_id`, category or vendor values give an empty report rather than an error, as on the dashboard.
+9. **Performance**: two queries whatever the row count: the PM Tasks, then the Vendors loaded with them (`with('vendor:id,name')`). This is tested for both endpoints. There is no row limit or pagination; the export builds the whole sheet in memory before streaming. That is fine for a month of PM Tasks, but a multi-year period over many Sites could use a lot of memory. Add a limit later if needed.
