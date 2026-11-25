@@ -10,11 +10,11 @@ The dev-lead on issue 42 noticed a possible bug (decision note 13 in issue 42). 
 
 ## Acceptance criteria
 
-- [ ] First, a failing feature test (SQLite, as in `phpunit.xml`): a PM Task due exactly on the last day of the compliance window counts in `pm.compliance`. Use an explicit `from`/`to`, and also a default-period case if the window end differs there (`dueWindowEnd` caps it at today). A task due the day after the window end does not count.
-- [ ] A task due exactly on `from` counts (lower-bound regression test).
-- [ ] The fix uses the same half-open comparison as issue 42 (`>= from`, `< windowEnd + 1 day`) or `whereDate`. No raw SQL that only works on one driver.
-- [ ] If the new test passes without the fix (the bug doesn't reproduce), don't change the query. Keep the boundary tests and record that finding here.
-- [ ] The issue 28 query-count test and every existing dashboard test still pass.
+- [x] First, a failing feature test (SQLite, as in `phpunit.xml`): a PM Task due exactly on the last day of the compliance window counts in `pm.compliance`. Use an explicit `from`/`to`, and also a default-period case if the window end differs there (`dueWindowEnd` caps it at today). A task due the day after the window end does not count.
+- [x] A task due exactly on `from` counts (lower-bound regression test).
+- [x] The fix uses the same half-open comparison as issue 42 (`>= from`, `< windowEnd + 1 day`) or `whereDate`. No raw SQL that only works on one driver.
+- [x] If the new test passes without the fix (the bug doesn't reproduce), don't change the query. Keep the boundary tests and record that finding here.
+- [x] The issue 28 query-count test and every existing dashboard test still pass.
 
 ## Comments
 
@@ -34,3 +34,8 @@ The dev-lead on issue 42 noticed a possible bug (decision note 13 in issue 42). 
    - `test_pm_compliance_counts_tasks_due_on_the_first_and_last_day_of_an_explicit_period` uses `from=2026-11-01`, `to=2026-11-15`. Tasks due on 10-31, 11-01, 11-15 and 11-16 give `due` 2.
    - `test_pm_compliance_in_the_default_period_counts_a_task_due_today_but_not_tomorrow` has today as 2026-11-20 (Manila), where the window end is capped at today. A task due 11-20 counts. A task due 11-21 doesn't.
 4. No behaviour change beyond the boundary, and no doc or GLOSSARY change. The query count is unchanged: the issue 28 query-count test passes.
+
+### QA (qa-51, 2026-11-25): PASS
+
+- `php artisan test --compact` (backend): 1377 passed, 6449 assertions. `vendor/bin/pint --test`: pass.
+- Two new tests in `DashboardKpisApiTest` cover the explicit-period first and last day (with the day before and the day after excluded) and the default period (due today counts, due tomorrow doesn't).
