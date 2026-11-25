@@ -7,8 +7,8 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **03 — Import master data from the source database into PSS tables** (PR #49, 2026-11-24)
-- In flight: none
-- Build order (human hint, adjusted for dependencies): 44, 49, 42, 29 (after 42), 47 (after 44), 41, 33 (after 41), 31, 15.
+- In flight: **44 — Email and password sign-in for every environment** (handed off 2026-11-24)
+- Build order (human hint, adjusted for dependencies): **44**, 49, 42, 29 (after 42), 47 (after 44), 41, 33 (after 41), 31, 15.
 - Ready now (`ready-for-agent`, every blocker done): 15, 31, 33, 41, 42, 44, 49. Waiting on a blocker: 29 (42), 47 (44).
 - Waiting on the human (`needs-info`): none. Parked post-MVP (`needs-triage`): 50.
 - Doc follow-ups: none open
