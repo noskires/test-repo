@@ -6,10 +6,10 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **44 — Email and password sign-in for every environment** (PR #50, 2026-11-25)
-- In flight: **49 — Attention reasons: count only the Vendor's own records** (handed off 2026-11-25)
-- Build order (human hint, adjusted for dependencies): 49, 42, 29 (after 42), 47 (after 44), 41, 33 (after 41), 31, 15.
-- Ready now (`ready-for-agent`, every blocker done): 15, 31, 33, 41, 42, 47, 49. Waiting on a blocker: 29 (42).
+- Last merged: **49 — Attention reasons: count only the Vendor's own records** (PR #51, 2026-11-25)
+- In flight: none
+- Build order (human hint, adjusted for dependencies): 42, 29 (after 42), 47 (after 44), 41, 33 (after 41), 31, 15.
+- Ready now (`ready-for-agent`, every blocker done): 15, 31, 33, 41, 42, 47. Waiting on a blocker: 29 (42).
 - Waiting on the human (`needs-info`): none. Parked post-MVP (`needs-triage`): 50.
 - Doc follow-ups: none open
 
@@ -65,7 +65,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 46 | Admin-created users and pending access | done | none | #45 |
 | 47 | Deactivate and reactivate users | ready-for-agent | 46, 44 | |
 | 48 | Restyle the Angular app to the PSS design (lucide-angular) | done | 46 | #47 |
-| 49 | Attention reasons: count only the Vendor's own records (chore, security) | ready-for-agent | 28 | |
+| 49 | Attention reasons: count only the Vendor's own records (chore, security) | done | 28 | #51 |
 | 50 | Admin create and edit PM Checklists (parked, post-MVP) | needs-triage | 31 | |
 
 Other merged PRs: #1 PRD v2 docs, #2 project scaffold, #3 unblock answered issues, #15 no-duplicate-lines decision.
@@ -120,3 +120,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-24: issue 03 merged as PR #49; unblocks 31.
 - 2026-11-25: issue 44 merged as PR #50; unblocks 47. Docs review found no gaps.
 - 2026-11-25: product-owner picked 49: first in the human's build order, a small security chore that closes a cross-Vendor data leak in merged code (issue 28's attention reasons). Added the hand-off clarifications.
+- 2026-11-25: issue 49 merged as PR #51. Docs review found no gaps.

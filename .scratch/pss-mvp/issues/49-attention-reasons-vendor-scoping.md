@@ -1,6 +1,7 @@
 # 49 — Equipment Requiring Attention: count only the Vendor's own records (chore, security)
 
-Status: ready-for-agent
+Status: done
+Merged: PR #51 (3a980bf), 2026-11-25
 Blocked by: 28
 Type: chore
 
