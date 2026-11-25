@@ -49,3 +49,13 @@ Issue 46 lets a System Administrator add users. Nothing yet removes or deactivat
 - Token revocation: the token carries only the user id (ADR 0004), so checking an `is_active` flag (or `deactivated_at`) on each request is enough. The dev-lead picks the mechanism and records it.
 - Where things live: the admin user endpoints and access states (issue 46, ADR 0005), role grants and Vendor links (issue 45), Site EIC assignment (issue 05), Needs Setup (`App\NeedsSetup`, issue 32).
 - Record your decisions under a dated "Decisions (dev-lead, ...)" heading here.
+
+### Clarifications (product-owner, 2026-11-25, at hand-off)
+
+- Issue 44 merged (PR #50). Sign-in is email + password through `App\Auth\CredentialChecker` / `LocalCredentialChecker`. The API group in `routes/api.php` runs `auth:api`, `RequirePasswordChange` and `BlockPendingUsers`. Put the deactivated check where it also covers `me`, `refresh` and `logout`, so an old token gets 401 on every endpoint, those included. A deactivated user who gets the password right still gets the same 401 and generic message as a wrong password (no 403, nothing that hints the account exists).
+- Admin user routes: `routes/api.php`, `admin` prefix behind `can:manage-roles` (`AdminUserController`). Add `deactivate` / `reactivate` there.
+- **History entry**: nothing stores user history yet. Issue 46 only has `users.access_set_by_user_id` / `access_set_at`, which get overwritten. Add a small append-only table (user, action `deactivate`/`reactivate`, actor user id, timestamp). Don't reuse `approval_records`: that's for workflow documents. Record the name you choose.
+- **"Restores exactly as before"**: simplest is to keep `access`, `vendor_id` and the role rows untouched and add a separate `deactivated_at` (+ by whom) flag. Then reactivation just clears the flag.
+- **The 422 "Reactivate the user first." list** is the human's: grant role, Site EIC assignment, Vendor link. Product-owner's reading for consistency: `PUT /api/admin/users/{user}/access` on a deactivated user also returns that 422, because it's the access-change path. The issue 44 admin password reset (`POST .../password`) is **not** on the human's list, so leave it allowed. Both go under "Decisions to confirm" in the PR.
+- **Demo accounts** (issue 44, `DemoAccountsSeeder`): don't change them. Re-running the seeder must not reactivate a demo user an admin deactivated, unless the seeder already rewrites everything. Check and record what it does.
+- Docs: don't edit GLOSSARY.md or the ADRs. The releaser's docs review flags any gap (likely the GLOSSARY Access entry and ADR 0005) for the product-owner.

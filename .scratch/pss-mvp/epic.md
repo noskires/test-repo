@@ -7,9 +7,9 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **51 — PM Compliance: include PM Tasks due on the last day** (PR #53, 2026-11-25)
-- In flight: none
-- Build order (human hint, adjusted for dependencies): 29 (first report + export), 47, 41, 33 (after 41), 31, 15; then 52, 53, 54 once the human answers.
-- Ready now (`ready-for-agent`, every blocker done): 15, 29, 31, 33, 41, 47. Waiting on a blocker: none.
+- In flight: **29 — Reports: access, xlsx export, Check-up compliance report** (building; 47 is next)
+- Build order (human hint, adjusted for dependencies): 29, 47, 41, 33 (after 41), 31, 15; then 52, 53, 54 once the human answers.
+- Ready now (`ready-for-agent`, every blocker done): 15, 31, 33, 41, 47 (29 in flight).
 - Waiting on the human (`needs-info`): 52, 53, 54 (report columns). Parked post-MVP (`needs-triage`): 50.
 - Doc follow-ups: none open
 
@@ -129,3 +129,6 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-25: issue 42 merged as PR #52; unblocks 29. Docs review found no gaps (GLOSSARY Dashboard entry already covers the range and financials). Open code follow-up for the product-owner: `DashboardKpis::pmCompliance` `whereBetween` on `due_date` may miss the last day on SQLite.
 - 2026-11-25: product-owner triaged the 42 follow-up into 51 (ready-for-agent: PM Compliance `whereBetween` on `due_date` may drop the last day on SQLite). Split 29: 29 now builds the `view-reports` gate, xlsx export and the Check-up compliance report (provisional columns, to confirm), and is blocked by 51 so it doesn't inherit the bug; 52, 53, 54 hold the other three reports (needs-info: columns). Picked 51: a small chore that fixes a merged KPI and comes before 29.
 - 2026-11-25: issue 51 merged as PR #53; unblocks 29. Docs review found no gaps.
+- 2026-11-25: product-owner picked 29: next in the build order, unblocked by 51, and it builds the report access, Vendor scoping and xlsx export that 52–54 reuse. Added the hand-off clarification (rows share 51's due window).
+- 2026-11-25: team lead put 29 on hold before any code: the `phpoffice/phpspreadsheet` approval must be confirmed with the human (the issue files record it as approved on 2026-11-22). 29 and 15 (which needs the same package) set to needs-info. product-owner picked 47 instead: next in the build order, it lets an admin cut off people who have left. Added the post-44 hand-off clarifications.
+- 2026-11-25: the human reconfirmed `phpoffice/phpspreadsheet` is approved. 29 and 15 back to ready-for-agent. The team lead builds 29 first (its QA was already waiting); 47 is next after 29 merges.

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ECallProposalController;
 use App\Http\Controllers\Api\ECallReviewController;
 use App\Http\Controllers\Api\EquipmentHistoryController;
 use App\Http\Controllers\Api\NeedsSetupController;
+use App\Http\Controllers\Api\PmComplianceReportController;
 use App\Http\Controllers\Api\PmReportController;
 use App\Http\Controllers\Api\PmTaskController;
 use App\Http\Controllers\Api\PmTaskECallController;
@@ -50,6 +51,11 @@ Route::middleware(['auth:api', RequirePasswordChange::class, BlockPendingUsers::
     Route::get('me/waiting', WaitingListController::class)->name('me.waiting.index');
     Route::get('needs-setup', NeedsSetupController::class)->name('needs-setup.index');
     Route::get('dashboard', DashboardController::class)->name('dashboard.index');
+
+    Route::middleware('can:view-reports')->prefix('reports')->name('reports.')->group(function () {
+        Route::get('pm-compliance', [PmComplianceReportController::class, 'index'])->name('pm-compliance.index');
+        Route::get('pm-compliance/export', [PmComplianceReportController::class, 'export'])->name('pm-compliance.export');
+    });
 
     Route::apiResource('vendors', VendorController::class)->except(['destroy']);
     Route::get('vendors/{vendor}/price-list-items', [PriceListItemController::class, 'index'])->name('vendors.price-list-items.index');
