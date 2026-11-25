@@ -48,7 +48,7 @@ final class DashboardKpis
             ],
             'equipment' => [
                 'operating' => self::operating($equipment),
-                'requiring_attention' => self::requiringAttention($equipment, $today),
+                'requiring_attention' => self::requiringAttention($equipment, $filters['vendor_id'] ?? null, $today),
             ],
         ];
     }
@@ -126,10 +126,14 @@ final class DashboardKpis
     }
 
     /**
+     * With an effective Vendor (vendor staff are forced to their own; an internal user may pass vendor_id), the
+     * overdue_pm, failed_items and emergency_e_call reasons count only that Vendor's PM Tasks and E-Calls, so a Site's
+     * former Vendor's records never show (issue 49). not_operating comes from master data and is not narrowed.
+     *
      * @param  list<Equipment>  $equipment
      * @return array{count: int, items: list<array{equipment_id: string, equipment_name: string, site_id: string, reasons: list<string>}>}
      */
-    private static function requiringAttention(array $equipment, CarbonImmutable $today): array
+    private static function requiringAttention(array $equipment, ?int $vendorId, CarbonImmutable $today): array
     {
         if ($equipment === []) {
             return ['count' => 0, 'items' => []];
@@ -138,15 +142,17 @@ final class DashboardKpis
         $equipmentIds = array_values(array_unique(array_map(fn (Equipment $item): string => $item->id, $equipment)));
 
         $openTasks = PmTask::query()->open()->whereIn('equipment_id', $equipmentIds)
+            ->when($vendorId !== null, fn ($query) => $query->where('vendor_id', $vendorId))
             ->get(['equipment_id', 'status', 'due_date', 'work_done_date'])
             ->groupBy('equipment_id');
 
-        $withFailedItems = self::equipmentWithFailedLatestReport($equipmentIds);
+        $withFailedItems = self::equipmentWithFailedLatestReport($equipmentIds, $vendorId);
 
         $withEmergency = array_flip(ECall::query()
             ->whereIn('equipment_id', $equipmentIds)
             ->where('priority', ECallPriority::Emergency)
             ->whereNotIn('status', DashboardCounts::CLOSED_E_CALL_STATUSES)
+            ->when($vendorId !== null, fn ($query) => $query->where('vendor_id', $vendorId))
             ->distinct()
             ->pluck('equipment_id')
             ->all());
@@ -179,16 +185,18 @@ final class DashboardKpis
 
     /**
      * The Equipment whose most recent Completed PM Task (latest due date, then highest id) has a failed response on
-     * the highest revision of its PM Report. Two queries.
+     * the highest revision of its PM Report. With a Vendor, only that Vendor's Completed PM Tasks are considered, so
+     * "most recent" means that Vendor's most recent. Two queries.
      *
      * @param  list<string>  $equipmentIds
      * @return array<string, int> Equipment IDs as keys.
      */
-    private static function equipmentWithFailedLatestReport(array $equipmentIds): array
+    private static function equipmentWithFailedLatestReport(array $equipmentIds, ?int $vendorId): array
     {
         $latestTaskIdByEquipment = PmTask::query()
             ->where('status', PmStatus::Completed)
             ->whereIn('equipment_id', $equipmentIds)
+            ->when($vendorId !== null, fn ($query) => $query->where('vendor_id', $vendorId))
             ->orderBy('due_date')
             ->orderBy('id')
             ->toBase()
