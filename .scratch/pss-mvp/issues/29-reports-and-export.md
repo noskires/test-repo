@@ -25,13 +25,13 @@ The original combined criteria are replaced by the ones below. The `view-reports
 
 ## Acceptance criteria
 
-- [ ] `GET /api/reports/pm-compliance` returns JSON `{period: {from, to}, summary: {due, on_time, compliance}, rows: [...]}`. `summary` is exactly what the dashboard's `pm.compliance` gives for the same period and filters: reuse `PmCompliance` / `DashboardKpis`, don't copy the logic.
-- [ ] `rows`: one per PM Task counted as due in the period by the issue 28 PM Compliance rule, sorted by due date, then Site name, then Equipment name. Each row has `site_name`, `equipment_name`, `equipment_category`, `vendor_name`, `due_date`, `work_done_date` (null if none), `status` and `on_time` (true / false). Names come from the PM Task's snapshots and the PSS Vendor table. **These columns are provisional (product-owner); see Open questions.**
-- [ ] Filters: `from`, `to` (same validation and Manila current-month default as the dashboard, issue 42), `site_id`, `equipment_category_id` and `vendor_id`, which apply as they do on the dashboard.
-- [ ] `GET /api/reports/pm-compliance/export` takes the same filters and downloads `.xlsx` (`phpoffice/phpspreadsheet`, approved 2026-11-22; add it with composer). It has one sheet: a header row with the same columns in the same order, then the data rows. Dates are `Y-m-d` text, and `on_time` is `Yes` / `No`. A feature test opens the downloaded file and checks the header row and the data rows against fixtures. The filename includes the period, e.g. `pm-compliance-2026-11-01-to-2026-11-30.xlsx`.
-- [ ] A `view-reports` gate allows only users with the `system-administrator` or `management-viewer` role (issue 04). Everyone else, including other internal employees, gets 403 on both endpoints. A pending user gets 403 through the existing pending block. One test per outcome.
-- [ ] Vendor scoping follows issues 04/45/49: internal users see every Site. A vendor-linked Management / Viewer is forced to their own Vendor (their own `vendor_id`, ignoring any `vendor_id` they pass) and sees only their Vendor's PM Tasks. Test it with another Vendor's PM Task on the same Site.
-- [ ] No package other than `phpoffice/phpspreadsheet` is added. The query count doesn't grow with the number of rows.
+- [x] `GET /api/reports/pm-compliance` returns JSON `{period: {from, to}, summary: {due, on_time, compliance}, rows: [...]}`. `summary` is exactly what the dashboard's `pm.compliance` gives for the same period and filters: reuse `PmCompliance` / `DashboardKpis`, don't copy the logic.
+- [x] `rows`: one per PM Task counted as due in the period by the issue 28 PM Compliance rule, sorted by due date, then Site name, then Equipment name. Each row has `site_name`, `equipment_name`, `equipment_category`, `vendor_name`, `due_date`, `work_done_date` (null if none), `status` and `on_time` (true / false). Names come from the PM Task's snapshots and the PSS Vendor table. **These columns are provisional (product-owner); see Open questions.**
+- [x] Filters: `from`, `to` (same validation and Manila current-month default as the dashboard, issue 42), `site_id`, `equipment_category_id` and `vendor_id`, which apply as they do on the dashboard.
+- [x] `GET /api/reports/pm-compliance/export` takes the same filters and downloads `.xlsx` (`phpoffice/phpspreadsheet`, approved 2026-11-22; add it with composer). It has one sheet: a header row with the same columns in the same order, then the data rows. Dates are `Y-m-d` text, and `on_time` is `Yes` / `No`. A feature test opens the downloaded file and checks the header row and the data rows against fixtures. The filename includes the period, e.g. `pm-compliance-2026-11-01-to-2026-11-30.xlsx`.
+- [x] A `view-reports` gate allows only users with the `system-administrator` or `management-viewer` role (issue 04). Everyone else, including other internal employees, gets 403 on both endpoints. A pending user gets 403 through the existing pending block. One test per outcome.
+- [x] Vendor scoping follows issues 04/45/49: internal users see every Site. A vendor-linked Management / Viewer is forced to their own Vendor (their own `vendor_id`, ignoring any `vendor_id` they pass) and sees only their Vendor's PM Tasks. Test it with another Vendor's PM Task on the same Site.
+- [x] No package other than `phpoffice/phpspreadsheet` is added. The query count doesn't grow with the number of rows.
 
 ## Comments
 
@@ -97,3 +97,9 @@ Held before any code was written. The team lead says adding `phpoffice/phpspread
 7. **Gate order**: the pending block runs before the gate, so a pending user always gets the pending 403, even with a role. The gate runs before validation, so a user without access gets 403, not 422, for bad filters.
 8. **Vendor scoping**: reuses `DashboardCounts::visibleFilters()`, so a vendor-linked user's `vendor_id` replaces any `vendor_id` they pass. Unknown `site_id`, category or vendor values give an empty report rather than an error, as on the dashboard.
 9. **Performance**: two queries whatever the row count: the PM Tasks, then the Vendors loaded with them (`with('vendor:id,name')`). This is tested for both endpoints. There is no row limit or pagination; the export builds the whole sheet in memory before streaming. That is fine for a month of PM Tasks, but a multi-year period over many Sites could use a lot of memory. Add a limit later if needed.
+
+### QA (qa-29, 2026-11-25): PASS
+
+- `php artisan test --compact` (backend): 1393 passed, 6529 assertions. `vendor/bin/pint --test`: pass. No frontend change.
+- `PmComplianceReportApiTest` has 16 tests: one per gate outcome, Vendor scoping with another Vendor's PM Task on the same Site, the xlsx file opened with PhpSpreadsheet (header row, data rows, one sheet, cell types, filename, content type), the query count for both endpoints, and rows == summary.due == dashboard pm.compliance on the first and last day.
+- The only new package is `phpoffice/phpspreadsheet` (and its dependencies). No master tables were created.
