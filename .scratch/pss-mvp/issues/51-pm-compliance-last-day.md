@@ -1,6 +1,7 @@
 # 51 — PM Compliance: include PM Tasks due on the last day of the period (chore, bug)
 
-Status: ready-for-agent
+Status: done
+Merged: PR #53 (bf4a5d4), 2026-11-25
 Blocked by: 28, 42
 Type: chore
 
