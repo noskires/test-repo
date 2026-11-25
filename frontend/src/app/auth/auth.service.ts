@@ -19,10 +19,13 @@ export type UserAccess = 'internal' | 'vendor' | 'pending';
 /** Shape of `GET /api/auth/me`. */
 export interface CurrentUser {
   employee_id: string;
+  email: string | null;
   name: string;
   roles: string[];
   vendor_id: number | null;
   access: UserAccess;
+  /** A temporary password (new user or admin reset) must be changed before using PSS (issue 44). */
+  must_change_password: boolean;
 }
 
 /** Shape of `POST /api/auth/login` and `POST /api/auth/refresh`. */
@@ -30,6 +33,14 @@ export interface TokenResponse {
   access_token: string;
   token_type: string;
   expires_in: number;
+  must_change_password: boolean;
+}
+
+/** Body of `POST /api/auth/password` (issue 44). */
+export interface ChangePasswordRequest {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
 }
 
 export const AUTH_API = {
@@ -37,6 +48,7 @@ export const AUTH_API = {
   refresh: '/api/auth/refresh',
   logout: '/api/auth/logout',
   me: '/api/auth/me',
+  password: '/api/auth/password',
 } as const;
 
 /**
@@ -59,6 +71,7 @@ export class AuthService {
   readonly user = this.userSignal.asReadonly();
   readonly isSignedIn = computed(() => this.tokenSignal() !== null && this.userSignal() !== null);
   readonly isPending = computed(() => this.userSignal()?.access === 'pending');
+  readonly mustChangePassword = computed(() => this.userSignal()?.must_change_password === true);
 
   hasToken(): boolean {
     return this.tokenSignal() !== null;
@@ -69,19 +82,27 @@ export class AuthService {
     return roles.some((role) => mine.includes(role));
   }
 
-  /** Signs in, stores the token, then loads the signed-in user. Stores nothing on failure. */
-  login(employeeId: string, password: string): Observable<CurrentUser> {
+  /** Signs in with email and password, stores the token, then loads the signed-in user. Stores nothing on failure. */
+  login(email: string, password: string): Observable<CurrentUser> {
+    return this.http.post<TokenResponse>(AUTH_API.login, { email, password }).pipe(
+      tap((response) => this.storeToken(response.access_token)),
+      switchMap(() => this.http.get<CurrentUser>(AUTH_API.me)),
+      tap((user) => this.userSignal.set(user)),
+      catchError((error) => {
+        this.clearSession();
+        throw error;
+      }),
+    );
+  }
+
+  /**
+   * Changes the signed-in user's own password (issue 44). On success the server clears
+   * `must_change_password` and returns the updated user, which replaces the cached one.
+   */
+  changePassword(request: ChangePasswordRequest): Observable<CurrentUser> {
     return this.http
-      .post<TokenResponse>(AUTH_API.login, { employee_id: employeeId, password })
-      .pipe(
-        tap((response) => this.storeToken(response.access_token)),
-        switchMap(() => this.http.get<CurrentUser>(AUTH_API.me)),
-        tap((user) => this.userSignal.set(user)),
-        catchError((error) => {
-          this.clearSession();
-          throw error;
-        }),
-      );
+      .post<CurrentUser>(AUTH_API.password, request)
+      .pipe(tap((user) => this.userSignal.set(user)));
   }
 
   /** Calls the logout API, then always clears the session and goes to the login screen. */

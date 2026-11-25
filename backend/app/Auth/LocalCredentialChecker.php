@@ -3,28 +3,27 @@
 namespace App\Auth;
 
 use App\Models\User;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * Checks the password against the hashed users.password (demo accounts from DemoAccountsSeeder). Local and testing only.
+ * Checks the password against the hashed users.password of the user with that email, in every environment (issue 44).
+ * A user without an email or a password never matches. An unknown email still costs one hash check, so the response
+ * time doesn't tell who is registered (Q16).
  */
 class LocalCredentialChecker implements CredentialChecker
 {
-    /**
-     * @throws LocalCredentialCheckerNotAllowed outside local and testing
-     */
-    public function __construct(Application $app)
+    private static ?string $dummyHash = null;
+
+    public function isValid(string $email, string $password): bool
     {
-        if (! $app->environment('local', 'testing')) {
-            throw LocalCredentialCheckerNotAllowed::inEnvironment($app->environment());
+        $hashedPassword = $email === '' ? null : User::query()->where('email', $email)->value('password');
+
+        if (! is_string($hashedPassword)) {
+            Hash::check($password, self::$dummyHash ??= Hash::make('pss-dummy-password'));
+
+            return false;
         }
-    }
 
-    public function isValid(string $employeeId, string $password): bool
-    {
-        $hashedPassword = User::query()->where('employee_id', $employeeId)->value('password');
-
-        return is_string($hashedPassword) && Hash::check($password, $hashedPassword);
+        return Hash::check($password, $hashedPassword);
     }
 }

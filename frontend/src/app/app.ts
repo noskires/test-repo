@@ -1,12 +1,12 @@
 import { Component, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { LucideBuildingComplex, LucideLogOut } from '@lucide/angular';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { LucideBuildingComplex, LucideKeyRound, LucideLogOut } from '@lucide/angular';
 import { AuthService } from './auth/auth.service';
 import { Menu } from './menu/menu';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Menu, LucideBuildingComplex, LucideLogOut],
+  imports: [RouterOutlet, RouterLink, Menu, LucideBuildingComplex, LucideKeyRound, LucideLogOut],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

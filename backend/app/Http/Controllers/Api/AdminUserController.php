@@ -7,6 +7,7 @@ use App\Enums\UserAccess;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GrantUserRoleRequest;
 use App\Http\Requests\LinkUserVendorRequest;
+use App\Http\Requests\ResetUserPasswordRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserAccessRequest;
 use App\Http\Resources\UserResource;
@@ -44,16 +45,21 @@ class AdminUserController extends Controller
     /**
      * Add a PSS user (Q14): an employee from the master data, classified as internal or a Vendor's staff, with no
      * roles. Linking to a Vendor goes through the same rules as PUT .../vendor (a current Site EIC is refused), and
-     * nothing is stored when it is refused.
+     * nothing is stored when it is refused. The user gets the email and a temporary password to change on first
+     * sign-in (issue 44).
      */
     public function store(StoreUserRequest $request, MasterDataDirectory $directory): JsonResponse
     {
         $employeeId = $request->validated('employee_id');
         $vendorId = $request->validated('vendor_id');
+        $email = $request->validated('email');
+        $temporaryPassword = $request->validated('temporary_password');
         $admin = $request->user();
 
-        $user = DB::transaction(function () use ($employeeId, $vendorId, $directory, $admin): User {
+        $user = DB::transaction(function () use ($employeeId, $vendorId, $email, $temporaryPassword, $directory, $admin): User {
             $user = new User(['employee_id' => $employeeId, 'name' => $directory->findEmployee($employeeId)->name]);
+            $user->email = $email;
+            $user->setTemporaryPassword($temporaryPassword);
 
             if ($vendorId === null) {
                 $user->markInternal($admin);
@@ -66,6 +72,17 @@ class AdminUserController extends Controller
         });
 
         return UserResource::make($user->load('roles'))->response()->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    /**
+     * Reset a forgotten password (issue 44): the user gets a new temporary password to change on their next sign-in.
+     * Tokens already issued stay valid until they expire, but the temporary-password check blocks them.
+     */
+    public function resetPassword(ResetUserPasswordRequest $request, User $user): UserResource
+    {
+        $user->setTemporaryPassword($request->validated('temporary_password'));
+
+        return UserResource::make($user->load('roles'));
     }
 
     /**

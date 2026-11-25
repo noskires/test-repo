@@ -70,8 +70,8 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Login checks credentials only through this port (ADR 0004). Until the external checker lands (issue 44) every
-     * environment gets the local one, which itself refuses to resolve outside local and testing.
+     * Login checks credentials only through this port (ADR 0004). Every environment checks email and password against
+     * the users table (issue 44, ADR 0004 amendment 2026-11-24).
      */
     private function registerCredentialChecker(): void
     {

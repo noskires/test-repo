@@ -67,7 +67,7 @@ class VendorAdminRefusalTest extends TestCase
             ->addEmployee(new Employee(id: 'EMP-NEW', name: 'Nina'));
 
         $this->actingAs($this->admin)
-            ->postJson('/api/admin/users', ['employee_id' => 'EMP-NEW', 'vendor_id' => $vendor->id])
+            ->postJson('/api/admin/users', ['employee_id' => 'EMP-NEW', 'vendor_id' => $vendor->id, 'email' => 'nina@example.test', 'temporary_password' => 'Temporary-Pass-1'])
             ->assertCreated();
         $id = User::query()->where('employee_id', 'EMP-NEW')->value('id');
 

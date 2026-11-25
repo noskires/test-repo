@@ -7,18 +7,21 @@ use App\Enums\UserAccess;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
- * A PSS user, keyed by the unique external employee_id and added by a System Administrator (ADR 0004, ADR 0005). The
- * token carries only the primary key, so roles, access and the Vendor link are read from the database on every request.
+ * A PSS user, added by a System Administrator (ADR 0004, ADR 0005). They sign in with their unique email and password
+ * (issue 44); the unique employee_id links them to their imported employee record. The token carries only the primary
+ * key, so roles, access and the Vendor link are read from the database on every request.
  *
  * Every user has an access state (UserAccess). This model is the one place that keeps "vendor exactly when vendor_id is
  * set": see the saving hook in booted().
@@ -37,6 +40,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $attributes = [
         'access' => 'pending',
+        'must_change_password' => false,
     ];
 
     /**
@@ -67,7 +71,43 @@ class User extends Authenticatable implements JWTSubject
             'vendor_id' => 'integer',
             'access' => UserAccess::class,
             'access_set_at' => 'datetime',
+            'must_change_password' => 'boolean',
         ];
+    }
+
+    /**
+     * The sign-in email (issue 44), stored trimmed and lower-case so lookups and the unique index ignore case.
+     *
+     * @return Attribute<string|null, string|null>
+     */
+    protected function email(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value): ?string => self::normalizeEmail($value));
+    }
+
+    /**
+     * Trim and lower-case an email the way it is stored. Null stays null.
+     */
+    public static function normalizeEmail(?string $email): ?string
+    {
+        return $email === null ? null : Str::lower(trim($email));
+    }
+
+    /**
+     * Give this user a temporary password (a new user, an admin reset or the first-admin command): they must change it
+     * on their next sign-in before using PSS. Saved here.
+     */
+    public function setTemporaryPassword(string $password): void
+    {
+        $this->forceFill(['password' => $password, 'must_change_password' => true])->save();
+    }
+
+    /**
+     * The user's own new password: clears the temporary-password flag. Saved here.
+     */
+    public function changePassword(string $password): void
+    {
+        $this->forceFill(['password' => $password, 'must_change_password' => false])->save();
     }
 
     /**

@@ -10,7 +10,13 @@ import {
   UrlTree,
 } from '@angular/router';
 import { firstValueFrom, isObservable, Observable, of } from 'rxjs';
-import { adminGuard, authGuard, pendingGuard, reportsGuard } from './auth.guards';
+import {
+  adminGuard,
+  authGuard,
+  changePasswordGuard,
+  pendingGuard,
+  reportsGuard,
+} from './auth.guards';
 import { authInterceptor } from './auth.interceptor';
 import { AuthService, CurrentUser, TOKEN_STORAGE_KEY, UserAccess } from './auth.service';
 
@@ -20,8 +26,17 @@ function user(
   roles: string[],
   vendor_id: number | null = null,
   access: UserAccess = vendor_id === null ? 'internal' : 'vendor',
+  mustChangePassword = false,
 ): CurrentUser {
-  return { employee_id: 'EMP-1', name: 'Someone', roles, vendor_id, access };
+  return {
+    employee_id: 'EMP-1',
+    email: 'someone@pss.test',
+    name: 'Someone',
+    roles,
+    vendor_id,
+    access,
+    must_change_password: mustChangePassword,
+  };
 }
 
 function setup(platform: 'browser' | 'server' = 'browser') {
@@ -134,6 +149,46 @@ describe('route guards', () => {
     it('pendingGuard sends an unauthenticated user to login', async () => {
       const { router } = setup();
       expect(urlOf(await run(pendingGuard), router)).toBe('/login');
+    });
+  });
+
+  describe('temporary passwords (issue 44)', () => {
+    it.each([
+      ['authGuard', authGuard],
+      ['adminGuard', adminGuard],
+      ['reportsGuard', reportsGuard],
+      ['pendingGuard', pendingGuard],
+    ] as const)(
+      '%s sends a user who must change the password to that screen',
+      async (_l, guard) => {
+        const { auth, router } = setup();
+        auth.setSession('tok', user(['system-administrator'], null, 'internal', true));
+        expect(urlOf(await run(guard), router)).toBe('/change-password');
+      },
+    );
+
+    it('a pending user with a temporary password changes it before the waiting page', async () => {
+      const { auth, router } = setup();
+      auth.setSession('tok', user([], null, 'pending', true));
+      expect(urlOf(await run(authGuard), router)).toBe('/change-password');
+    });
+
+    it('changePasswordGuard lets any signed-in user in', async () => {
+      const { auth, router } = setup();
+      for (const signedIn of [
+        user([], null, 'internal', true),
+        user([]),
+        user([], null, 'pending'),
+        user([], 7),
+      ]) {
+        auth.setSession('tok', signedIn);
+        expect(urlOf(await run(changePasswordGuard), router)).toBe(true);
+      }
+    });
+
+    it('changePasswordGuard sends an unauthenticated user to login', async () => {
+      const { router } = setup();
+      expect(urlOf(await run(changePasswordGuard), router)).toBe('/login');
     });
   });
 

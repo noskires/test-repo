@@ -28,11 +28,11 @@ class AuthApiTest extends TestCase
 
         $this->directory = $this->app->make(MasterDataDirectory::class);
         $this->directory->addEmployee(new Employee(id: 'EMP-1', name: 'Rina Requestor'));
-        User::factory()->create(['employee_id' => 'EMP-1', 'name' => 'Rina Requestor']);
+        User::factory()->create(['employee_id' => 'EMP-1', 'name' => 'Rina Requestor', 'email' => 'rina@example.test']);
     }
 
     /**
-     * Bind a credential checker that accepts exactly these employee ID and password pairs.
+     * Bind a credential checker that accepts exactly these email and password pairs.
      *
      * @param  array<string, string>  $passwords
      */
@@ -45,16 +45,16 @@ class AuthApiTest extends TestCase
              */
             public function __construct(private array $passwords) {}
 
-            public function isValid(string $employeeId, string $password): bool
+            public function isValid(string $email, string $password): bool
             {
-                return ($this->passwords[$employeeId] ?? null) === $password;
+                return ($this->passwords[$email] ?? null) === $password;
             }
         });
     }
 
-    private function login(string $employeeId = 'EMP-1', string $password = 'secret'): string
+    private function login(string $email = 'rina@example.test', string $password = 'secret'): string
     {
-        return $this->postJson('/api/auth/login', ['employee_id' => $employeeId, 'password' => $password])
+        return $this->postJson('/api/auth/login', ['email' => $email, 'password' => $password])
             ->assertOk()
             ->json('access_token');
     }
@@ -71,51 +71,69 @@ class AuthApiTest extends TestCase
 
     public function test_login_returns_a_bearer_token_that_lives_60_minutes(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
 
-        $this->postJson('/api/auth/login', ['employee_id' => 'EMP-1', 'password' => 'secret'])
+        $this->postJson('/api/auth/login', ['email' => 'rina@example.test', 'password' => 'secret'])
             ->assertOk()
-            ->assertJsonStructure(['access_token', 'token_type', 'expires_in'])
+            ->assertJsonStructure(['access_token', 'token_type', 'expires_in', 'must_change_password'])
             ->assertJsonPath('token_type', 'bearer')
-            ->assertJsonPath('expires_in', 3600);
+            ->assertJsonPath('expires_in', 3600)
+            ->assertJsonPath('must_change_password', false);
     }
 
     /**
-     * The password is checked first (Q16): a wrong one gives the same 401 whether or not the employee is a PSS user.
+     * The password is checked first (Q16): a wrong one gives the same 401 whether or not the email belongs to a PSS
+     * user, and an unknown email gives that same 401.
      */
-    public function test_wrong_credentials_give_the_same_401_for_registered_and_unregistered_employees(): void
+    public function test_wrong_credentials_give_the_same_401_for_known_and_unknown_emails(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret', 'EMP-2' => 'secret']);
-        $this->directory->addEmployee(new Employee(id: 'EMP-2', name: 'Uma Unregistered'));
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
 
-        $registered = $this->postJson('/api/auth/login', ['employee_id' => 'EMP-1', 'password' => 'wrong'])
+        $known = $this->postJson('/api/auth/login', ['email' => 'rina@example.test', 'password' => 'wrong'])
             ->assertUnauthorized()
-            ->assertExactJson(['message' => 'Invalid employee ID or password.']);
-        $unregistered = $this->postJson('/api/auth/login', ['employee_id' => 'EMP-2', 'password' => 'wrong'])
+            ->assertExactJson(['message' => 'Invalid email or password.']);
+        $unknown = $this->postJson('/api/auth/login', ['email' => 'nobody@example.test', 'password' => 'secret'])
             ->assertUnauthorized()
-            ->assertExactJson(['message' => 'Invalid employee ID or password.']);
+            ->assertExactJson(['message' => 'Invalid email or password.']);
 
-        $this->assertSame($registered->getContent(), $unregistered->getContent());
+        $this->assertSame($known->getContent(), $unknown->getContent());
         $this->assertSame(1, User::query()->count());
     }
 
+    /**
+     * Only reachable with a checker other than the local one: correct credentials for an email with no PSS user.
+     */
     public function test_correct_credentials_without_a_pss_user_give_403_no_token_and_create_no_user(): void
     {
-        $this->acceptCredentials(['EMP-2' => 'secret', 'EMP-GHOST' => 'secret']);
-        $this->directory->addEmployee(new Employee(id: 'EMP-2', name: 'Uma Unregistered'));
+        $this->acceptCredentials(['ghost@example.test' => 'secret']);
 
-        foreach (['EMP-2', 'EMP-GHOST'] as $employeeId) {
-            $this->postJson('/api/auth/login', ['employee_id' => $employeeId, 'password' => 'secret'])
-                ->assertForbidden()
-                ->assertExactJson(['message' => "Your account isn't set up in PSS yet. Ask an administrator."]);
-        }
+        $this->postJson('/api/auth/login', ['email' => 'ghost@example.test', 'password' => 'secret'])
+            ->assertForbidden()
+            ->assertExactJson(['message' => "Your account isn't set up in PSS yet. Ask an administrator."]);
 
         $this->assertSame(1, User::query()->count());
+    }
+
+    public function test_the_email_is_matched_without_regard_to_case_or_surrounding_spaces(): void
+    {
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
+
+        $this->login('  Rina@Example.TEST ');
+    }
+
+    public function test_a_user_who_must_change_their_password_is_told_so_at_login(): void
+    {
+        User::query()->where('employee_id', 'EMP-1')->sole()->forceFill(['must_change_password' => true])->save();
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
+
+        $this->postJson('/api/auth/login', ['email' => 'rina@example.test', 'password' => 'secret'])
+            ->assertOk()
+            ->assertJsonPath('must_change_password', true);
     }
 
     public function test_login_never_calls_the_master_data_directory(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
         $this->app->instance(MasterDataDirectory::class, $this->createMock(MasterDataDirectory::class));
         $this->app->make(MasterDataDirectory::class)->expects($this->never())->method($this->anything());
 
@@ -124,10 +142,10 @@ class AuthApiTest extends TestCase
 
     public function test_a_pending_user_with_a_correct_password_gets_a_token(): void
     {
-        User::factory()->pending()->create(['employee_id' => 'EMP-P']);
-        $this->acceptCredentials(['EMP-P' => 'secret']);
+        User::factory()->pending()->create(['employee_id' => 'EMP-P', 'email' => 'paula@example.test']);
+        $this->acceptCredentials(['paula@example.test' => 'secret']);
 
-        $token = $this->login('EMP-P');
+        $token = $this->login('paula@example.test');
         $this->forgetSignedInUser();
 
         $this->withToken($token)->getJson('/api/auth/me')->assertOk()->assertJsonPath('access', 'pending');
@@ -135,16 +153,34 @@ class AuthApiTest extends TestCase
 
     public function test_missing_fields_give_422(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
 
         $this->postJson('/api/auth/login', [])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['employee_id', 'password']);
+            ->assertJsonValidationErrors(['email', 'password']);
+    }
+
+    public function test_an_invalid_email_gives_422(): void
+    {
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
+
+        $this->postJson('/api/auth/login', ['email' => 'not-an-email', 'password' => 'secret'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['email']);
+    }
+
+    public function test_the_employee_id_is_no_longer_what_users_sign_in_with(): void
+    {
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
+
+        $this->postJson('/api/auth/login', ['employee_id' => 'EMP-1', 'password' => 'secret'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['email']);
     }
 
     public function test_the_token_authenticates_requests_until_it_expires_after_60_minutes(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
         $token = $this->login();
 
         $this->travel(59)->minutes();
@@ -158,7 +194,7 @@ class AuthApiTest extends TestCase
 
     public function test_refresh_returns_a_new_token_for_a_valid_token(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
         $token = $this->login();
         $this->forgetSignedInUser();
 
@@ -175,7 +211,7 @@ class AuthApiTest extends TestCase
 
     public function test_refresh_accepts_an_expired_token_inside_the_14_day_window(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
         $token = $this->login();
 
         $this->travel(14)->days();
@@ -187,7 +223,7 @@ class AuthApiTest extends TestCase
 
     public function test_refresh_gives_401_after_the_14_day_window(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
         $token = $this->login();
 
         $this->travel(14)->days();
@@ -204,7 +240,7 @@ class AuthApiTest extends TestCase
 
     public function test_logout_blacklists_the_token(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
         $token = $this->login();
         $this->forgetSignedInUser();
 
@@ -218,7 +254,7 @@ class AuthApiTest extends TestCase
 
     public function test_me_returns_the_signed_in_users_identity_roles_and_vendor(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
         $token = $this->login();
         User::query()->where('employee_id', 'EMP-1')->sole()->grantRole(PssRole::ManagementViewer);
         $this->forgetSignedInUser();
@@ -227,16 +263,18 @@ class AuthApiTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'employee_id' => 'EMP-1',
+                'email' => 'rina@example.test',
                 'name' => 'Rina Requestor',
                 'roles' => ['management-viewer'],
                 'vendor_id' => null,
                 'access' => 'internal',
+                'must_change_password' => false,
             ]);
     }
 
     public function test_me_reads_the_vendor_link_from_the_database_on_each_request(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
         $token = $this->login();
         $vendor = Vendor::factory()->create();
         User::query()->where('employee_id', 'EMP-1')->sole()->forceFill(['vendor_id' => $vendor->id])->save();
@@ -260,7 +298,7 @@ class AuthApiTest extends TestCase
 
     public function test_the_api_routes_accept_the_jwt(): void
     {
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
         $token = $this->login();
         $this->forgetSignedInUser();
 
@@ -271,7 +309,7 @@ class AuthApiTest extends TestCase
     {
         $vendor = Vendor::factory()->create();
         User::query()->where('employee_id', 'EMP-1')->sole()->forceFill(['vendor_id' => $vendor->id, 'name' => 'Old Name'])->save();
-        $this->acceptCredentials(['EMP-1' => 'secret']);
+        $this->acceptCredentials(['rina@example.test' => 'secret']);
 
         $this->login();
         $this->login();

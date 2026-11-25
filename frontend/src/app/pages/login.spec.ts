@@ -21,10 +21,10 @@ function setup() {
   fixture.detectChanges();
   const el = fixture.nativeElement as HTMLElement;
 
-  function fill(employeeId: string, password: string) {
-    const id = el.querySelector<HTMLInputElement>('input[name="employee_id"]')!;
+  function fill(email: string, password: string) {
+    const id = el.querySelector<HTMLInputElement>('input[name="email"]')!;
     const pw = el.querySelector<HTMLInputElement>('input[name="password"]')!;
-    id.value = employeeId;
+    id.value = email;
     id.dispatchEvent(new Event('input'));
     pw.value = password;
     pw.dispatchEvent(new Event('input'));
@@ -39,42 +39,68 @@ describe('LoginPage', () => {
   beforeEach(() => localStorage.clear());
   afterEach(() => localStorage.clear());
 
-  it('signs in and goes to the home page', async () => {
-    const { fill, http, navigate, fixture } = setup();
-    fill('EMP-9001', 'password');
-
-    const login = http.expectOne('/api/auth/login');
-    expect(login.request.body).toEqual({ employee_id: 'EMP-9001', password: 'password' });
-    login.flush({ access_token: 'tok', token_type: 'bearer', expires_in: 3600 });
-    http.expectOne('/api/auth/me').flush({
+  function me(mustChangePassword: boolean) {
+    return {
       employee_id: 'EMP-9001',
+      email: 'admin@pss.test',
       name: 'Ada',
       roles: ['system-administrator'],
       vendor_id: null,
       access: 'internal',
+      must_change_password: mustChangePassword,
+    };
+  }
+
+  it('signs in with email and password and goes to the home page', async () => {
+    const { fill, http, navigate, fixture } = setup();
+    fill(' admin@pss.test ', 'password');
+
+    const login = http.expectOne('/api/auth/login');
+    expect(login.request.body).toEqual({ email: 'admin@pss.test', password: 'password' });
+    login.flush({
+      access_token: 'tok',
+      token_type: 'bearer',
+      expires_in: 3600,
+      must_change_password: false,
     });
+    http.expectOne('/api/auth/me').flush(me(false));
     await fixture.whenStable();
 
     expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBe('tok');
     expect(navigate).toHaveBeenCalledWith('/');
   });
 
+  it('goes to the change-password screen after signing in with a temporary password', async () => {
+    const { fill, http, navigate, fixture } = setup();
+    fill('admin@pss.test', 'Temporary-Pass-1');
+
+    http.expectOne('/api/auth/login').flush({
+      access_token: 'tok',
+      token_type: 'bearer',
+      expires_in: 3600,
+      must_change_password: true,
+    });
+    http.expectOne('/api/auth/me').flush(me(true));
+    await fixture.whenStable();
+
+    expect(navigate).toHaveBeenCalledWith('/change-password');
+    expect(navigate).not.toHaveBeenCalledWith('/');
+  });
+
   it('shows the error on 401 and stores nothing', async () => {
     const { fill, http, navigate, fixture, el } = setup();
-    fill('EMP-9001', 'wrong');
+    fill('admin@pss.test', 'wrong');
 
     http
       .expectOne('/api/auth/login')
       .flush(
-        { message: 'Invalid employee ID or password.' },
+        { message: 'Invalid email or password.' },
         { status: 401, statusText: 'Unauthorized' },
       );
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(el.querySelector('[role="alert"]')?.textContent).toContain(
-      'Invalid employee ID or password.',
-    );
+    expect(el.querySelector('[role="alert"]')?.textContent).toContain('Invalid email or password.');
     expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
     expect(navigate).not.toHaveBeenCalled();
     http.verify();
@@ -82,7 +108,7 @@ describe('LoginPage', () => {
 
   it('shows the backend message on 403 (not set up in PSS) and stores nothing', async () => {
     const { fill, http, navigate, fixture, el } = setup();
-    fill('EMP-2000', 'password');
+    fill('someone@pss.test', 'password');
 
     http
       .expectOne('/api/auth/login')
@@ -103,7 +129,7 @@ describe('LoginPage', () => {
 
   it('shows a generic error when the server fails', async () => {
     const { fill, http, fixture, el } = setup();
-    fill('EMP-9001', 'password');
+    fill('admin@pss.test', 'password');
 
     http.expectOne('/api/auth/login').flush({}, { status: 500, statusText: 'Server Error' });
     await fixture.whenStable();
@@ -113,7 +139,7 @@ describe('LoginPage', () => {
     expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
   });
 
-  it('does not submit with an empty employee ID or password', () => {
+  it('does not submit with an empty email or password', () => {
     const { fill, http } = setup();
     fill('', '');
     http.expectNone('/api/auth/login');
@@ -126,6 +152,7 @@ describe('LoginPage', () => {
     expect(button.classList).toContain('btn');
     expect(button.classList).toContain('accent');
     expect(button.textContent).toContain('Sign in');
-    expect(el.querySelector('input[name="employee_id"]')!.classList).toContain('mono');
+    expect(el.querySelector<HTMLInputElement>('input[name="email"]')!.type).toBe('email');
+    expect(el.querySelector('input[name="employee_id"]')).toBeNull();
   });
 });

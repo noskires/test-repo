@@ -23,6 +23,8 @@ describe('PendingPage', () => {
       roles: [],
       vendor_id: null,
       access: 'pending',
+      email: null,
+      must_change_password: false,
     });
   });
 

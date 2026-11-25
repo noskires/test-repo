@@ -75,6 +75,8 @@ describe('Menu component', () => {
         roles,
         vendor_id: null,
         access: 'internal',
+        email: null,
+        must_change_password: false,
       });
     }
     const fixture = TestBed.createComponent(Menu);

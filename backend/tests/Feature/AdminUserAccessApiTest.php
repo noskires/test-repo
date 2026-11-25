@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Vendor;
 use Closure;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -34,7 +35,7 @@ class AdminUserAccessApiTest extends TestCase
         $directory->addEmployee(new Employee(id: 'EMP-NEW', name: 'Nina Newcomer'));
         $directory->addEmployee(new Employee(id: 'EMP-EIC', name: 'Eric Engineer'));
 
-        $this->admin = User::factory()->create(['employee_id' => 'EMP-ADMIN', 'name' => 'Ada Admin']);
+        $this->admin = User::factory()->create(['employee_id' => 'EMP-ADMIN', 'name' => 'Ada Admin', 'email' => 'ada@example.test']);
         $this->admin->grantRole(PssRole::SystemAdministrator);
         $this->travelTo('2026-11-24 09:30:00');
     }
@@ -43,16 +44,23 @@ class AdminUserAccessApiTest extends TestCase
     {
         $this->actingAs($this->admin);
 
-        $this->postJson('/api/admin/users', ['employee_id' => 'EMP-NEW', 'access' => 'internal'])
+        $this->postJson('/api/admin/users', ['employee_id' => 'EMP-NEW', 'access' => 'internal', 'email' => 'nina@example.test', 'temporary_password' => 'Temporary-Pass-1'])
             ->assertCreated()
             ->assertJsonPath('data.employee_id', 'EMP-NEW')
             ->assertJsonPath('data.name', 'Nina Newcomer')
             ->assertJsonPath('data.roles', [])
             ->assertJsonPath('data.vendor_id', null)
             ->assertJsonPath('data.access', 'internal')
-            ->assertJsonStructure(['data' => ['id', 'employee_id', 'name', 'roles', 'vendor_id', 'access']]);
+            ->assertJsonPath('data.email', 'nina@example.test')
+            ->assertJsonPath('data.must_change_password', true)
+            ->assertJsonMissingPath('data.password')
+            ->assertJsonMissingPath('data.temporary_password')
+            ->assertJsonStructure(['data' => ['id', 'employee_id', 'email', 'name', 'roles', 'vendor_id', 'access', 'must_change_password']]);
 
         $user = User::query()->where('employee_id', 'EMP-NEW')->sole();
+        $this->assertTrue($user->must_change_password);
+        $this->assertNotSame('Temporary-Pass-1', $user->getAuthPassword());
+        $this->assertTrue(Hash::check('Temporary-Pass-1', $user->getAuthPassword()));
         $this->assertSame(UserAccess::Internal, $user->access);
         $this->assertSame($this->admin->id, $user->access_set_by_user_id);
         $this->assertSame([], $user->roleKeys());
@@ -63,7 +71,7 @@ class AdminUserAccessApiTest extends TestCase
         $vendor = Vendor::factory()->create();
         $this->actingAs($this->admin);
 
-        $this->postJson('/api/admin/users', ['employee_id' => 'EMP-NEW', 'vendor_id' => $vendor->id])
+        $this->postJson('/api/admin/users', ['employee_id' => 'EMP-NEW', 'vendor_id' => $vendor->id, 'email' => 'nina@example.test', 'temporary_password' => 'Temporary-Pass-1'])
             ->assertCreated()
             ->assertJsonPath('data.vendor_id', $vendor->id)
             ->assertJsonPath('data.access', 'vendor');
@@ -78,15 +86,23 @@ class AdminUserAccessApiTest extends TestCase
      */
     public static function invalidNewUsers(): array
     {
+        $valid = ['email' => 'nina@example.test', 'temporary_password' => 'Temporary-Pass-1'];
+
         return [
-            'missing employee id' => [['access' => 'internal'], 'employee_id'],
-            'employee unknown to master data' => [['employee_id' => 'EMP-GHOST', 'access' => 'internal'], 'employee_id'],
-            'employee already a pss user' => [['employee_id' => 'EMP-ADMIN', 'access' => 'internal'], 'employee_id'],
-            'neither access nor vendor' => [['employee_id' => 'EMP-NEW'], 'access'],
-            'both access and vendor' => [['employee_id' => 'EMP-NEW', 'access' => 'internal', 'vendor_id' => 'VENDOR'], 'access'],
-            'access vendor' => [['employee_id' => 'EMP-NEW', 'access' => 'vendor'], 'access'],
-            'access pending' => [['employee_id' => 'EMP-NEW', 'access' => 'pending'], 'access'],
-            'unknown vendor' => [['employee_id' => 'EMP-NEW', 'vendor_id' => 999_999], 'vendor_id'],
+            'missing employee id' => [['access' => 'internal', ...$valid], 'employee_id'],
+            'employee unknown to master data' => [['employee_id' => 'EMP-GHOST', 'access' => 'internal', ...$valid], 'employee_id'],
+            'employee already a pss user' => [['employee_id' => 'EMP-ADMIN', 'access' => 'internal', ...$valid], 'employee_id'],
+            'neither access nor vendor' => [['employee_id' => 'EMP-NEW', ...$valid], 'access'],
+            'both access and vendor' => [['employee_id' => 'EMP-NEW', 'access' => 'internal', 'vendor_id' => 'VENDOR', ...$valid], 'access'],
+            'access vendor' => [['employee_id' => 'EMP-NEW', 'access' => 'vendor', ...$valid], 'access'],
+            'access pending' => [['employee_id' => 'EMP-NEW', 'access' => 'pending', ...$valid], 'access'],
+            'unknown vendor' => [['employee_id' => 'EMP-NEW', 'vendor_id' => 999_999, ...$valid], 'vendor_id'],
+            'missing email' => [['employee_id' => 'EMP-NEW', 'access' => 'internal', 'temporary_password' => 'Temporary-Pass-1'], 'email'],
+            'invalid email' => [['employee_id' => 'EMP-NEW', 'access' => 'internal', ...$valid, 'email' => 'not-an-email'], 'email'],
+            'email already used' => [['employee_id' => 'EMP-NEW', 'access' => 'internal', ...$valid, 'email' => 'ada@example.test'], 'email'],
+            'email already used in another case' => [['employee_id' => 'EMP-NEW', 'access' => 'internal', ...$valid, 'email' => 'ADA@Example.test'], 'email'],
+            'missing temporary password' => [['employee_id' => 'EMP-NEW', 'access' => 'internal', 'email' => 'nina@example.test'], 'temporary_password'],
+            'temporary password too short' => [['employee_id' => 'EMP-NEW', 'access' => 'internal', ...$valid, 'temporary_password' => 'short'], 'temporary_password'],
         ];
     }
 
@@ -115,7 +131,7 @@ class AdminUserAccessApiTest extends TestCase
         $vendor = Vendor::factory()->create();
         $this->actingAs($this->admin);
 
-        $this->postJson('/api/admin/users', ['employee_id' => 'EMP-EIC', 'vendor_id' => $vendor->id])
+        $this->postJson('/api/admin/users', ['employee_id' => 'EMP-EIC', 'vendor_id' => $vendor->id, 'email' => 'eric@example.test', 'temporary_password' => 'Temporary-Pass-1'])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['vendor_id' => 'replace them as EIC first']);
 
@@ -305,7 +321,7 @@ class AdminUserAccessApiTest extends TestCase
         foreach ([User::factory()->create(['employee_id' => 'EMP-1']), $viewer, User::factory()->vendorStaff()->create()] as $user) {
             $this->actingAs($user);
 
-            $this->postJson('/api/admin/users', ['employee_id' => 'EMP-NEW', 'access' => 'internal'])->assertForbidden();
+            $this->postJson('/api/admin/users', ['employee_id' => 'EMP-NEW', 'access' => 'internal', 'email' => 'nina@example.test', 'temporary_password' => 'Temporary-Pass-1'])->assertForbidden();
             $this->putJson("/api/admin/users/{$target->id}/access", ['access' => 'internal'])->assertForbidden();
         }
 
@@ -315,7 +331,7 @@ class AdminUserAccessApiTest extends TestCase
 
     public function test_the_new_endpoints_give_401_without_a_token(): void
     {
-        $this->postJson('/api/admin/users', ['employee_id' => 'EMP-NEW', 'access' => 'internal'])->assertUnauthorized();
+        $this->postJson('/api/admin/users', ['employee_id' => 'EMP-NEW', 'access' => 'internal', 'email' => 'nina@example.test', 'temporary_password' => 'Temporary-Pass-1'])->assertUnauthorized();
         $this->putJson("/api/admin/users/{$this->admin->id}/access", ['access' => 'internal'])->assertUnauthorized();
     }
 
