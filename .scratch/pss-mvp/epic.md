@@ -7,7 +7,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **49 — Attention reasons: count only the Vendor's own records** (PR #51, 2026-11-25)
-- In flight: none
+- In flight: **42 — Dashboard: date range and financial sums** (handed off 2026-11-25)
 - Build order (human hint, adjusted for dependencies): 42, 29 (after 42), 47 (after 44), 41, 33 (after 41), 31, 15.
 - Ready now (`ready-for-agent`, every blocker done): 15, 31, 33, 41, 42, 47. Waiting on a blocker: 29 (42).
 - Waiting on the human (`needs-info`): none. Parked post-MVP (`needs-triage`): 50.
@@ -121,3 +121,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-25: issue 44 merged as PR #50; unblocks 47. Docs review found no gaps.
 - 2026-11-25: product-owner picked 49: first in the human's build order, a small security chore that closes a cross-Vendor data leak in merged code (issue 28's attention reasons). Added the hand-off clarifications.
 - 2026-11-25: issue 49 merged as PR #51. Docs review found no gaps.
+- 2026-11-25: product-owner picked 42: next in the human's build order, it unblocks 29 (Reports), and every decision is in. Added the hand-off clarifications (event dates from Approval Records, centavo sums, by_site/by_vendor shape).
