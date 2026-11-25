@@ -1,6 +1,7 @@
 # 44 — Email and password sign-in for every environment
 
-Status: ready-for-agent
+Status: done
+Merged: PR #50 (236ba64), 2026-11-25
 Blocked by: 04, 46
 Type: task
 
