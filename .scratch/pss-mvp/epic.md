@@ -7,10 +7,10 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 ## Resume here
 
 - Last merged: **42 — Dashboard: date range and financial sums** (PR #52, 2026-11-25)
-- In flight: none
-- Build order (human hint, adjusted for dependencies): 29, 47, 41, 33 (after 41), 31, 15.
-- Ready now (`ready-for-agent`, every blocker done): 15, 29, 31, 33, 41, 47. Waiting on a blocker: none.
-- Waiting on the human (`needs-info`): none. Parked post-MVP (`needs-triage`): 50.
+- In flight: **51 — PM Compliance: include PM Tasks due on the last day** (handed off 2026-11-25)
+- Build order (human hint, adjusted for dependencies): 51 (chore, before 29), 29 (first report + export), 47, 41, 33 (after 41), 31, 15; then 52, 53, 54 once the human answers.
+- Ready now (`ready-for-agent`, every blocker done): 15, 31, 33, 41, 47, 51. Waiting on a blocker: 29 (51).
+- Waiting on the human (`needs-info`): 52, 53, 54 (report columns). Parked post-MVP (`needs-triage`): 50.
 - Doc follow-ups: none open
 
 ## Board
@@ -45,7 +45,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 26 | Equipment maintenance history | done | 11, 13, 18 | #41 |
 | 27 | Dashboard: operational counts | done | 11, 17, 21 | #42 |
 | 28 | Define dashboard and report KPIs | done | 09 | #48 |
-| 29 | Reports and export | ready-for-agent | 04, 26, 27, 28, 42 | |
+| 29 | Reports: access, xlsx export, Check-up compliance report | ready-for-agent | 04, 26, 27, 28, 42, 51 | |
 | 30 | Local dev master data fake | done | 02 | #7 |
 | 31 | Seed the default MVP PM Checklists (Genset, ACU, ATS) | ready-for-agent | 07, 03 | |
 | 32 | Admin "Needs Setup" list | done | 08, 19 | #38 |
@@ -67,6 +67,10 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 48 | Restyle the Angular app to the PSS design (lucide-angular) | done | 46 | #47 |
 | 49 | Attention reasons: count only the Vendor's own records (chore, security) | done | 28 | #51 |
 | 50 | Admin create and edit PM Checklists (parked, post-MVP) | needs-triage | 31 | |
+| 51 | PM Compliance: include PM Tasks due on the last day (chore, bug) | ready-for-agent | 28, 42 | |
+| 52 | Report: Work Order status and costs | needs-info | 29, 42 | |
+| 53 | Report: Equipment history | needs-info | 26, 29 | |
+| 54 | Report: Spend by Site and Vendor | needs-info | 29, 42 | |
 
 Other merged PRs: #1 PRD v2 docs, #2 project scaffold, #3 unblock answered issues, #15 no-duplicate-lines decision.
 
@@ -123,3 +127,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-25: issue 49 merged as PR #51. Docs review found no gaps.
 - 2026-11-25: product-owner picked 42: next in the human's build order, it unblocks 29 (Reports), and every decision is in. Added the hand-off clarifications (event dates from Approval Records, centavo sums, by_site/by_vendor shape).
 - 2026-11-25: issue 42 merged as PR #52; unblocks 29. Docs review found no gaps (GLOSSARY Dashboard entry already covers the range and financials). Open code follow-up for the product-owner: `DashboardKpis::pmCompliance` `whereBetween` on `due_date` may miss the last day on SQLite.
+- 2026-11-25: product-owner triaged the 42 follow-up into 51 (ready-for-agent: PM Compliance `whereBetween` on `due_date` may drop the last day on SQLite). Split 29: 29 now builds the `view-reports` gate, xlsx export and the Check-up compliance report (provisional columns, to confirm), and is blocked by 51 so it doesn't inherit the bug; 52, 53, 54 hold the other three reports (needs-info: columns). Picked 51: a small chore that fixes a merged KPI and comes before 29.
