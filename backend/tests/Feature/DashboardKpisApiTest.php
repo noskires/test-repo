@@ -379,8 +379,8 @@ class DashboardKpisApiTest extends TestCase
             ->assertJsonPath('data.e_calls.open', 1)
             ->assertJsonPath('data.work_orders.groups.closed', 0);
 
-        $this->assertSame(['pm', 'e_calls', 'work_orders', 'equipment'], array_keys($response->json('data')));
-        $this->assertSame(['by_status', 'compliance'], array_keys($response->json('data.pm')));
+        $this->assertSame(['pm', 'e_calls', 'work_orders', 'equipment', 'financials'], array_keys($response->json('data')));
+        $this->assertSame(['by_status', 'compliance', 'completed_in_range'], array_keys($response->json('data.pm')));
         $this->assertSame(['by_status', 'open'], array_keys($response->json('data.e_calls')));
         $this->assertSame(['by_status', 'groups'], array_keys($response->json('data.work_orders')));
         $this->assertSame(['operating', 'requiring_attention'], array_keys($response->json('data.equipment')));

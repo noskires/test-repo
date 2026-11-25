@@ -183,7 +183,7 @@ class DashboardApiTest extends TestCase
 
         $this->dashboard()
             ->assertOk()
-            ->assertExactJsonStructure(['data' => ['pm' => ['by_status' => ['scheduled', 'in_progress', 'for_validation', 'returned'], 'compliance' => ['period_from', 'period_to', 'due', 'on_time', 'percent']], 'e_calls' => ['by_status' => array_column(ECallStatus::cases(), 'value'), 'open'], 'work_orders' => ['by_status' => array_column(WorkOrderStatus::cases(), 'value'), 'groups' => ['awaiting_endorsement', 'under_implementation', 'awaiting_eic_validation', 'awaiting_billing_endorsement', 'closed']], 'equipment' => ['operating' => ['operational', 'non_operational', 'unknown'], 'requiring_attention' => ['count', 'items']]]])
+            ->assertExactJsonStructure(['data' => ['pm' => ['by_status' => ['scheduled', 'in_progress', 'for_validation', 'returned'], 'compliance' => ['period_from', 'period_to', 'due', 'on_time', 'percent'], 'completed_in_range'], 'e_calls' => ['by_status' => array_column(ECallStatus::cases(), 'value'), 'open'], 'work_orders' => ['by_status' => array_column(WorkOrderStatus::cases(), 'value'), 'groups' => ['awaiting_endorsement', 'under_implementation', 'awaiting_eic_validation', 'awaiting_billing_endorsement', 'closed']], 'equipment' => ['operating' => ['operational', 'non_operational', 'unknown'], 'requiring_attention' => ['count', 'items']], 'financials' => ['estimated' => ['total', 'by_site', 'by_vendor'], 'approved' => ['total', 'by_site', 'by_vendor'], 'billing' => ['total', 'by_site', 'by_vendor']]]])
             ->assertJsonPath('data.e_calls.by_status', [
                 'for_vendor_assessment' => 2,
                 'for_eic_review' => 1,
@@ -342,6 +342,7 @@ class DashboardApiTest extends TestCase
             fn (array $query): bool => str_contains(strtolower($query['query']), 'count(*)'),
         );
 
-        $this->assertCount(3, $countQueries);
+        // Three status sections plus pm.completed_in_range (issue 42).
+        $this->assertCount(4, $countQueries);
     }
 }

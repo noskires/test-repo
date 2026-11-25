@@ -30,12 +30,13 @@ final class DashboardKpis
 {
     /**
      * @param  array{site_id?: string, equipment_category_id?: string, vendor_id?: int}  $filters
+     * @param  array{CarbonImmutable, CarbonImmutable}|null  $period  The dashboard's from/to (issue 42); the default period when null.
      * @return array{pm: array{compliance: array<string, mixed>}, equipment: array<string, mixed>}
      */
-    public static function for(User $user, array $filters, MasterDataDirectory $directory, CarbonImmutable $today): array
+    public static function for(User $user, array $filters, MasterDataDirectory $directory, CarbonImmutable $today, ?array $period = null): array
     {
         $filters = DashboardCounts::visibleFilters($user, $filters);
-        [$from, $to] = self::defaultPeriod($today);
+        [$from, $to] = $period ?? self::defaultPeriod($today);
         $equipment = self::coveredEquipment($filters, $directory);
 
         return [
@@ -54,7 +55,7 @@ final class DashboardKpis
     }
 
     /**
-     * Provisional (until issue 42 adds a date range): the current calendar month in the app timezone (Asia/Manila).
+     * The dashboard period when no from/to is given (provisional, issue 42): the current calendar month in the app timezone (Asia/Manila).
      *
      * @return array{CarbonImmutable, CarbonImmutable}
      */
