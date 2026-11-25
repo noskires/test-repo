@@ -164,6 +164,29 @@ class DashboardKpisApiTest extends TestCase
             ->assertJsonPath('data.pm.compliance.percent', null);
     }
 
+    public function test_pm_compliance_counts_tasks_due_on_the_first_and_last_day_of_an_explicit_period(): void
+    {
+        $this->pmTask('EQ-1', PmStatus::Completed, '2026-10-31', '2026-10-31');
+        $this->pmTask('EQ-1', PmStatus::Completed, '2026-11-01', '2026-11-01');
+        $this->pmTask('EQ-1', PmStatus::Completed, '2026-11-15', '2026-11-15');
+        $this->pmTask('EQ-1', PmStatus::Completed, '2026-11-16', '2026-11-16');
+
+        $this->dashboard(['from' => '2026-11-01', 'to' => '2026-11-15'])->assertOk()
+            ->assertJsonPath('data.pm.compliance.due', 2)
+            ->assertJsonPath('data.pm.compliance.on_time', 2)
+            ->assertJsonPath('data.pm.compliance.percent', 100);
+    }
+
+    public function test_pm_compliance_in_the_default_period_counts_a_task_due_today_but_not_tomorrow(): void
+    {
+        $this->pmTask('EQ-1', PmStatus::Completed, '2026-11-20', '2026-11-20');
+        $this->pmTask('EQ-1', PmStatus::Completed, '2026-11-21', '2026-11-20');
+
+        $this->dashboard()->assertOk()
+            ->assertJsonPath('data.pm.compliance.due', 1)
+            ->assertJsonPath('data.pm.compliance.on_time', 1);
+    }
+
     public function test_pm_compliance_is_narrowed_by_site_category_and_vendor(): void
     {
         $this->pmTask('EQ-A', PmStatus::Completed, '2026-11-05', '2026-11-05', ['site_id' => 'S-1', 'equipment_category_id' => 'CAT-1']);
