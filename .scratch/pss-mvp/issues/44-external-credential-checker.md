@@ -22,24 +22,24 @@ From the issue 45/46 grilling (still valid): users are never created on sign-in.
 ## Acceptance criteria
 
 **Backend**
-- [ ] `POST /api/auth/login` takes `email` + `password` (not `employee_id`). Missing or invalid email: 422. Wrong email or password: 401 with one generic message. The issue 46 order and responses stay the same otherwise. Update the existing auth tests.
-- [ ] `LocalCredentialChecker` works in every environment. `LocalCredentialCheckerNotAllowed` and the environment guard are removed, and their tests are replaced by a test that the checker resolves in `production`.
-- [ ] `users.email` is required and unique (migration). An existing row without an email can't sign in; it isn't silently given one.
-- [ ] Admin user creation (issue 46 endpoint) requires `email` (unique, 422 on a duplicate) and `temporary_password` (Laravel's default `Password` rule). The password is stored hashed, and the user is marked `must_change_password`.
-- [ ] While `must_change_password` is set, the login response says so (e.g. `must_change_password: true`), and every API call except change-password, me, refresh and logout returns 403 with "Change your temporary password first."
-- [ ] `POST /api/auth/password`: the signed-in user gives `current_password` and `password` + `password_confirmation`. A wrong current password is 422. A new password equal to the current one is 422. Success clears `must_change_password`.
-- [ ] Admin reset: `POST /api/admin/users/{user}/password` (behind the System Administrator gate) sets a new temporary password and `must_change_password`. Non-admins get 403. Feature tests for each case.
-- [ ] `pss:setup-first-admin` also sets the first admin's email and a temporary password (as options or env vars; the dev-lead decides and documents it), with `must_change_password`.
-- [ ] `DemoAccountsSeeder` gives each demo account an email. `backend/README.md` lists them.
+- [x] `POST /api/auth/login` takes `email` + `password` (not `employee_id`). Missing or invalid email: 422. Wrong email or password: 401 with one generic message. The issue 46 order and responses stay the same otherwise. Update the existing auth tests.
+- [x] `LocalCredentialChecker` works in every environment. `LocalCredentialCheckerNotAllowed` and the environment guard are removed, and their tests are replaced by a test that the checker resolves in `production`.
+- [x] `users.email` is required and unique (migration). An existing row without an email can't sign in; it isn't silently given one.
+- [x] Admin user creation (issue 46 endpoint) requires `email` (unique, 422 on a duplicate) and `temporary_password` (Laravel's default `Password` rule). The password is stored hashed, and the user is marked `must_change_password`.
+- [x] While `must_change_password` is set, the login response says so (e.g. `must_change_password: true`), and every API call except change-password, me, refresh and logout returns 403 with "Change your temporary password first."
+- [x] `POST /api/auth/password`: the signed-in user gives `current_password` and `password` + `password_confirmation`. A wrong current password is 422. A new password equal to the current one is 422. Success clears `must_change_password`.
+- [x] Admin reset: `POST /api/admin/users/{user}/password` (behind the System Administrator gate) sets a new temporary password and `must_change_password`. Non-admins get 403. Feature tests for each case.
+- [x] `pss:setup-first-admin` also sets the first admin's email and a temporary password (as options or env vars; the dev-lead decides and documents it), with `must_change_password`.
+- [x] `DemoAccountsSeeder` gives each demo account an email. `backend/README.md` lists them.
 
 **Frontend (Angular)**
-- [ ] The login screen asks for email and password. Update the spec tests.
-- [ ] After a login with `must_change_password`, the app shows a change-password screen and nothing else until it succeeds.
-- [ ] Signed-in users can reach a change-password screen from the menu.
-- [ ] If the Angular app already has an admin user form (issue 46), add the email and temporary-password fields and a "Reset password" action. If it doesn't, the API is enough.
+- [x] The login screen asks for email and password. Update the spec tests.
+- [x] After a login with `must_change_password`, the app shows a change-password screen and nothing else until it succeeds.
+- [x] Signed-in users can reach a change-password screen from the menu.
+- [x] If the Angular app already has an admin user form (issue 46), add the email and temporary-password fields and a "Reset password" action. If it doesn't, the API is enough.
 
 **Added scope (human, 2026-11-25)**
-- [ ] "Generate sample accounts for the users (admin, eic, supervisor, div head, center head, sector head, vendors) so we can test some of the finished features." In `local`, `php artisan migrate:fresh --seed` gives one sign-in-able account per role (email + `DemoAccountsSeeder::PASSWORD`, `must_change_password` false) on the sample employees: System Administrator (EMP-9001), Management Viewer (EMP-9002), Requestor (EMP-1001), Supervisor / Team Head (EMP-2001), Division Head (EMP-3001), Center Head (EMP-4001), Sector Head (EMP-5001), EIC (EMP-6001, the Site EIC of the sample Sites through `SiteSetting::assignEic`) and Vendor staff (EMP-8001) linked to the demo Vendor, which is a Site Vendor (`SiteSetting::assignVendor`). A second Vendor with its own staff account shows vendor scoping. Readable `.test` emails, idempotent, covered in `DemoAccountsSeederTest`, and listed in `backend/README.md` (email, role, password).
+- [x] "Generate sample accounts for the users (admin, eic, supervisor, div head, center head, sector head, vendors) so we can test some of the finished features." In `local`, `php artisan migrate:fresh --seed` gives one sign-in-able account per role (email + `DemoAccountsSeeder::PASSWORD`, `must_change_password` false) on the sample employees: System Administrator (EMP-9001), Management Viewer (EMP-9002), Requestor (EMP-1001), Supervisor / Team Head (EMP-2001), Division Head (EMP-3001), Center Head (EMP-4001), Sector Head (EMP-5001), EIC (EMP-6001, the Site EIC of the sample Sites through `SiteSetting::assignEic`) and Vendor staff (EMP-8001) linked to the demo Vendor, which is a Site Vendor (`SiteSetting::assignVendor`). A second Vendor with its own staff account shows vendor scoping. Readable `.test` emails, idempotent, covered in `DemoAccountsSeederTest`, and listed in `backend/README.md` (email, role, password).
 
 ## Comments
 
@@ -73,3 +73,10 @@ Dev-lead, 2026-11-25 (finishing the build a previous dev-lead started on 2026-11
 11. **Demo accounts (added scope):** emails `admin@`, `viewer@`, `requestor@`, `supervisor@`, `divhead@`, `centerhead@`, `sectorhead@`, `eic@`, `vendor1@`, `vendor2@pss.test`, all with password `password` and `must_change_password` false. The approver accounts (Team Head up to Sector Head) get no PSS role, because the approver chain comes from the master data's Immediate Head links. Added sample employee `EMP-8002` "Wendy Second Vendor Staff" (`SampleMasterData::SECOND_VENDOR_STAFF_EMPLOYEE_ID`), plus constant `SampleMasterData::EIC_EMPLOYEE_ID` for EMP-6001.
 12. **Site assignment for the demo (please confirm):** the EIC account is EIC of both sample Sites. The Site Vendors are split instead of putting the demo Vendor on both: "Demo Facilities Services Inc." (vendor1) serves `SITE-MKT`, and the second Vendor "Second Demo Maintenance Corp." (vendor2) serves `SITE-CEB`. So each vendor account sees only its own Site's work, which demonstrates vendor scoping. All changes go through `SiteSetting::assignEic` / `assignVendor`, recorded as changed by the demo admin.
 13. **Seeder idempotency:** re-running the seeder matches accounts by employee ID and sets their email, name, password and `must_change_password = false` again, and re-assigns the two Sites' Vendor and EIC (a no-op when unchanged, so no extra history rows). So a re-seed undoes a tester's password change or Site settings change on these demo records. That is acceptable for local demo data. The seeder runs only in `local`, and hashing 10 passwords takes about 4 to 5 seconds.
+
+### QA (qa-44b, 2026-11-25): PASS
+
+- `php artisan test --compact` (backend): 1355 passed, 6338 assertions. `vendor/bin/pint --test`: pass.
+- `npx ng test --watch=false` (frontend): 9 files, 85 tests passed.
+- `migrate:fresh --seed` on a scratch SQLite DB seeded cleanly. All 10 demo accounts returned 200 on `POST /api/auth/login` with the demo password, and a wrong password returned 401.
+- Every acceptance criterion maps to a real test. No skipped or empty tests.
