@@ -25,7 +25,7 @@ class PendingUserAccessTest extends TestCase
     {
         parent::setUp();
 
-        $this->pending = User::factory()->pending()->create(['employee_id' => 'EMP-P', 'name' => 'Paula Pending']);
+        $this->pending = User::factory()->pending()->create(['employee_id' => 'EMP-P', 'name' => 'Paula Pending', 'email' => 'paula@example.test']);
     }
 
     public function test_me_works_and_returns_pending_access(): void
@@ -35,10 +35,12 @@ class PendingUserAccessTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'employee_id' => 'EMP-P',
+                'email' => 'paula@example.test',
                 'name' => 'Paula Pending',
                 'roles' => [],
                 'vendor_id' => null,
                 'access' => 'pending',
+                'must_change_password' => false,
             ]);
     }
 

@@ -26,14 +26,16 @@ use App\Http\Controllers\Api\WorkOrderCompletionValidationController;
 use App\Http\Controllers\Api\WorkOrderController;
 use App\Http\Controllers\Api\WorkOrderEndorsementController;
 use App\Http\Middleware\BlockPendingUsers;
+use App\Http\Middleware\RequirePasswordChange;
 use Illuminate\Support\Facades\Route;
 
 Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1')->name('auth.login');
 Route::post('auth/refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
 
-Route::middleware(['auth:api', BlockPendingUsers::class])->group(function () {
+Route::middleware(['auth:api', RequirePasswordChange::class, BlockPendingUsers::class])->group(function () {
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::get('auth/me', [AuthController::class, 'me'])->name('auth.me');
+    Route::post('auth/password', [AuthController::class, 'changePassword'])->name('auth.password.update');
 
     Route::middleware('can:manage-roles')->prefix('admin')->name('admin.')->group(function () {
         Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
@@ -42,6 +44,7 @@ Route::middleware(['auth:api', BlockPendingUsers::class])->group(function () {
         Route::post('users/{user}/roles', [AdminUserController::class, 'grantRole'])->name('users.roles.store');
         Route::delete('users/{user}/roles/{role}', [AdminUserController::class, 'revokeRole'])->name('users.roles.destroy');
         Route::put('users/{user}/vendor', [AdminUserController::class, 'linkVendor'])->name('users.vendor.update');
+        Route::post('users/{user}/password', [AdminUserController::class, 'resetPassword'])->name('users.password.reset');
     });
 
     Route::get('me/waiting', WaitingListController::class)->name('me.waiting.index');

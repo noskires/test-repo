@@ -6,10 +6,10 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 
 ## Resume here
 
-- Last merged: **03 — Import master data from the source database into PSS tables** (PR #49, 2026-11-24)
+- Last merged: **44 — Email and password sign-in for every environment** (PR #50, 2026-11-25)
 - In flight: none
-- Build order (human hint, adjusted for dependencies): 44, 49, 42, 29 (after 42), 47 (after 44), 41, 33 (after 41), 31, 15.
-- Ready now (`ready-for-agent`, every blocker done): 15, 31, 33, 41, 42, 44, 49. Waiting on a blocker: 29 (42), 47 (44).
+- Build order (human hint, adjusted for dependencies): 49, 42, 29 (after 42), 47 (after 44), 41, 33 (after 41), 31, 15.
+- Ready now (`ready-for-agent`, every blocker done): 15, 31, 33, 41, 42, 47, 49. Waiting on a blocker: 29 (42).
 - Waiting on the human (`needs-info`): none. Parked post-MVP (`needs-triage`): 50.
 - Doc follow-ups: none open
 
@@ -60,7 +60,7 @@ Owners: **releaser** updates this file in each issue's close-out commit (before 
 | 41 | Cancel a PM Task | ready-for-agent | 08, 25, 32 | |
 | 42 | Dashboard: date range and financial sums | ready-for-agent | 27 | |
 | 43 | Angular login screen, token handling, role-aware menu | done | 04 | #44 |
-| 44 | Email and password sign-in for every environment | ready-for-agent | 04, 46 | |
+| 44 | Email and password sign-in for every environment | done | 04, 46 | #50 |
 | 45 | Vendor-linked users and the System Administrator role | done | 46 | #46 |
 | 46 | Admin-created users and pending access | done | none | #45 |
 | 47 | Deactivate and reactivate users | ready-for-agent | 46, 44 | |
@@ -118,3 +118,4 @@ Doc gaps the releaser found at close-out (GLOSSARY, ADR, spec, READMEs). product
 - 2026-11-24: issue 28 merged as PR #48; nothing is ready (29 waits on 42).
 - 2026-11-24: product-owner recorded the human's 2026-11-24 grilling: 03 rewritten (import master data from a DB), 44 rewritten (email sign-in), 15, 31 (reduced), 33, 41, 42, 47 set ready-for-agent; new 49 (security chore from 28) and 50 (parked). ADRs 0001, 0004 and 0005 amended. Handed off 03.
 - 2026-11-24: issue 03 merged as PR #49; unblocks 31.
+- 2026-11-25: issue 44 merged as PR #50; unblocks 47. Docs review found no gaps.

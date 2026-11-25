@@ -23,10 +23,12 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'employee_id' => $this->employee_id,
+            'email' => $this->email,
             'name' => $this->name,
             'roles' => $this->roleKeys(),
             'vendor_id' => $this->vendor_id,
             'access' => $this->access->value,
+            'must_change_password' => (bool) $this->must_change_password,
         ];
     }
 }

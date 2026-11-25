@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * A pending user (issue 46, Q5) can sign in but may only see who they are and sign out until a System Administrator
- * classifies them. Runs on the whole `auth:api` group, so every route added there later is blocked by default.
+ * A pending user (issue 46, Q5) can sign in but may only see who they are, change their password (issue 44) and sign
+ * out until a System Administrator classifies them. Runs on the whole `auth:api` group, so every route added there later is blocked by default.
  */
 class BlockPendingUsers
 {
@@ -17,7 +17,7 @@ class BlockPendingUsers
      *
      * @var list<string>
      */
-    public const array ALLOWED_ROUTES = ['auth.me', 'auth.logout'];
+    public const array ALLOWED_ROUTES = ['auth.me', 'auth.logout', 'auth.password.update'];
 
     /**
      * Handle an incoming request.

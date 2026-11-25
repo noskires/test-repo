@@ -5,7 +5,7 @@
         <span class="brand-tile"><svg lucideBuildingComplex size="16"></svg></span>
         <span>PSS<small>Passive Support Services</small></span>
       </div>
-      @if (!auth.isPending()) {
+      @if (!auth.isPending() && !auth.mustChangePassword()) {
         <app-menu />
       }
     </aside>
@@ -20,6 +20,9 @@
           <span class="who-name">{{ auth.user()?.name }}</span>
           <span class="who-id mono muted">{{ auth.user()?.employee_id }}</span>
         </span>
+        <a class="btn ghost sm" routerLink="/change-password">
+          <svg lucideKeyRound size="16"></svg>Change password
+        </a>
         <button type="button" class="btn ghost sm" (click)="logout()">
           <svg lucideLogOut size="16"></svg>Log out
         </button>

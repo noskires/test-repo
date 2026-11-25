@@ -37,6 +37,8 @@ describe('App', () => {
       roles: ['management-viewer'],
       vendor_id: null,
       access: 'internal',
+      email: null,
+      must_change_password: false,
     });
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
@@ -57,6 +59,8 @@ describe('App', () => {
       roles: ['system-administrator'],
       vendor_id: null,
       access: 'internal',
+      email: null,
+      must_change_password: false,
     });
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
@@ -77,6 +81,8 @@ describe('App', () => {
       roles: ['system-administrator'],
       vendor_id: null,
       access: 'pending',
+      email: null,
+      must_change_password: false,
     });
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
@@ -88,6 +94,43 @@ describe('App', () => {
     expect(el.querySelector('header button')?.textContent).toContain('Log out');
   });
 
+  it('links every signed-in user to the change-password screen from the top bar', () => {
+    TestBed.inject(AuthService).setSession('tok', {
+      employee_id: 'EMP-1001',
+      name: 'Rina Requestor',
+      roles: [],
+      vendor_id: null,
+      access: 'internal',
+      email: 'requestor@pss.test',
+      must_change_password: false,
+    });
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    const link = el.querySelector<HTMLAnchorElement>('header a[href="/change-password"]');
+    expect(link?.textContent).toContain('Change password');
+    expect(el.querySelector('nav')).not.toBeNull();
+  });
+
+  it('shows no menu while the user must change a temporary password', () => {
+    TestBed.inject(AuthService).setSession('tok', {
+      employee_id: 'EMP-9001',
+      name: 'Ada Administrator',
+      roles: ['system-administrator'],
+      vendor_id: null,
+      access: 'internal',
+      email: 'admin@pss.test',
+      must_change_password: true,
+    });
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('nav')).toBeNull();
+    expect(el.querySelector('header button')?.textContent).toContain('Log out');
+  });
+
   it('the logout button calls the API, clears the token and goes to login', () => {
     const auth = TestBed.inject(AuthService);
     auth.setSession('tok', {
@@ -96,6 +139,8 @@ describe('App', () => {
       roles: [],
       vendor_id: null,
       access: 'internal',
+      email: null,
+      must_change_password: false,
     });
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     const fixture = TestBed.createComponent(App);

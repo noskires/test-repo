@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { CHANGE_PASSWORD_PATH } from '../auth/auth.guards';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
@@ -10,20 +11,20 @@ import { AuthService } from '../auth/auth.service';
       <div class="page-head">
         <div>
           <h1>Sign in to PSS</h1>
-          <div class="sub">Use your employee ID and password.</div>
+          <div class="sub">Use your email and password.</div>
         </div>
       </div>
       <form (submit)="submit($event)" novalidate>
         <div class="field">
-          <label for="login-employee-id">Employee ID</label>
+          <label for="login-email">Email</label>
           <input
-            id="login-employee-id"
-            class="mono"
-            name="employee_id"
+            id="login-email"
+            name="email"
+            type="email"
             autocomplete="username"
             required
-            [value]="employeeId()"
-            (input)="employeeId.set(inputValue($event))"
+            [value]="email()"
+            (input)="email.set(inputValue($event))"
           />
         </div>
         <div class="field">
@@ -69,7 +70,7 @@ export class LoginPage {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  protected readonly employeeId = signal('');
+  protected readonly email = signal('');
   protected readonly password = signal('');
   protected readonly error = signal<string | null>(null);
   protected readonly busy = signal(false);
@@ -80,19 +81,19 @@ export class LoginPage {
 
   protected submit(event: Event): void {
     event.preventDefault();
-    const employeeId = this.employeeId().trim();
+    const email = this.email().trim();
     const password = this.password();
-    if (!employeeId || !password) {
-      this.error.set('Enter your employee ID and password.');
+    if (!email || !password) {
+      this.error.set('Enter your email and password.');
       return;
     }
 
     this.busy.set(true);
     this.error.set(null);
-    this.auth.login(employeeId, password).subscribe({
-      next: () => {
+    this.auth.login(email, password).subscribe({
+      next: (user) => {
         this.busy.set(false);
-        void this.router.navigateByUrl('/');
+        void this.router.navigateByUrl(user.must_change_password ? CHANGE_PASSWORD_PATH : '/');
       },
       error: (error: unknown) => {
         this.busy.set(false);
@@ -105,7 +106,10 @@ export class LoginPage {
   private messageFor(error: unknown): string {
     if (error instanceof HttpErrorResponse) {
       if (error.status === 401) {
-        return error.error?.message ?? 'Invalid employee ID or password.';
+        return error.error?.message ?? 'Invalid email or password.';
+      }
+      if (error.status === 422) {
+        return 'Enter a valid email address.';
       }
       if (error.status === 403) {
         return (

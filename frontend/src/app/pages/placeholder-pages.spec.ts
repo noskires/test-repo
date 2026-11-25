@@ -17,6 +17,8 @@ describe('placeholder pages', () => {
       roles: [],
       vendor_id: null,
       access: 'internal',
+      email: null,
+      must_change_password: false,
     });
   });
 

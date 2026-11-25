@@ -43,11 +43,16 @@ return [
     | First System Administrator
     |--------------------------------------------------------------------------
     |
-    | The external employee ID that `php artisan pss:setup-first-admin` grants
-    | the System Administrator role at install (ADR 0004).
+    | The employee ID that `php artisan pss:setup-first-admin` grants the
+    | System Administrator role at install (ADR 0004), and the email and
+    | temporary password a new first admin signs in with (issue 44). They must
+    | change the temporary password on first sign-in. `--email` overrides the
+    | email.
     |
     */
 
     'first_admin_employee_id' => env('PSS_FIRST_ADMIN_EMPLOYEE_ID'),
+    'first_admin_email' => env('PSS_FIRST_ADMIN_EMAIL'),
+    'first_admin_temporary_password' => env('PSS_FIRST_ADMIN_TEMPORARY_PASSWORD'),
 
 ];

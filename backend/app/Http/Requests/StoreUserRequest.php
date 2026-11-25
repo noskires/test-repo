@@ -3,11 +3,13 @@
 namespace App\Http\Requests;
 
 use App\MasterData\MasterDataDirectory;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class StoreUserRequest extends FormRequest
 {
@@ -20,8 +22,19 @@ class StoreUserRequest extends FormRequest
     }
 
     /**
+     * Compare the email the way it is stored: trimmed and lower-case (issue 44).
+     */
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('email'))) {
+            $this->merge(['email' => User::normalizeEmail($this->input('email'))]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request (issue 46, Q14). The employee must exist in the master data
      * and not be a PSS user yet. Exactly one of `access: internal` or an existing `vendor_id` classifies the new user.
+     * The user signs in with a unique `email` and a `temporary_password` they must change first (issue 44).
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -42,6 +55,8 @@ class StoreUserRequest extends FormRequest
             ],
             'access' => ['required_without:vendor_id', 'prohibits:vendor_id', 'nullable', Rule::in(['internal'])],
             'vendor_id' => ['required_without:access', 'nullable', 'integer', 'exists:vendors,id'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
+            'temporary_password' => ['required', 'string', 'max:255', Password::default()],
         ];
     }
 
@@ -52,6 +67,7 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'employee_id.unique' => 'This employee is already a PSS user.',
+            'email.unique' => 'This email is already used by another PSS user.',
             'access.required_without' => 'Choose internal or a Vendor.',
             'vendor_id.required_without' => 'Choose internal or a Vendor.',
             'access.prohibits' => 'Choose internal or a Vendor, not both.',

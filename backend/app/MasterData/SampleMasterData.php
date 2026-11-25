@@ -25,10 +25,17 @@ final class SampleMasterData
 
     public const string VENDOR_STAFF_EMPLOYEE_ID = 'EMP-8001';
 
+    /** The staff of the second demo Vendor (issue 44 added scope), to show vendor scoping. */
+    public const string SECOND_VENDOR_STAFF_EMPLOYEE_ID = 'EMP-8002';
+
+    /** The EIC of the sample Sites (DemoAccountsSeeder, issue 44 added scope). */
+    public const string EIC_EMPLOYEE_ID = 'EMP-6001';
+
     /** Every sample employee, for MasterDataSampleSeeder (the port has no employee list). */
     public const array EMPLOYEE_IDS = [
-        self::REQUESTOR_EMPLOYEE_ID, 'EMP-2001', 'EMP-3001', 'EMP-4001', 'EMP-5001', 'EMP-6001',
+        self::REQUESTOR_EMPLOYEE_ID, 'EMP-2001', 'EMP-3001', 'EMP-4001', 'EMP-5001', self::EIC_EMPLOYEE_ID,
         self::SYSTEM_ADMINISTRATOR_EMPLOYEE_ID, self::MANAGEMENT_VIEWER_EMPLOYEE_ID, self::VENDOR_STAFF_EMPLOYEE_ID,
+        self::SECOND_VENDOR_STAFF_EMPLOYEE_ID,
     ];
 
     public static function load(InMemoryMasterDataDirectory $directory): InMemoryMasterDataDirectory
@@ -80,9 +87,10 @@ final class SampleMasterData
             ->addEmployee(new Employee(id: 'EMP-3001', name: 'Diana Division Head', immediateHeadId: 'EMP-4001', positionTitle: 'Division Head'))
             ->addEmployee(new Employee(id: 'EMP-4001', name: 'Carlo Center Head', immediateHeadId: 'EMP-5001', positionTitle: 'Center Head'))
             ->addEmployee(new Employee(id: 'EMP-5001', name: 'Sofia Sector Head', positionTitle: 'Sector Head'))
-            ->addEmployee(new Employee(id: 'EMP-6001', name: 'Erwin Engineer-in-Charge', immediateHeadId: 'EMP-3001'))
+            ->addEmployee(new Employee(id: self::EIC_EMPLOYEE_ID, name: 'Erwin Engineer-in-Charge', immediateHeadId: 'EMP-3001'))
             ->addEmployee(new Employee(id: self::SYSTEM_ADMINISTRATOR_EMPLOYEE_ID, name: 'Ada Administrator'))
             ->addEmployee(new Employee(id: self::MANAGEMENT_VIEWER_EMPLOYEE_ID, name: 'Mario Management Viewer'))
-            ->addEmployee(new Employee(id: self::VENDOR_STAFF_EMPLOYEE_ID, name: 'Victor Vendor Staff'));
+            ->addEmployee(new Employee(id: self::VENDOR_STAFF_EMPLOYEE_ID, name: 'Victor Vendor Staff'))
+            ->addEmployee(new Employee(id: self::SECOND_VENDOR_STAFF_EMPLOYEE_ID, name: 'Wendy Second Vendor Staff'));
     }
 }
