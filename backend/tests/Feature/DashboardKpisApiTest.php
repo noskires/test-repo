@@ -115,7 +115,10 @@ class DashboardKpisApiTest extends TestCase
         $report->responses()->create(['checklist_item_id' => $this->item->id, 'value' => 'x', 'remarks' => null, 'is_failed' => $failed]);
     }
 
-    private function eCall(string $equipmentId, ECallPriority $priority, ECallStatus $status): void
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function eCall(string $equipmentId, ECallPriority $priority, ECallStatus $status, array $attributes = []): void
     {
         $equipment = $this->directory->findEquipment($equipmentId);
         ECall::factory()->create([
@@ -125,6 +128,7 @@ class DashboardKpisApiTest extends TestCase
             'vendor_id' => $this->vendor->id,
             'priority' => $priority,
             'status' => $status,
+            ...$attributes,
         ]);
     }
 
@@ -294,6 +298,71 @@ class DashboardKpisApiTest extends TestCase
                 ->assertJsonPath('data.equipment.operating.non_operational', 1)
                 ->assertJsonPath('data.pm.compliance.due', 0);
         }
+    }
+
+    /**
+     * EQ-1 sits at the Vendor's own Site S-1, but every record on it belongs to another Vendor (say the Site's
+     * previous Vendor): an overdue PM Task, a failed latest PM Report and an open Emergency E-Call. EQ-2 is down.
+     */
+    private function recordsOfAnotherVendorAtOwnSite(): void
+    {
+        $other = ['vendor_id' => $this->otherVendor->id];
+        $this->equipment('EQ-1', 'S-1');
+        $this->equipment('EQ-2', 'S-1', 'down');
+        $this->pmTask('EQ-1', PmStatus::Scheduled, '2026-11-05', null, $other);
+        $this->report($this->pmTask('EQ-1', PmStatus::Completed, '2026-10-01', '2026-10-01', $other), 1, true);
+        $this->eCall('EQ-1', ECallPriority::Emergency, ECallStatus::ForVendorAssessment, $other);
+        $this->pmTask('EQ-2', PmStatus::Scheduled, '2026-11-05', null, $other);
+    }
+
+    public function test_vendor_staff_get_no_reasons_from_another_vendors_records_but_internal_users_do(): void
+    {
+        $this->recordsOfAnotherVendorAtOwnSite();
+        $staff = User::factory()->vendorStaff($this->vendor)->create();
+
+        $this->dashboard([], $staff)->assertOk()->assertJsonPath('data.equipment.requiring_attention', [
+            'count' => 1,
+            'items' => [
+                ['equipment_id' => 'EQ-2', 'equipment_name' => 'Equipment EQ-2', 'site_id' => 'S-1', 'reasons' => ['not_operating']],
+            ],
+        ]);
+
+        $this->dashboard()->assertOk()->assertJsonPath('data.equipment.requiring_attention', [
+            'count' => 2,
+            'items' => [
+                ['equipment_id' => 'EQ-1', 'equipment_name' => 'Equipment EQ-1', 'site_id' => 'S-1', 'reasons' => ['overdue_pm', 'failed_items', 'emergency_e_call']],
+                ['equipment_id' => 'EQ-2', 'equipment_name' => 'Equipment EQ-2', 'site_id' => 'S-1', 'reasons' => ['overdue_pm', 'not_operating']],
+            ],
+        ]);
+    }
+
+    public function test_an_internal_users_vendor_filter_narrows_the_reasons_the_same_way(): void
+    {
+        $this->recordsOfAnotherVendorAtOwnSite();
+
+        $this->dashboard(['vendor_id' => $this->vendor->id])->assertOk()
+            ->assertJsonPath('data.equipment.requiring_attention.items.*.equipment_id', ['EQ-2'])
+            ->assertJsonPath('data.equipment.requiring_attention.items.0.reasons', ['not_operating']);
+    }
+
+    public function test_vendor_staff_failed_items_use_the_latest_completed_task_of_their_own_vendor(): void
+    {
+        $this->equipment('EQ-1', 'S-1');
+        $this->equipment('EQ-2', 'S-1');
+        $other = ['vendor_id' => $this->otherVendor->id];
+        // EQ-1: own Vendor's task failed; another Vendor's later task is clean.
+        $this->report($this->pmTask('EQ-1', PmStatus::Completed, '2026-09-01', '2026-09-01'), 1, true);
+        $this->report($this->pmTask('EQ-1', PmStatus::Completed, '2026-10-01', '2026-10-01', $other), 1, false);
+        // EQ-2: own Vendor's task is clean; another Vendor's later task failed.
+        $this->report($this->pmTask('EQ-2', PmStatus::Completed, '2026-09-01', '2026-09-01'), 1, false);
+        $this->report($this->pmTask('EQ-2', PmStatus::Completed, '2026-10-01', '2026-10-01', $other), 1, true);
+        $staff = User::factory()->vendorStaff($this->vendor)->create();
+
+        $this->dashboard([], $staff)->assertOk()
+            ->assertJsonPath('data.equipment.requiring_attention.items.*.equipment_id', ['EQ-1'])
+            ->assertJsonPath('data.equipment.requiring_attention.items.0.reasons', ['failed_items']);
+        $this->dashboard()->assertOk()
+            ->assertJsonPath('data.equipment.requiring_attention.items.*.equipment_id', ['EQ-2']);
     }
 
     // Regression and performance
