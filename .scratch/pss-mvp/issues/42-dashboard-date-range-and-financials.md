@@ -31,17 +31,17 @@ Split from issue 27 on 2026-11-24. PRD §4.1 asks the dashboard (`GET /api/dashb
 
 ## Acceptance criteria
 
-- [ ] `GET /api/dashboard` accepts optional `from` and `to` (dates, `Y-m-d`, inclusive, Asia/Manila). `from` after `to`, or a bad date: 422.
-- [ ] Without `from`/`to`, the period is the current Manila calendar month, the same default as issue 28's PM Compliance. When they're given, PM Compliance (`pm.compliance`) uses them too.
-- [ ] `pm.completed_in_range`: PM Tasks `Completed` whose Work Done Date is in the range.
-- [ ] `financials` = `{estimated, approved, billing}`. Each has a `total` plus `by_site` (`[{site_id, site_name, amount}]`) and `by_vendor` (`[{vendor_id, vendor_name, amount}]`). Amounts are decimal strings, exact per ADR 0002 (sum the already-rounded document totals, no float).
+- [x] `GET /api/dashboard` accepts optional `from` and `to` (dates, `Y-m-d`, inclusive, Asia/Manila). `from` after `to`, or a bad date: 422.
+- [x] Without `from`/`to`, the period is the current Manila calendar month, the same default as issue 28's PM Compliance. When they're given, PM Compliance (`pm.compliance`) uses them too.
+- [x] `pm.completed_in_range`: PM Tasks `Completed` whose Work Done Date is in the range.
+- [x] `financials` = `{estimated, approved, billing}`. Each has a `total` plus `by_site` (`[{site_id, site_name, amount}]`) and `by_vendor` (`[{vendor_id, vendor_name, amount}]`). Amounts are decimal strings, exact per ADR 0002 (sum the already-rounded document totals, no float).
   - `estimated`: the Work Order estimated amount, for Work Orders not `Rejected` or `Cancelled` whose `created_at` (Manila date) is in the range.
   - `approved`: the estimated amount of Work Orders with an LVL2 `approve` Approval Record whose date is in the range, minus any now `Rejected`. If LVL2 approved more than once (after a Return), use the latest.
   - `billing`: the Billing Amount of `Closed` Work Orders whose close date (the Approval Record or status change that closed it) is in the range.
-- [ ] The `site_id`, `equipment_category_id` and `vendor_id` filters apply to the new figures as in issue 27 (Work Orders through their E-Call). Vendor staff are forced to their own Vendor.
-- [ ] Issue 27's `by_status` / `groups` counts are unchanged by `from`/`to` (regression test).
-- [ ] With seeded fixtures, each sum matches a hand-calculated expectation, in total, by Site and by Vendor, including: a Work Order on the range boundary (in), one a day outside (out), a Rejected one after LVL2 (out of approved), a Cancelled one (out of estimated), one still in billing endorsement (out of billing).
-- [ ] No query per Work Order: grouped SUM queries.
+- [x] The `site_id`, `equipment_category_id` and `vendor_id` filters apply to the new figures as in issue 27 (Work Orders through their E-Call). Vendor staff are forced to their own Vendor.
+- [x] Issue 27's `by_status` / `groups` counts are unchanged by `from`/`to` (regression test).
+- [x] With seeded fixtures, each sum matches a hand-calculated expectation, in total, by Site and by Vendor, including: a Work Order on the range boundary (in), one a day outside (out), a Rejected one after LVL2 (out of approved), a Cancelled one (out of estimated), one still in billing endorsement (out of billing).
+- [x] No query per Work Order: grouped SUM queries.
 
 ## Comments
 
@@ -87,3 +87,8 @@ Decisions (dev-lead, 2026-11-25):
 12. **Existing tests touched**: the shape assertions in `DashboardApiTest` (exact JSON structure, COUNT query count from 3 to 4) and `DashboardKpisApiTest` (key lists) now include the new keys. The issue 27 values are unchanged.
 13. **Observation, out of scope**: `DashboardKpis::pmCompliance` uses `whereBetween('due_date', [from, windowEnd])`. On SQLite a task due exactly on the window end is stored as `Y-m-d 00:00:00` and may fall outside that string comparison. MySQL `date` columns are not affected. Not changed here; worth a follow-up check.
 14. **GLOSSARY**: the Dashboard entry could mention the date range and the three financial figures. Left for the product-owner.
+
+### QA (qa-42, 2026-11-25): PASS
+
+- `php artisan test --compact` (backend): 1375 passed, 6440 assertions. `vendor/bin/pint --test`: pass. Frontend untouched.
+- Every acceptance criterion maps to a real test in `DashboardFinancialsApiTest` (boundaries, Rejected/Cancelled/billing-endorsement exclusions, latest-LVL2 rule, Vendor forcing, status counts unchanged, constant query count).
