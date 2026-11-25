@@ -72,7 +72,8 @@ final class DashboardKpis
     {
         $query = PmTask::query()
             ->whereNotIn('status', PmCompliance::EXCLUDED_STATUSES)
-            ->whereBetween('due_date', [$from->toDateString(), PmCompliance::dueWindowEnd($to, $today)]);
+            ->where('due_date', '>=', $from->toDateString())
+            ->where('due_date', '<', CarbonImmutable::parse(PmCompliance::dueWindowEnd($to, $today))->addDay()->toDateString());
         foreach (['site_id', 'equipment_category_id', 'vendor_id'] as $column) {
             if (array_key_exists($column, $filters)) {
                 $query->where('pm_tasks.'.$column, $filters[$column]);
