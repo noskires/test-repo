@@ -85,6 +85,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->registerMorphMap();
         $this->registerAdminGates();
+        $this->registerReportGates();
     }
 
     /**
@@ -103,6 +104,16 @@ class AppServiceProvider extends ServiceProvider
         ] as $gate) {
             Gate::define($gate, fn (User $user): bool => $user->hasRole(PssRole::SystemAdministrator));
         }
+    }
+
+    /**
+     * Reports and Exports are for the System Administrator and Management / Viewer only (issue 04, Q11). Vendor
+     * scoping is applied by each report, not here.
+     */
+    private function registerReportGates(): void
+    {
+        Gate::define('view-reports', fn (User $user): bool => $user->hasRole(PssRole::SystemAdministrator)
+            || $user->hasRole(PssRole::ManagementViewer));
     }
 
     /**

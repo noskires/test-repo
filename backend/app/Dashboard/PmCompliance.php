@@ -36,12 +36,22 @@ final class PmCompliance
                 continue;
             }
             $due++;
-            if (self::countsAsDone($task->status) && $task->workDoneDate !== null && $task->workDoneDate->format('Y-m-d') <= $dueDate) {
+            if (self::isOnTime($task)) {
                 $onTime++;
             }
         }
 
         return ['due' => $due, 'on_time' => $onTime, 'percent' => self::percent($onTime, $due)];
+    }
+
+    /**
+     * Whether a due task counts as done on time: done (countsAsDone) with a Work Done Date on or before its due date.
+     */
+    public static function isOnTime(PmTaskDates $task): bool
+    {
+        return self::countsAsDone($task->status)
+            && $task->workDoneDate !== null
+            && $task->workDoneDate->format('Y-m-d') <= $task->dueDate->format('Y-m-d');
     }
 
     /**

@@ -12,6 +12,7 @@ use App\Models\PmTask;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -70,6 +71,23 @@ final class DashboardKpis
      */
     private static function pmCompliance(array $filters, CarbonImmutable $from, CarbonImmutable $to, CarbonImmutable $today): array
     {
+        $tasks = self::pmComplianceDueTasks($filters, $from, $to, $today)
+            ->get(['status', 'due_date', 'work_done_date'])
+            ->map(fn (PmTask $task): PmTaskDates => new PmTaskDates($task->status, $task->due_date, $task->work_done_date));
+
+        return PmCompliance::calculate($tasks, $from, $to, $today);
+    }
+
+    /**
+     * The PM Tasks counted as due in the period by the PM Compliance rule (issues 28/51): not excluded, due from the
+     * period start up to PmCompliance::dueWindowEnd() inclusive. Shared with the Check-up compliance report (issue 29)
+     * so its rows always match the dashboard's "due". The caller applies DashboardCounts::visibleFilters first.
+     *
+     * @param  array{site_id?: string, equipment_category_id?: string, vendor_id?: int}  $filters
+     * @return Builder<PmTask>
+     */
+    public static function pmComplianceDueTasks(array $filters, CarbonImmutable $from, CarbonImmutable $to, CarbonImmutable $today): Builder
+    {
         $query = PmTask::query()
             ->whereNotIn('status', PmCompliance::EXCLUDED_STATUSES)
             ->where('due_date', '>=', $from->toDateString())
@@ -80,10 +98,7 @@ final class DashboardKpis
             }
         }
 
-        $tasks = $query->get(['status', 'due_date', 'work_done_date'])
-            ->map(fn (PmTask $task): PmTaskDates => new PmTaskDates($task->status, $task->due_date, $task->work_done_date));
-
-        return PmCompliance::calculate($tasks, $from, $to, $today);
+        return $query;
     }
 
     /**
