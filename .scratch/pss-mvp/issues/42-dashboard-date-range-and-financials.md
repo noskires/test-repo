@@ -1,6 +1,7 @@
 # 42 — Dashboard: date range and financial sums
 
-Status: ready-for-agent
+Status: done
+Merged: PR #52 (7a6d5fc), 2026-11-25
 Blocked by: 27
 Type: task
 
